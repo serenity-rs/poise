@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"macro":["attribute","key","value"],"struct":["Attribute","Attributes","Key","Keywords","Unicode","Value"]};
+window.SIDEBAR_ITEMS = {"macro":[["attribute",1],["key",1],["value",1]],"struct":["Attribute","Attributes","Key","Keywords","Unicode","Value"]};

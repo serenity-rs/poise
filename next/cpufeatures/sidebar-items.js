@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"macro":["new"]};
+window.SIDEBAR_ITEMS = {"macro":[["new",1]]};

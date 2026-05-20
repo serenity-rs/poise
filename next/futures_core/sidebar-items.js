@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"macro":["ready"],"mod":["future","stream","task"]};
+window.SIDEBAR_ITEMS = {"macro":[["ready",1]],"mod":["future","stream","task"]};

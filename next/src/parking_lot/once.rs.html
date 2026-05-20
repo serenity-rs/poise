@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/parking_lot-0.12.3/src/once.rs`."><title>once.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-b7b9f40b.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="parking_lot" data-themes="" data-resource-suffix="" data-rustdoc-version="1.95.0-nightly (9e79395f9 2026-02-10)" data-channel="nightly" data-search-js="search-fb33671b.js" data-stringdex-js="stringdex-b897f86f.js" data-settings-js="settings-170eb4bf.js" ><script src="../../static.files/storage-f9617a14.js"></script><script defer src="../../static.files/src-script-813739b1.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-12f88f4f.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-f7c3ffd8.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><h1><div class="sub-heading">parking_lot/</div>once.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-3"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="comment">// Copyright 2016 Amanieu d'Antras
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/parking_lot-0.12.3/src/once.rs`."><title>once.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-17e0aaed.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="parking_lot" data-themes="" data-resource-suffix="" data-rustdoc-version="1.97.0-nightly (e50aa6fba 2026-05-19)" data-channel="nightly" data-search-js="search-fd9372ac.js" data-stringdex-js="stringdex-2da4960a.js" data-settings-js="settings-170eb4bf.js" ><script src="../../static.files/storage-41dd4d93.js"></script><script defer src="../../static.files/src-script-813739b1.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-fcd733ba.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-f7c3ffd8.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><h1><div class="sub-heading">parking_lot/</div>once.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-3"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="comment">// Copyright 2016 Amanieu d'Antras
 <a href=#2 id=2 data-nosnippet>2</a>//
 <a href=#3 id=3 data-nosnippet>3</a>// Licensed under the Apache License, Version 2.0, &lt;LICENSE-APACHE or
 <a href=#4 id=4 data-nosnippet>4</a>// http://apache.org/licenses/LICENSE-2.0&gt; or the MIT license &lt;LICENSE-MIT or
@@ -87,11 +87,11 @@
 <a href=#87 id=87 data-nosnippet>87</a>    </span><span class="attr">#[inline]
 <a href=#88 id=88 data-nosnippet>88</a>    </span><span class="kw">pub fn </span>state(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; OnceState {
 <a href=#89 id=89 data-nosnippet>89</a>        <span class="kw">let </span>state = <span class="self">self</span>.<span class="number">0</span>.load(Ordering::Acquire);
-<a href=#90 id=90 data-nosnippet>90</a>        <span class="kw">if </span>state &amp; <span class="macro">DONE_BIT !</span>= <span class="number">0 </span>{
+<a href=#90 id=90 data-nosnippet>90</a>        <span class="kw">if </span>state &amp; DONE_BIT != <span class="number">0 </span>{
 <a href=#91 id=91 data-nosnippet>91</a>            OnceState::Done
-<a href=#92 id=92 data-nosnippet>92</a>        } <span class="kw">else if </span>state &amp; <span class="macro">LOCKED_BIT !</span>= <span class="number">0 </span>{
+<a href=#92 id=92 data-nosnippet>92</a>        } <span class="kw">else if </span>state &amp; LOCKED_BIT != <span class="number">0 </span>{
 <a href=#93 id=93 data-nosnippet>93</a>            OnceState::InProgress
-<a href=#94 id=94 data-nosnippet>94</a>        } <span class="kw">else if </span>state &amp; <span class="macro">POISON_BIT !</span>= <span class="number">0 </span>{
+<a href=#94 id=94 data-nosnippet>94</a>        } <span class="kw">else if </span>state &amp; POISON_BIT != <span class="number">0 </span>{
 <a href=#95 id=95 data-nosnippet>95</a>            OnceState::Poisoned
 <a href=#96 id=96 data-nosnippet>96</a>        } <span class="kw">else </span>{
 <a href=#97 id=97 data-nosnippet>97</a>            OnceState::New
@@ -201,7 +201,7 @@
 <a href=#201 id=201 data-nosnippet>201</a>        <span class="kw">let </span><span class="kw-2">mut </span>state = <span class="self">self</span>.<span class="number">0</span>.load(Ordering::Relaxed);
 <a href=#202 id=202 data-nosnippet>202</a>        <span class="kw">loop </span>{
 <a href=#203 id=203 data-nosnippet>203</a>            <span class="comment">// If another thread called the closure, we're done
-<a href=#204 id=204 data-nosnippet>204</a>            </span><span class="kw">if </span>state &amp; <span class="macro">DONE_BIT !</span>= <span class="number">0 </span>{
+<a href=#204 id=204 data-nosnippet>204</a>            </span><span class="kw">if </span>state &amp; DONE_BIT != <span class="number">0 </span>{
 <a href=#205 id=205 data-nosnippet>205</a>                <span class="comment">// An acquire fence is needed here since we didn't load the
 <a href=#206 id=206 data-nosnippet>206</a>                // state with Ordering::Acquire.
 <a href=#207 id=207 data-nosnippet>207</a>                </span>fence(Ordering::Acquire);
@@ -209,7 +209,7 @@
 <a href=#209 id=209 data-nosnippet>209</a>            }
 <a href=#210 id=210 data-nosnippet>210</a>
 <a href=#211 id=211 data-nosnippet>211</a>            <span class="comment">// If the state has been poisoned and we aren't forcing, then panic
-<a href=#212 id=212 data-nosnippet>212</a>            </span><span class="kw">if </span>state &amp; <span class="macro">POISON_BIT !</span>= <span class="number">0 </span>&amp;&amp; !ignore_poison {
+<a href=#212 id=212 data-nosnippet>212</a>            </span><span class="kw">if </span>state &amp; POISON_BIT != <span class="number">0 </span>&amp;&amp; !ignore_poison {
 <a href=#213 id=213 data-nosnippet>213</a>                <span class="comment">// Need the fence here as well for the same reason
 <a href=#214 id=214 data-nosnippet>214</a>                </span>fence(Ordering::Acquire);
 <a href=#215 id=215 data-nosnippet>215</a>                <span class="macro">panic!</span>(<span class="string">"Once instance has previously been poisoned"</span>);
@@ -278,7 +278,7 @@
 <a href=#278 id=278 data-nosnippet>278</a>                <span class="comment">// Mark the state as poisoned, unlock it and unpark all threads.
 <a href=#279 id=279 data-nosnippet>279</a>                </span><span class="kw">let </span>once = <span class="self">self</span>.<span class="number">0</span>;
 <a href=#280 id=280 data-nosnippet>280</a>                <span class="kw">let </span>state = once.<span class="number">0</span>.swap(POISON_BIT, Ordering::Release);
-<a href=#281 id=281 data-nosnippet>281</a>                <span class="kw">if </span>state &amp; <span class="macro">PARKED_BIT !</span>= <span class="number">0 </span>{
+<a href=#281 id=281 data-nosnippet>281</a>                <span class="kw">if </span>state &amp; PARKED_BIT != <span class="number">0 </span>{
 <a href=#282 id=282 data-nosnippet>282</a>                    <span class="kw">let </span>addr = once <span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_ as </span>usize;
 <a href=#283 id=283 data-nosnippet>283</a>                    <span class="kw">unsafe </span>{
 <a href=#284 id=284 data-nosnippet>284</a>                        parking_lot_core::unpark_all(addr, DEFAULT_UNPARK_TOKEN);
@@ -290,7 +290,7 @@
 <a href=#290 id=290 data-nosnippet>290</a>        <span class="comment">// At this point we have the lock, so run the closure. Make sure we
 <a href=#291 id=291 data-nosnippet>291</a>        // properly clean up if the closure panicks.
 <a href=#292 id=292 data-nosnippet>292</a>        </span><span class="kw">let </span>guard = PanicGuard(<span class="self">self</span>);
-<a href=#293 id=293 data-nosnippet>293</a>        <span class="kw">let </span>once_state = <span class="kw">if </span>state &amp; <span class="macro">POISON_BIT !</span>= <span class="number">0 </span>{
+<a href=#293 id=293 data-nosnippet>293</a>        <span class="kw">let </span>once_state = <span class="kw">if </span>state &amp; POISON_BIT != <span class="number">0 </span>{
 <a href=#294 id=294 data-nosnippet>294</a>            OnceState::Poisoned
 <a href=#295 id=295 data-nosnippet>295</a>        } <span class="kw">else </span>{
 <a href=#296 id=296 data-nosnippet>296</a>            OnceState::New
@@ -300,7 +300,7 @@
 <a href=#300 id=300 data-nosnippet>300</a>
 <a href=#301 id=301 data-nosnippet>301</a>        <span class="comment">// Now unlock the state, set the done bit and unpark all threads
 <a href=#302 id=302 data-nosnippet>302</a>        </span><span class="kw">let </span>state = <span class="self">self</span>.<span class="number">0</span>.swap(DONE_BIT, Ordering::Release);
-<a href=#303 id=303 data-nosnippet>303</a>        <span class="kw">if </span>state &amp; <span class="macro">PARKED_BIT !</span>= <span class="number">0 </span>{
+<a href=#303 id=303 data-nosnippet>303</a>        <span class="kw">if </span>state &amp; PARKED_BIT != <span class="number">0 </span>{
 <a href=#304 id=304 data-nosnippet>304</a>            <span class="kw">let </span>addr = <span class="self">self </span><span class="kw">as </span><span class="kw-2">*const </span><span class="kw">_ as </span>usize;
 <a href=#305 id=305 data-nosnippet>305</a>            <span class="kw">unsafe </span>{
 <a href=#306 id=306 data-nosnippet>306</a>                parking_lot_core::unpark_all(addr, DEFAULT_UNPARK_TOKEN);

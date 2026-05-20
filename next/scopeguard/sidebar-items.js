@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["Always"],"fn":["guard"],"macro":["defer"],"struct":["ScopeGuard"],"trait":["Strategy"]};
+window.SIDEBAR_ITEMS = {"enum":["Always"],"fn":["guard"],"macro":[["defer",1]],"struct":["ScopeGuard"],"trait":["Strategy"]};

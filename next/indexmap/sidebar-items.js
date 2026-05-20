@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"macro":["indexmap","indexset"],"mod":["map","set"],"struct":["TryReserveError"],"trait":["Equivalent"]};
+window.SIDEBAR_ITEMS = {"macro":[["indexmap",1],["indexset",1]],"mod":["map","set"],"struct":["TryReserveError"],"trait":["Equivalent"]};

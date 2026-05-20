@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"macro":["assert_try_writeable_eq","assert_try_writeable_parts_eq","assert_writeable_eq","assert_writeable_parts_eq","impl_display_with_writeable"],"mod":["adapters"],"struct":["LengthHint","Part"],"trait":["PartsWrite","TryWriteable","Writeable"]};
+window.SIDEBAR_ITEMS = {"macro":[["assert_try_writeable_eq",1],["assert_try_writeable_parts_eq",1],["assert_writeable_eq",1],["assert_writeable_parts_eq",1],["impl_display_with_writeable",1]],"mod":["adapters"],"struct":["LengthHint","Part"],"trait":["PartsWrite","TryWriteable","Writeable"]};

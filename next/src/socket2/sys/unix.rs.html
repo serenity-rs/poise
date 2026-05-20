@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/socket2-0.5.7/src/sys/unix.rs`."><title>unix.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../static.files/rustdoc-b7b9f40b.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="socket2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.95.0-nightly (9e79395f9 2026-02-10)" data-channel="nightly" data-search-js="search-fb33671b.js" data-stringdex-js="stringdex-b897f86f.js" data-settings-js="settings-170eb4bf.js" ><script src="../../../static.files/storage-f9617a14.js"></script><script defer src="../../../static.files/src-script-813739b1.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-12f88f4f.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-f7c3ffd8.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><h1><div class="sub-heading">socket2/sys/</div>unix.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-4"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="comment">// Copyright 2015 The Rust Project Developers.
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/socket2-0.5.7/src/sys/unix.rs`."><title>unix.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../static.files/rustdoc-17e0aaed.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="socket2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.97.0-nightly (e50aa6fba 2026-05-19)" data-channel="nightly" data-search-js="search-fd9372ac.js" data-stringdex-js="stringdex-2da4960a.js" data-settings-js="settings-170eb4bf.js" ><script src="../../../static.files/storage-41dd4d93.js"></script><script defer src="../../../static.files/src-script-813739b1.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-fcd733ba.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-f7c3ffd8.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><h1><div class="sub-heading">socket2/sys/</div>unix.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-4"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="comment">// Copyright 2015 The Rust Project Developers.
 <a href=#2 id=2 data-nosnippet>2</a>//
 <a href=#3 id=3 data-nosnippet>3</a>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
 <a href=#4 id=4 data-nosnippet>4</a>// https://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license
@@ -563,7 +563,7 @@
 <a href=#563 id=563 data-nosnippet>563</a>    /// [`SEQPACKET`]: Type::SEQPACKET
 <a href=#564 id=564 data-nosnippet>564</a>    </span><span class="attr">#[cfg(not(target_os = <span class="string">"espidf"</span>))]
 <a href=#565 id=565 data-nosnippet>565</a>    </span><span class="kw">pub const fn </span>is_end_of_record(<span class="self">self</span>) -&gt; bool {
-<a href=#566 id=566 data-nosnippet>566</a>        <span class="self">self</span>.<span class="number">0 </span>&amp; <span class="macro">libc::MSG_EOR !</span>= <span class="number">0
+<a href=#566 id=566 data-nosnippet>566</a>        <span class="self">self</span>.<span class="number">0 </span>&amp; libc::MSG_EOR != <span class="number">0
 <a href=#567 id=567 data-nosnippet>567</a>    </span>}
 <a href=#568 id=568 data-nosnippet>568</a>
 <a href=#569 id=569 data-nosnippet>569</a>    <span class="doccomment">/// Check if the message contains out-of-band data.
@@ -573,7 +573,7 @@
 <a href=#573 id=573 data-nosnippet>573</a>    ///
 <a href=#574 id=574 data-nosnippet>574</a>    /// On Unix this corresponds to the `MSG_OOB` flag.
 <a href=#575 id=575 data-nosnippet>575</a>    </span><span class="kw">pub const fn </span>is_out_of_band(<span class="self">self</span>) -&gt; bool {
-<a href=#576 id=576 data-nosnippet>576</a>        <span class="self">self</span>.<span class="number">0 </span>&amp; <span class="macro">libc::MSG_OOB !</span>= <span class="number">0
+<a href=#576 id=576 data-nosnippet>576</a>        <span class="self">self</span>.<span class="number">0 </span>&amp; libc::MSG_OOB != <span class="number">0
 <a href=#577 id=577 data-nosnippet>577</a>    </span>}
 <a href=#578 id=578 data-nosnippet>578</a>
 <a href=#579 id=579 data-nosnippet>579</a>    <span class="doccomment">/// Check if the confirm flag is set.
@@ -589,7 +589,7 @@
 <a href=#589 id=589 data-nosnippet>589</a>        doc(cfg(all(feature = <span class="string">"all"</span>, any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"linux"</span>))))
 <a href=#590 id=590 data-nosnippet>590</a>    )]
 <a href=#591 id=591 data-nosnippet>591</a>    </span><span class="kw">pub const fn </span>is_confirm(<span class="self">self</span>) -&gt; bool {
-<a href=#592 id=592 data-nosnippet>592</a>        <span class="self">self</span>.<span class="number">0 </span>&amp; <span class="macro">libc::MSG_CONFIRM !</span>= <span class="number">0
+<a href=#592 id=592 data-nosnippet>592</a>        <span class="self">self</span>.<span class="number">0 </span>&amp; libc::MSG_CONFIRM != <span class="number">0
 <a href=#593 id=593 data-nosnippet>593</a>    </span>}
 <a href=#594 id=594 data-nosnippet>594</a>
 <a href=#595 id=595 data-nosnippet>595</a>    <span class="doccomment">/// Check if the don't route flag is set.
@@ -604,7 +604,7 @@
 <a href=#604 id=604 data-nosnippet>604</a>        doc(cfg(all(feature = <span class="string">"all"</span>, any(target_os = <span class="string">"android"</span>, target_os = <span class="string">"linux"</span>))))
 <a href=#605 id=605 data-nosnippet>605</a>    )]
 <a href=#606 id=606 data-nosnippet>606</a>    </span><span class="kw">pub const fn </span>is_dontroute(<span class="self">self</span>) -&gt; bool {
-<a href=#607 id=607 data-nosnippet>607</a>        <span class="self">self</span>.<span class="number">0 </span>&amp; <span class="macro">libc::MSG_DONTROUTE !</span>= <span class="number">0
+<a href=#607 id=607 data-nosnippet>607</a>        <span class="self">self</span>.<span class="number">0 </span>&amp; libc::MSG_DONTROUTE != <span class="number">0
 <a href=#608 id=608 data-nosnippet>608</a>    </span>}
 <a href=#609 id=609 data-nosnippet>609</a>}
 <a href=#610 id=610 data-nosnippet>610</a>
@@ -993,7 +993,7 @@
 <a href=#993 id=993 data-nosnippet>993</a><span class="attr">#[cfg(all(feature = <span class="string">"all"</span>, target_os = <span class="string">"vita"</span>))]
 <a href=#994 id=994 data-nosnippet>994</a></span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>nonblocking(fd: Socket) -&gt; io::Result&lt;bool&gt; {
 <a href=#995 id=995 data-nosnippet>995</a>    <span class="kw">unsafe </span>{
-<a href=#996 id=996 data-nosnippet>996</a>        getsockopt::&lt;Bool&gt;(fd, libc::SOL_SOCKET, libc::SO_NONBLOCK).map(|non_block| <span class="macro">non_block !</span>= <span class="number">0</span>)
+<a href=#996 id=996 data-nosnippet>996</a>        getsockopt::&lt;Bool&gt;(fd, libc::SOL_SOCKET, libc::SO_NONBLOCK).map(|non_block| non_block != <span class="number">0</span>)
 <a href=#997 id=997 data-nosnippet>997</a>    }
 <a href=#998 id=998 data-nosnippet>998</a>}
 <a href=#999 id=999 data-nosnippet>999</a>
@@ -1281,7 +1281,7 @@
 <a href=#1281 id=1281 data-nosnippet>1281</a></span><span class="kw">fn </span>fcntl_add(fd: Socket, get_cmd: c_int, set_cmd: c_int, flag: c_int) -&gt; io::Result&lt;()&gt; {
 <a href=#1282 id=1282 data-nosnippet>1282</a>    <span class="kw">let </span>previous = fcntl_get(fd, get_cmd)<span class="question-mark">?</span>;
 <a href=#1283 id=1283 data-nosnippet>1283</a>    <span class="kw">let </span>new = previous | flag;
-<a href=#1284 id=1284 data-nosnippet>1284</a>    <span class="kw">if </span><span class="macro">new !</span>= previous {
+<a href=#1284 id=1284 data-nosnippet>1284</a>    <span class="kw">if </span>new != previous {
 <a href=#1285 id=1285 data-nosnippet>1285</a>        <span class="macro">syscall!</span>(fcntl(fd, set_cmd, new)).map(|<span class="kw">_</span>| ())
 <a href=#1286 id=1286 data-nosnippet>1286</a>    } <span class="kw">else </span>{
 <a href=#1287 id=1287 data-nosnippet>1287</a>        <span class="comment">// Flag was already set.
@@ -1294,7 +1294,7 @@
 <a href=#1294 id=1294 data-nosnippet>1294</a></span><span class="kw">fn </span>fcntl_remove(fd: Socket, get_cmd: c_int, set_cmd: c_int, flag: c_int) -&gt; io::Result&lt;()&gt; {
 <a href=#1295 id=1295 data-nosnippet>1295</a>    <span class="kw">let </span>previous = fcntl_get(fd, get_cmd)<span class="question-mark">?</span>;
 <a href=#1296 id=1296 data-nosnippet>1296</a>    <span class="kw">let </span>new = previous &amp; !flag;
-<a href=#1297 id=1297 data-nosnippet>1297</a>    <span class="kw">if </span><span class="macro">new !</span>= previous {
+<a href=#1297 id=1297 data-nosnippet>1297</a>    <span class="kw">if </span>new != previous {
 <a href=#1298 id=1298 data-nosnippet>1298</a>        <span class="macro">syscall!</span>(fcntl(fd, set_cmd, new)).map(|<span class="kw">_</span>| ())
 <a href=#1299 id=1299 data-nosnippet>1299</a>    } <span class="kw">else </span>{
 <a href=#1300 id=1300 data-nosnippet>1300</a>        <span class="comment">// Flag was already set.
@@ -1595,7 +1595,7 @@
 <a href=#1595 id=1595 data-nosnippet>1595</a>    </span><span class="kw">pub fn </span>is_listener(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;bool&gt; {
 <a href=#1596 id=1596 data-nosnippet>1596</a>        <span class="kw">unsafe </span>{
 <a href=#1597 id=1597 data-nosnippet>1597</a>            getsockopt::&lt;c_int&gt;(<span class="self">self</span>.as_raw(), libc::SOL_SOCKET, libc::SO_ACCEPTCONN)
-<a href=#1598 id=1598 data-nosnippet>1598</a>                .map(|v| <span class="macro">v !</span>= <span class="number">0</span>)
+<a href=#1598 id=1598 data-nosnippet>1598</a>                .map(|v| v != <span class="number">0</span>)
 <a href=#1599 id=1599 data-nosnippet>1599</a>        }
 <a href=#1600 id=1600 data-nosnippet>1600</a>    }
 <a href=#1601 id=1601 data-nosnippet>1601</a>
@@ -1730,7 +1730,7 @@
 <a href=#1730 id=1730 data-nosnippet>1730</a>    </span><span class="kw">pub fn </span>cork(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;bool&gt; {
 <a href=#1731 id=1731 data-nosnippet>1731</a>        <span class="kw">unsafe </span>{
 <a href=#1732 id=1732 data-nosnippet>1732</a>            getsockopt::&lt;Bool&gt;(<span class="self">self</span>.as_raw(), libc::IPPROTO_TCP, libc::TCP_CORK)
-<a href=#1733 id=1733 data-nosnippet>1733</a>                .map(|cork| <span class="macro">cork !</span>= <span class="number">0</span>)
+<a href=#1733 id=1733 data-nosnippet>1733</a>                .map(|cork| cork != <span class="number">0</span>)
 <a href=#1734 id=1734 data-nosnippet>1734</a>        }
 <a href=#1735 id=1735 data-nosnippet>1735</a>    }
 <a href=#1736 id=1736 data-nosnippet>1736</a>
@@ -1781,7 +1781,7 @@
 <a href=#1781 id=1781 data-nosnippet>1781</a>    </span><span class="kw">pub fn </span>quickack(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;bool&gt; {
 <a href=#1782 id=1782 data-nosnippet>1782</a>        <span class="kw">unsafe </span>{
 <a href=#1783 id=1783 data-nosnippet>1783</a>            getsockopt::&lt;Bool&gt;(<span class="self">self</span>.as_raw(), libc::IPPROTO_TCP, libc::TCP_QUICKACK)
-<a href=#1784 id=1784 data-nosnippet>1784</a>                .map(|quickack| <span class="macro">quickack !</span>= <span class="number">0</span>)
+<a href=#1784 id=1784 data-nosnippet>1784</a>                .map(|quickack| quickack != <span class="number">0</span>)
 <a href=#1785 id=1785 data-nosnippet>1785</a>        }
 <a href=#1786 id=1786 data-nosnippet>1786</a>    }
 <a href=#1787 id=1787 data-nosnippet>1787</a>
@@ -1836,7 +1836,7 @@
 <a href=#1836 id=1836 data-nosnippet>1836</a>                libc::IPPROTO_TCP,
 <a href=#1837 id=1837 data-nosnippet>1837</a>                libc::TCP_THIN_LINEAR_TIMEOUTS,
 <a href=#1838 id=1838 data-nosnippet>1838</a>            )
-<a href=#1839 id=1839 data-nosnippet>1839</a>            .map(|timeouts| <span class="macro">timeouts !</span>= <span class="number">0</span>)
+<a href=#1839 id=1839 data-nosnippet>1839</a>            .map(|timeouts| timeouts != <span class="number">0</span>)
 <a href=#1840 id=1840 data-nosnippet>1840</a>        }
 <a href=#1841 id=1841 data-nosnippet>1841</a>    }
 <a href=#1842 id=1842 data-nosnippet>1842</a>
@@ -2193,7 +2193,7 @@
 <a href=#2193 id=2193 data-nosnippet>2193</a>    </span><span class="kw">pub fn </span>reuse_port(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;bool&gt; {
 <a href=#2194 id=2194 data-nosnippet>2194</a>        <span class="kw">unsafe </span>{
 <a href=#2195 id=2195 data-nosnippet>2195</a>            getsockopt::&lt;c_int&gt;(<span class="self">self</span>.as_raw(), libc::SOL_SOCKET, libc::SO_REUSEPORT)
-<a href=#2196 id=2196 data-nosnippet>2196</a>                .map(|reuse| <span class="macro">reuse !</span>= <span class="number">0</span>)
+<a href=#2196 id=2196 data-nosnippet>2196</a>                .map(|reuse| reuse != <span class="number">0</span>)
 <a href=#2197 id=2197 data-nosnippet>2197</a>        }
 <a href=#2198 id=2198 data-nosnippet>2198</a>    }
 <a href=#2199 id=2199 data-nosnippet>2199</a>
@@ -2234,7 +2234,7 @@
 <a href=#2234 id=2234 data-nosnippet>2234</a>    </span><span class="kw">pub fn </span>reuse_port_lb(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;bool&gt; {
 <a href=#2235 id=2235 data-nosnippet>2235</a>        <span class="kw">unsafe </span>{
 <a href=#2236 id=2236 data-nosnippet>2236</a>            getsockopt::&lt;c_int&gt;(<span class="self">self</span>.as_raw(), libc::SOL_SOCKET, libc::SO_REUSEPORT_LB)
-<a href=#2237 id=2237 data-nosnippet>2237</a>                .map(|reuse| <span class="macro">reuse !</span>= <span class="number">0</span>)
+<a href=#2237 id=2237 data-nosnippet>2237</a>                .map(|reuse| reuse != <span class="number">0</span>)
 <a href=#2238 id=2238 data-nosnippet>2238</a>        }
 <a href=#2239 id=2239 data-nosnippet>2239</a>    }
 <a href=#2240 id=2240 data-nosnippet>2240</a>
@@ -2273,7 +2273,7 @@
 <a href=#2273 id=2273 data-nosnippet>2273</a>    </span><span class="kw">pub fn </span>freebind(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;bool&gt; {
 <a href=#2274 id=2274 data-nosnippet>2274</a>        <span class="kw">unsafe </span>{
 <a href=#2275 id=2275 data-nosnippet>2275</a>            getsockopt::&lt;c_int&gt;(<span class="self">self</span>.as_raw(), libc::SOL_IP, libc::IP_FREEBIND)
-<a href=#2276 id=2276 data-nosnippet>2276</a>                .map(|freebind| <span class="macro">freebind !</span>= <span class="number">0</span>)
+<a href=#2276 id=2276 data-nosnippet>2276</a>                .map(|freebind| freebind != <span class="number">0</span>)
 <a href=#2277 id=2277 data-nosnippet>2277</a>        }
 <a href=#2278 id=2278 data-nosnippet>2278</a>    }
 <a href=#2279 id=2279 data-nosnippet>2279</a>
@@ -2321,7 +2321,7 @@
 <a href=#2321 id=2321 data-nosnippet>2321</a>    </span><span class="kw">pub fn </span>freebind_ipv6(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; io::Result&lt;bool&gt; {
 <a href=#2322 id=2322 data-nosnippet>2322</a>        <span class="kw">unsafe </span>{
 <a href=#2323 id=2323 data-nosnippet>2323</a>            getsockopt::&lt;c_int&gt;(<span class="self">self</span>.as_raw(), libc::SOL_IPV6, libc::IPV6_FREEBIND)
-<a href=#2324 id=2324 data-nosnippet>2324</a>                .map(|freebind| <span class="macro">freebind !</span>= <span class="number">0</span>)
+<a href=#2324 id=2324 data-nosnippet>2324</a>                .map(|freebind| freebind != <span class="number">0</span>)
 <a href=#2325 id=2325 data-nosnippet>2325</a>        }
 <a href=#2326 id=2326 data-nosnippet>2326</a>    }
 <a href=#2327 id=2327 data-nosnippet>2327</a>

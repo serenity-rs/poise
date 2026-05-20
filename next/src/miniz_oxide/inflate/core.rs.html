@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/miniz_oxide-0.8.0/src/inflate/core.rs`."><title>core.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../static.files/rustdoc-b7b9f40b.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="miniz_oxide" data-themes="" data-resource-suffix="" data-rustdoc-version="1.95.0-nightly (9e79395f9 2026-02-10)" data-channel="nightly" data-search-js="search-fb33671b.js" data-stringdex-js="stringdex-b897f86f.js" data-settings-js="settings-170eb4bf.js" ><script src="../../../static.files/storage-f9617a14.js"></script><script defer src="../../../static.files/src-script-813739b1.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-12f88f4f.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-f7c3ffd8.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><h1><div class="sub-heading">miniz_oxide/inflate/</div>core.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-4"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="doccomment">//! Streaming decompression functionality.
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/miniz_oxide-0.8.0/src/inflate/core.rs`."><title>core.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../static.files/rustdoc-17e0aaed.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="miniz_oxide" data-themes="" data-resource-suffix="" data-rustdoc-version="1.97.0-nightly (e50aa6fba 2026-05-19)" data-channel="nightly" data-search-js="search-fd9372ac.js" data-stringdex-js="stringdex-2da4960a.js" data-settings-js="settings-170eb4bf.js" ><script src="../../../static.files/storage-41dd4d93.js"></script><script defer src="../../../static.files/src-script-813739b1.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-fcd733ba.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-f7c3ffd8.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><h1><div class="sub-heading">miniz_oxide/inflate/</div>core.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-4"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="doccomment">//! Streaming decompression functionality.
 <a href=#2 id=2 data-nosnippet>2</a>
 <a href=#3 id=3 data-nosnippet>3</a></span><span class="kw">use </span>super::<span class="kw-2">*</span>;
 <a href=#4 id=4 data-nosnippet>4</a><span class="kw">use </span><span class="kw">crate</span>::shared::{update_adler32, HUFFMAN_LENGTH_ORDER};
@@ -78,7 +78,7 @@
 <a href=#78 id=78 data-nosnippet>78</a>    </span><span class="kw">fn </span>lookup(<span class="kw-2">&amp;</span><span class="self">self</span>, bit_buf: BitBuffer) -&gt; <span class="prelude-ty">Option</span>&lt;(i32, u32)&gt; {
 <a href=#79 id=79 data-nosnippet>79</a>        <span class="kw">let </span>symbol = <span class="self">self</span>.fast_lookup(bit_buf).into();
 <a href=#80 id=80 data-nosnippet>80</a>        <span class="kw">if </span>symbol &gt;= <span class="number">0 </span>{
-<a href=#81 id=81 data-nosnippet>81</a>            <span class="kw">if </span>(symbol &gt;&gt; <span class="number">9</span>) <span class="kw">as </span><span class="macro">u32 !</span>= <span class="number">0 </span>{
+<a href=#81 id=81 data-nosnippet>81</a>            <span class="kw">if </span>(symbol &gt;&gt; <span class="number">9</span>) <span class="kw">as </span>u32 != <span class="number">0 </span>{
 <a href=#82 id=82 data-nosnippet>82</a>                <span class="prelude-val">Some</span>((symbol, (symbol &gt;&gt; <span class="number">9</span>) <span class="kw">as </span>u32))
 <a href=#83 id=83 data-nosnippet>83</a>            } <span class="kw">else </span>{
 <a href=#84 id=84 data-nosnippet>84</a>                <span class="comment">// Zero-length code.
@@ -218,7 +218,7 @@
 <a href=#218 id=218 data-nosnippet>218</a>    /// Note: Will return Some(1) if decompressing zlib but ignoring adler32.
 <a href=#219 id=219 data-nosnippet>219</a>    </span><span class="attr">#[inline]
 <a href=#220 id=220 data-nosnippet>220</a>    </span><span class="kw">pub fn </span>adler32(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;u32&gt; {
-<a href=#221 id=221 data-nosnippet>221</a>        <span class="kw">if </span><span class="self">self</span>.<span class="macro">state !</span>= State::Start &amp;&amp; !<span class="self">self</span>.state.is_failure() &amp;&amp; <span class="self">self</span>.<span class="macro">z_header0 !</span>= <span class="number">0 </span>{
+<a href=#221 id=221 data-nosnippet>221</a>        <span class="kw">if </span><span class="self">self</span>.state != State::Start &amp;&amp; !<span class="self">self</span>.state.is_failure() &amp;&amp; <span class="self">self</span>.z_header0 != <span class="number">0 </span>{
 <a href=#222 id=222 data-nosnippet>222</a>            <span class="prelude-val">Some</span>(<span class="self">self</span>.check_adler32)
 <a href=#223 id=223 data-nosnippet>223</a>        } <span class="kw">else </span>{
 <a href=#224 id=224 data-nosnippet>224</a>            <span class="prelude-val">None
@@ -228,7 +228,7 @@
 <a href=#228 id=228 data-nosnippet>228</a>    <span class="doccomment">/// Returns the adler32 that was read from the zlib header if it exists.
 <a href=#229 id=229 data-nosnippet>229</a>    </span><span class="attr">#[inline]
 <a href=#230 id=230 data-nosnippet>230</a>    </span><span class="kw">pub fn </span>adler32_header(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;u32&gt; {
-<a href=#231 id=231 data-nosnippet>231</a>        <span class="kw">if </span><span class="self">self</span>.<span class="macro">state !</span>= State::Start &amp;&amp; <span class="self">self</span>.<span class="macro">state !</span>= State::BadZlibHeader &amp;&amp; <span class="self">self</span>.<span class="macro">z_header0 !</span>= <span class="number">0 </span>{
+<a href=#231 id=231 data-nosnippet>231</a>        <span class="kw">if </span><span class="self">self</span>.state != State::Start &amp;&amp; <span class="self">self</span>.state != State::BadZlibHeader &amp;&amp; <span class="self">self</span>.z_header0 != <span class="number">0 </span>{
 <a href=#232 id=232 data-nosnippet>232</a>            <span class="prelude-val">Some</span>(<span class="self">self</span>.z_adler32)
 <a href=#233 id=233 data-nosnippet>233</a>        } <span class="kw">else </span>{
 <a href=#234 id=234 data-nosnippet>234</a>            <span class="prelude-val">None
@@ -516,7 +516,7 @@
 <a href=#516 id=516 data-nosnippet>516</a>
 <a href=#517 id=517 data-nosnippet>517</a>                <span class="kw">if </span>temp &gt;= <span class="number">0 </span>{
 <a href=#518 id=518 data-nosnippet>518</a>                    <span class="kw">let </span>code_len = (temp &gt;&gt; <span class="number">9</span>) <span class="kw">as </span>u32;
-<a href=#519 id=519 data-nosnippet>519</a>                    <span class="kw">if </span>(<span class="macro">code_len !</span>= <span class="number">0</span>) &amp;&amp; (l.num_bits &gt;= code_len) {
+<a href=#519 id=519 data-nosnippet>519</a>                    <span class="kw">if </span>(code_len != <span class="number">0</span>) &amp;&amp; (l.num_bits &gt;= code_len) {
 <a href=#520 id=520 data-nosnippet>520</a>                        <span class="kw">break</span>;
 <a href=#521 id=521 data-nosnippet>521</a>                    }
 <a href=#522 id=522 data-nosnippet>522</a>                } <span class="kw">else if </span>l.num_bits &gt; FAST_LOOKUP_BITS.into() {
@@ -654,7 +654,7 @@
 <a href=#654 id=654 data-nosnippet>654</a>
 <a href=#655 id=655 data-nosnippet>655</a><span class="attr">#[inline]
 <a href=#656 id=656 data-nosnippet>656</a></span><span class="kw">const fn </span>end_of_input(flags: u32) -&gt; Action {
-<a href=#657 id=657 data-nosnippet>657</a>    Action::End(<span class="kw">if </span>flags &amp; <span class="macro">TINFL_FLAG_HAS_MORE_INPUT !</span>= <span class="number">0 </span>{
+<a href=#657 id=657 data-nosnippet>657</a>    Action::End(<span class="kw">if </span>flags &amp; TINFL_FLAG_HAS_MORE_INPUT != <span class="number">0 </span>{
 <a href=#658 id=658 data-nosnippet>658</a>        TINFLStatus::NeedsMoreInput
 <a href=#659 id=659 data-nosnippet>659</a>    } <span class="kw">else </span>{
 <a href=#660 id=660 data-nosnippet>660</a>        TINFLStatus::FailedCannotMakeProgress
@@ -742,7 +742,7 @@
 <a href=#742 id=742 data-nosnippet>742</a>            <span class="kw-2">*</span>next = total;
 <a href=#743 id=743 data-nosnippet>743</a>        }
 <a href=#744 id=744 data-nosnippet>744</a>
-<a href=#745 id=745 data-nosnippet>745</a>        <span class="kw">if </span><span class="macro">total !</span>= <span class="number">65_536 </span>&amp;&amp; used_symbols &gt; <span class="number">1 </span>{
+<a href=#745 id=745 data-nosnippet>745</a>        <span class="kw">if </span>total != <span class="number">65_536 </span>&amp;&amp; used_symbols &gt; <span class="number">1 </span>{
 <a href=#746 id=746 data-nosnippet>746</a>            <span class="kw">return </span><span class="prelude-val">Some</span>(Action::Jump(BadTotalSymbols));
 <a href=#747 id=747 data-nosnippet>747</a>        }
 <a href=#748 id=748 data-nosnippet>748</a>
@@ -1068,7 +1068,7 @@
 <a href=#1068 id=1068 data-nosnippet>1068</a>            // the base, which together with the base gives us the exact value.
 <a href=#1069 id=1069 data-nosnippet>1069</a>
 <a href=#1070 id=1070 data-nosnippet>1070</a>            </span>fill_bit_buffer(<span class="kw-2">&amp;mut </span>l, in_iter);
-<a href=#1071 id=1071 data-nosnippet>1071</a>            <span class="kw">if </span>l.<span class="macro">num_extra !</span>= <span class="number">0 </span>{
+<a href=#1071 id=1071 data-nosnippet>1071</a>            <span class="kw">if </span>l.num_extra != <span class="number">0 </span>{
 <a href=#1072 id=1072 data-nosnippet>1072</a>                <span class="kw">let </span>extra_bits = l.bit_buf &amp; ((<span class="number">1 </span>&lt;&lt; l.num_extra) - <span class="number">1</span>);
 <a href=#1073 id=1073 data-nosnippet>1073</a>                l.bit_buf &gt;&gt;= l.num_extra;
 <a href=#1074 id=1074 data-nosnippet>1074</a>                l.num_bits -= l.num_extra;
@@ -1097,7 +1097,7 @@
 <a href=#1097 id=1097 data-nosnippet>1097</a>                <span class="kw">break </span><span class="lifetime">'o </span>TINFLStatus::Failed;
 <a href=#1098 id=1098 data-nosnippet>1098</a>            }
 <a href=#1099 id=1099 data-nosnippet>1099</a>
-<a href=#1100 id=1100 data-nosnippet>1100</a>            <span class="kw">if </span>l.<span class="macro">num_extra !</span>= <span class="number">0 </span>{
+<a href=#1100 id=1100 data-nosnippet>1100</a>            <span class="kw">if </span>l.num_extra != <span class="number">0 </span>{
 <a href=#1101 id=1101 data-nosnippet>1101</a>                fill_bit_buffer(<span class="kw-2">&amp;mut </span>l, in_iter);
 <a href=#1102 id=1102 data-nosnippet>1102</a>                <span class="kw">let </span>extra_bits = l.bit_buf &amp; ((<span class="number">1 </span>&lt;&lt; l.num_extra) - <span class="number">1</span>);
 <a href=#1103 id=1103 data-nosnippet>1103</a>                l.bit_buf &gt;&gt;= l.num_extra;
@@ -1107,7 +1107,7 @@
 <a href=#1107 id=1107 data-nosnippet>1107</a>
 <a href=#1108 id=1108 data-nosnippet>1108</a>            <span class="kw">let </span>position = out_buf.position();
 <a href=#1109 id=1109 data-nosnippet>1109</a>            <span class="kw">if </span>l.dist <span class="kw">as </span>usize &gt; out_buf.position()
-<a href=#1110 id=1110 data-nosnippet>1110</a>                &amp;&amp; (flags &amp; <span class="macro">TINFL_FLAG_USING_NON_WRAPPING_OUTPUT_BUF !</span>= <span class="number">0</span>)
+<a href=#1110 id=1110 data-nosnippet>1110</a>                &amp;&amp; (flags &amp; TINFL_FLAG_USING_NON_WRAPPING_OUTPUT_BUF != <span class="number">0</span>)
 <a href=#1111 id=1111 data-nosnippet>1111</a>            {
 <a href=#1112 id=1112 data-nosnippet>1112</a>                <span class="comment">// We encountered a distance that refers a position before
 <a href=#1113 id=1113 data-nosnippet>1113</a>                // the start of the decoded data, so we can't continue.
@@ -1174,7 +1174,7 @@
 <a href=#1174 id=1174 data-nosnippet>1174</a>    out_pos: usize,
 <a href=#1175 id=1175 data-nosnippet>1175</a>    flags: u32,
 <a href=#1176 id=1176 data-nosnippet>1176</a>) -&gt; (TINFLStatus, usize, usize) {
-<a href=#1177 id=1177 data-nosnippet>1177</a>    <span class="kw">let </span>out_buf_size_mask = <span class="kw">if </span>flags &amp; <span class="macro">TINFL_FLAG_USING_NON_WRAPPING_OUTPUT_BUF !</span>= <span class="number">0 </span>{
+<a href=#1177 id=1177 data-nosnippet>1177</a>    <span class="kw">let </span>out_buf_size_mask = <span class="kw">if </span>flags &amp; TINFL_FLAG_USING_NON_WRAPPING_OUTPUT_BUF != <span class="number">0 </span>{
 <a href=#1178 id=1178 data-nosnippet>1178</a>        usize::max_value()
 <a href=#1179 id=1179 data-nosnippet>1179</a>    } <span class="kw">else </span>{
 <a href=#1180 id=1180 data-nosnippet>1180</a>        <span class="comment">// In the case of zero len, any attempt to write would produce HasMoreOutput,
@@ -1218,7 +1218,7 @@
 <a href=#1218 id=1218 data-nosnippet>1218</a>                r.z_header1 = <span class="number">0</span>;
 <a href=#1219 id=1219 data-nosnippet>1219</a>                r.z_adler32 = <span class="number">1</span>;
 <a href=#1220 id=1220 data-nosnippet>1220</a>                r.check_adler32 = <span class="number">1</span>;
-<a href=#1221 id=1221 data-nosnippet>1221</a>                <span class="kw">if </span>flags &amp; <span class="macro">TINFL_FLAG_PARSE_ZLIB_HEADER !</span>= <span class="number">0 </span>{
+<a href=#1221 id=1221 data-nosnippet>1221</a>                <span class="kw">if </span>flags &amp; TINFL_FLAG_PARSE_ZLIB_HEADER != <span class="number">0 </span>{
 <a href=#1222 id=1222 data-nosnippet>1222</a>                    Action::Jump(State::ReadZlibCmf)
 <a href=#1223 id=1223 data-nosnippet>1223</a>                } <span class="kw">else </span>{
 <a href=#1224 id=1224 data-nosnippet>1224</a>                    Action::Jump(State::ReadBlockHeader)
@@ -1272,7 +1272,7 @@
 <a href=#1272 id=1272 data-nosnippet>1272</a>            </span>RawHeader =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">'state_machine</span>, {
 <a href=#1273 id=1273 data-nosnippet>1273</a>                <span class="kw">if </span>l.counter &lt; <span class="number">4 </span>{
 <a href=#1274 id=1274 data-nosnippet>1274</a>                    <span class="comment">// Read block length and block length check.
-<a href=#1275 id=1275 data-nosnippet>1275</a>                    </span><span class="kw">if </span>l.<span class="macro">num_bits !</span>= <span class="number">0 </span>{
+<a href=#1275 id=1275 data-nosnippet>1275</a>                    </span><span class="kw">if </span>l.num_bits != <span class="number">0 </span>{
 <a href=#1276 id=1276 data-nosnippet>1276</a>                        read_bits(<span class="kw-2">&amp;mut </span>l, <span class="number">8</span>, <span class="kw-2">&amp;mut </span>in_iter, flags, |l, bits| {
 <a href=#1277 id=1277 data-nosnippet>1277</a>                            r.raw_header[l.counter <span class="kw">as </span>usize] = bits <span class="kw">as </span>u8;
 <a href=#1278 id=1278 data-nosnippet>1278</a>                            l.counter += <span class="number">1</span>;
@@ -1299,7 +1299,7 @@
 <a href=#1299 id=1299 data-nosnippet>1299</a>                    } <span class="kw">else if </span>l.counter == <span class="number">0 </span>{
 <a href=#1300 id=1300 data-nosnippet>1300</a>                        <span class="comment">// Empty raw block. Sometimes used for synchronization.
 <a href=#1301 id=1301 data-nosnippet>1301</a>                        </span>Action::Jump(BlockDone)
-<a href=#1302 id=1302 data-nosnippet>1302</a>                    } <span class="kw">else if </span>l.<span class="macro">num_bits !</span>= <span class="number">0 </span>{
+<a href=#1302 id=1302 data-nosnippet>1302</a>                    } <span class="kw">else if </span>l.num_bits != <span class="number">0 </span>{
 <a href=#1303 id=1303 data-nosnippet>1303</a>                        <span class="comment">// There is some data in the bit buffer, so we need to write that first.
 <a href=#1304 id=1304 data-nosnippet>1304</a>                        </span>Action::Jump(RawReadFirstByte)
 <a href=#1305 id=1305 data-nosnippet>1305</a>                    } <span class="kw">else </span>{
@@ -1435,7 +1435,7 @@
 <a href=#1435 id=1435 data-nosnippet>1435</a>                            }
 <a href=#1436 id=1436 data-nosnippet>1436</a>                        }
 <a href=#1437 id=1437 data-nosnippet>1437</a>                    )
-<a href=#1438 id=1438 data-nosnippet>1438</a>                } <span class="kw">else if </span>l.<span class="macro">counter !</span>= r.table_sizes[LITLEN_TABLE] + r.table_sizes[DIST_TABLE] {
+<a href=#1438 id=1438 data-nosnippet>1438</a>                } <span class="kw">else if </span>l.counter != r.table_sizes[LITLEN_TABLE] + r.table_sizes[DIST_TABLE] {
 <a href=#1439 id=1439 data-nosnippet>1439</a>                    Action::Jump(BadCodeSizeSum)
 <a href=#1440 id=1440 data-nosnippet>1440</a>                } <span class="kw">else </span>{
 <a href=#1441 id=1441 data-nosnippet>1441</a>                    r.tables[LITLEN_TABLE].code_size[..r.table_sizes[LITLEN_TABLE] <span class="kw">as </span>usize]
@@ -1588,7 +1588,7 @@
 <a href=#1588 id=1588 data-nosnippet>1588</a>                    l.counter = u32::from(LENGTH_BASE[(l.counter - <span class="number">257</span>) <span class="kw">as </span>usize &amp; BASE_EXTRA_MASK]);
 <a href=#1589 id=1589 data-nosnippet>1589</a>                    <span class="comment">// Length and distance codes have a number of extra bits depending on
 <a href=#1590 id=1590 data-nosnippet>1590</a>                    // the base, which together with the base gives us the exact value.
-<a href=#1591 id=1591 data-nosnippet>1591</a>                    </span><span class="kw">if </span>l.<span class="macro">num_extra !</span>= <span class="number">0 </span>{
+<a href=#1591 id=1591 data-nosnippet>1591</a>                    </span><span class="kw">if </span>l.num_extra != <span class="number">0 </span>{
 <a href=#1592 id=1592 data-nosnippet>1592</a>                        Action::Jump(ReadExtraBitsLitlen)
 <a href=#1593 id=1593 data-nosnippet>1593</a>                    } <span class="kw">else </span>{
 <a href=#1594 id=1594 data-nosnippet>1594</a>                        Action::Jump(DecodeDistance)
@@ -1618,7 +1618,7 @@
 <a href=#1618 id=1618 data-nosnippet>1618</a>                    // this will never go out of bounds.
 <a href=#1619 id=1619 data-nosnippet>1619</a>                    </span>l.num_extra = u32::from(DIST_EXTRA[symbol <span class="kw">as </span>usize &amp; BASE_EXTRA_MASK]);
 <a href=#1620 id=1620 data-nosnippet>1620</a>                    l.dist = u32::from(DIST_BASE[symbol <span class="kw">as </span>usize &amp; BASE_EXTRA_MASK]);
-<a href=#1621 id=1621 data-nosnippet>1621</a>                    <span class="kw">if </span>l.<span class="macro">num_extra !</span>= <span class="number">0 </span>{
+<a href=#1621 id=1621 data-nosnippet>1621</a>                    <span class="kw">if </span>l.num_extra != <span class="number">0 </span>{
 <a href=#1622 id=1622 data-nosnippet>1622</a>                        <span class="comment">// ReadEXTRA_BITS_DISTACNE
 <a href=#1623 id=1623 data-nosnippet>1623</a>                        </span>Action::Jump(ReadExtraBitsDistance)
 <a href=#1624 id=1624 data-nosnippet>1624</a>                    } <span class="kw">else </span>{
@@ -1637,7 +1637,7 @@
 <a href=#1637 id=1637 data-nosnippet>1637</a>
 <a href=#1638 id=1638 data-nosnippet>1638</a>            HuffDecodeOuterLoop2 =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">'state_machine</span>, {
 <a href=#1639 id=1639 data-nosnippet>1639</a>                <span class="kw">if </span>l.dist <span class="kw">as </span>usize &gt; out_buf.position() &amp;&amp;
-<a href=#1640 id=1640 data-nosnippet>1640</a>                    (flags &amp; <span class="macro">TINFL_FLAG_USING_NON_WRAPPING_OUTPUT_BUF !</span>= <span class="number">0</span>)
+<a href=#1640 id=1640 data-nosnippet>1640</a>                    (flags &amp; TINFL_FLAG_USING_NON_WRAPPING_OUTPUT_BUF != <span class="number">0</span>)
 <a href=#1641 id=1641 data-nosnippet>1641</a>                {
 <a href=#1642 id=1642 data-nosnippet>1642</a>                    <span class="comment">// We encountered a distance that refers a position before
 <a href=#1643 id=1643 data-nosnippet>1643</a>                    // the start of the decoded data, so we can't continue.
@@ -1701,7 +1701,7 @@
 <a href=#1701 id=1701 data-nosnippet>1701</a>
 <a href=#1702 id=1702 data-nosnippet>1702</a>            BlockDone =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">'state_machine</span>, {
 <a href=#1703 id=1703 data-nosnippet>1703</a>                <span class="comment">// End once we've read the last block.
-<a href=#1704 id=1704 data-nosnippet>1704</a>                </span><span class="kw">if </span>r.<span class="macro">finish !</span>= <span class="number">0 </span>{
+<a href=#1704 id=1704 data-nosnippet>1704</a>                </span><span class="kw">if </span>r.finish != <span class="number">0 </span>{
 <a href=#1705 id=1705 data-nosnippet>1705</a>                    pad_to_bytes(<span class="kw-2">&amp;mut </span>l, <span class="kw-2">&amp;mut </span>in_iter, flags, |<span class="kw">_</span>| Action::None);
 <a href=#1706 id=1706 data-nosnippet>1706</a>
 <a href=#1707 id=1707 data-nosnippet>1707</a>                    <span class="kw">let </span>in_consumed = in_buf.len() - in_iter.len();
@@ -1711,7 +1711,7 @@
 <a href=#1711 id=1711 data-nosnippet>1711</a>                    l.bit_buf &amp;= ((<span class="number">1 </span><span class="kw">as </span>BitBuffer) &lt;&lt; l.num_bits) - <span class="number">1</span>;
 <a href=#1712 id=1712 data-nosnippet>1712</a>                    <span class="macro">debug_assert_eq!</span>(l.num_bits, <span class="number">0</span>);
 <a href=#1713 id=1713 data-nosnippet>1713</a>
-<a href=#1714 id=1714 data-nosnippet>1714</a>                    <span class="kw">if </span>flags &amp; <span class="macro">TINFL_FLAG_PARSE_ZLIB_HEADER !</span>= <span class="number">0 </span>{
+<a href=#1714 id=1714 data-nosnippet>1714</a>                    <span class="kw">if </span>flags &amp; TINFL_FLAG_PARSE_ZLIB_HEADER != <span class="number">0 </span>{
 <a href=#1715 id=1715 data-nosnippet>1715</a>                        l.counter = <span class="number">0</span>;
 <a href=#1716 id=1716 data-nosnippet>1716</a>                        Action::Jump(ReadAdler32)
 <a href=#1717 id=1717 data-nosnippet>1717</a>                    } <span class="kw">else </span>{
@@ -1724,7 +1724,7 @@
 <a href=#1724 id=1724 data-nosnippet>1724</a>
 <a href=#1725 id=1725 data-nosnippet>1725</a>            ReadAdler32 =&gt; <span class="macro">generate_state!</span>(state, <span class="lifetime">'state_machine</span>, {
 <a href=#1726 id=1726 data-nosnippet>1726</a>                <span class="kw">if </span>l.counter &lt; <span class="number">4 </span>{
-<a href=#1727 id=1727 data-nosnippet>1727</a>                    <span class="kw">if </span>l.<span class="macro">num_bits !</span>= <span class="number">0 </span>{
+<a href=#1727 id=1727 data-nosnippet>1727</a>                    <span class="kw">if </span>l.num_bits != <span class="number">0 </span>{
 <a href=#1728 id=1728 data-nosnippet>1728</a>                        read_bits(<span class="kw-2">&amp;mut </span>l, <span class="number">8</span>, <span class="kw-2">&amp;mut </span>in_iter, flags, |l, bits| {
 <a href=#1729 id=1729 data-nosnippet>1729</a>                            r.z_adler32 &lt;&lt;= <span class="number">8</span>;
 <a href=#1730 id=1730 data-nosnippet>1730</a>                            r.z_adler32 |= bits <span class="kw">as </span>u32;
@@ -1756,8 +1756,8 @@
 <a href=#1756 id=1756 data-nosnippet>1756</a>        };
 <a href=#1757 id=1757 data-nosnippet>1757</a>    };
 <a href=#1758 id=1758 data-nosnippet>1758</a>
-<a href=#1759 id=1759 data-nosnippet>1759</a>    <span class="kw">let </span>in_undo = <span class="kw">if </span><span class="macro">status !</span>= TINFLStatus::NeedsMoreInput
-<a href=#1760 id=1760 data-nosnippet>1760</a>        &amp;&amp; <span class="macro">status !</span>= TINFLStatus::FailedCannotMakeProgress
+<a href=#1759 id=1759 data-nosnippet>1759</a>    <span class="kw">let </span>in_undo = <span class="kw">if </span>status != TINFLStatus::NeedsMoreInput
+<a href=#1760 id=1760 data-nosnippet>1760</a>        &amp;&amp; status != TINFLStatus::FailedCannotMakeProgress
 <a href=#1761 id=1761 data-nosnippet>1761</a>    {
 <a href=#1762 id=1762 data-nosnippet>1762</a>        undo_bytes(<span class="kw-2">&amp;mut </span>l, (in_buf.len() - in_iter.len()) <span class="kw">as </span>u32) <span class="kw">as </span>usize
 <a href=#1763 id=1763 data-nosnippet>1763</a>    } <span class="kw">else </span>{
@@ -1769,7 +1769,7 @@
 <a href=#1769 id=1769 data-nosnippet>1769</a>    // TODO: May want to see if we can do this in a better way.
 <a href=#1770 id=1770 data-nosnippet>1770</a>    </span><span class="kw">if </span>status == TINFLStatus::NeedsMoreInput
 <a href=#1771 id=1771 data-nosnippet>1771</a>        &amp;&amp; out_buf.bytes_left() == <span class="number">0
-<a href=#1772 id=1772 data-nosnippet>1772</a>        </span>&amp;&amp; <span class="macro">state !</span>= State::ReadAdler32
+<a href=#1772 id=1772 data-nosnippet>1772</a>        </span>&amp;&amp; state != State::ReadAdler32
 <a href=#1773 id=1773 data-nosnippet>1773</a>    {
 <a href=#1774 id=1774 data-nosnippet>1774</a>        status = TINFLStatus::HasMoreOutput
 <a href=#1775 id=1775 data-nosnippet>1775</a>    }
@@ -1800,8 +1800,8 @@
 <a href=#1800 id=1800 data-nosnippet>1800</a>        </span><span class="kw">if </span>!<span class="macro">cfg!</span>(fuzzing) {
 <a href=#1801 id=1801 data-nosnippet>1801</a>            <span class="comment">// Once we are done, check if the checksum matches with the one provided in the zlib header.
 <a href=#1802 id=1802 data-nosnippet>1802</a>            </span><span class="kw">if </span>status == TINFLStatus::Done
-<a href=#1803 id=1803 data-nosnippet>1803</a>                &amp;&amp; flags &amp; <span class="macro">TINFL_FLAG_PARSE_ZLIB_HEADER !</span>= <span class="number">0
-<a href=#1804 id=1804 data-nosnippet>1804</a>                </span>&amp;&amp; r.<span class="macro">check_adler32 !</span>= r.z_adler32
+<a href=#1803 id=1803 data-nosnippet>1803</a>                &amp;&amp; flags &amp; TINFL_FLAG_PARSE_ZLIB_HEADER != <span class="number">0
+<a href=#1804 id=1804 data-nosnippet>1804</a>                </span>&amp;&amp; r.check_adler32 != r.z_adler32
 <a href=#1805 id=1805 data-nosnippet>1805</a>            {
 <a href=#1806 id=1806 data-nosnippet>1806</a>                status = TINFLStatus::Adler32Mismatch;
 <a href=#1807 id=1807 data-nosnippet>1807</a>            }
