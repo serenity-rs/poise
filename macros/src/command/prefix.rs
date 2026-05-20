@@ -177,20 +177,47 @@ fn parse_string(
     token: syn::Ident,
     parsed_rest: proc_macro2::TokenStream,
 ) -> proc_macro2::TokenStream {
-    quote::quote! {
-        match <String as ::poise::PopArgument>::pop_from(
-            &args,
-            attachment_idx,
-            serenity_ctx,
-            msg
-        ).await {
-            Ok((args, attachment_idx, token)) => {
-                match <#ty as ::std::str::FromStr>::from_str(&token) {
-                    Ok(#token) => { #parsed_rest },
-                    Err(e) => error = (e.into(), Some(token)),
-                }
-            },
-            Err(e) => error = e,
+    if let Some(ty) = unwrap_generic(ty, "Option") {
+        // Greedily parse `Option<T: FromStr>` by first trying to parse for `Some(T: FromStr)`.
+        // If that fails, try again with `None` instead.
+        quote::quote! {
+            match <String as ::poise::PopArgument>::pop_from(
+                &args,
+                attachment_idx,
+                serenity_ctx,
+                msg
+            ).await {
+                Ok((args, attachment_idx, token)) => {
+                    match <#ty as ::std::str::FromStr>::from_str(&token) {
+                        Ok(#token) => {
+                            let #token: Option<#ty> = Some(#token);
+                            #parsed_rest
+                        },
+                        Err(e) => error = (e.into(), Some(token)),
+                    }
+                },
+                Err(e) => error = e,
+            }
+            let #token: Option<#ty> = None;
+            #parsed_rest
+        }
+    } else {
+        // Here, we just have `T: FromStr`.
+        quote::quote! {
+            match <String as ::poise::PopArgument>::pop_from(
+                &args,
+                attachment_idx,
+                serenity_ctx,
+                msg
+            ).await {
+                Ok((args, attachment_idx, token)) => {
+                    match <#ty as ::std::str::FromStr>::from_str(&token) {
+                        Ok(#token) => { #parsed_rest },
+                        Err(e) => error = (e.into(), Some(token)),
+                    }
+                },
+                Err(e) => error = e,
+            }
         }
     }
 }
