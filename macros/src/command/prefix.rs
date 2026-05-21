@@ -128,7 +128,7 @@ fn parse_rest(
         (
             ty,
             quote::quote! {},
-            quote::quote! { error = (::poise::TooManyArguments::default().into(), None); },
+            quote::quote! { error = (::poise::TooFewArguments::default().into(), None); },
         )
     };
 
