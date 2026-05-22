@@ -162,13 +162,19 @@ fn parse_flag(
     parsed_rest: proc_macro2::TokenStream,
 ) -> proc_macro2::TokenStream {
     quote::quote! {
+        let mut args = args;
+        let mut attachment_idx = attachment_idx;
         let #token = match <String as ::poise::PopArgument>::pop_from(
             args,
             attachment_idx,
             serenity_ctx,
             msg,
         ).await {
-            Ok((args, attachment_idx, #token)) if #token.eq_ignore_ascii_case(#name) => true,
+            Ok((new_args, new_attachment_idx, #token)) if #token.eq_ignore_ascii_case(#name) => {
+                args = new_args;
+                attachment_idx = new_attachment_idx;
+                true
+            },
             _ => {
                 error = (concat!("Must use either `", #name, "` or nothing as a modifier").into(), None);
                 false
