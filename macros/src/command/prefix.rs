@@ -267,7 +267,7 @@ fn parse_param(
             let mut #token = Vec::new();
             let mut rest = vec![args.clone()];
 
-            let mut args = args.clone();
+            let mut args = args;
             let mut attachment_idx = attachment_idx;
 
             // We do not propagate errors here because parsing into a Vec<T> parameter with spare
