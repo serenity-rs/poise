@@ -48,38 +48,39 @@ fn parse_prefix_params(
     params: &[PrefixParameter],
     num_parsed: usize,
 ) -> Result<proc_macro2::TokenStream, syn::Error> {
-    let tokens = if let Some((first, rest)) = params.split_first() {
-        // Recursively parse the parameters after this one.
-        let parsed_rest = parse_prefix_params(rest, num_parsed + 1)?;
-
-        let ty = &first.ty;
-        let token = format_ident!("token_{}", first.idx);
-        match first.modifier {
-            Some(Modifier::Lazy) => {
-                let Some(ty) = unwrap_generic(ty, "Option") else {
-                    return Err(syn::Error::new(
-                        ty.span(),
-                        "can only decorate `Option<T>` with #[lazy]",
-                    ));
-                };
-                parse_lazy(&ty, token, parsed_rest)
-            }
-            Some(Modifier::Rest) => parse_rest(ty, token, parsed_rest),
-            Some(Modifier::Flag) => parse_flag(&first.name, token, parsed_rest),
-            Some(Modifier::String) => parse_string(ty, token, parsed_rest),
-            None => parse_param(ty, token, parsed_rest),
-        }
-    } else {
+    let Some((first, rest)) = params.split_first() else {
         // Once the input is exhausted and parsing was successful, we output the tokens we parsed.
-        let tokens = (0..num_parsed)
+        let idents = (0..num_parsed)
             .into_iter()
             .map(|i| format_ident!("token_{}", i))
             .collect::<Vec<_>>();
-        quote::quote! {
+        return Ok(quote::quote! {
             if args.is_empty() {
-                return Ok(( #( #tokens, )* ));
+                return Ok(( #( #idents, )* ));
+            }
+        });
+    };
+
+    // Recursively parse the parameters after this one.
+    let parsed_rest = parse_prefix_params(rest, num_parsed + 1)?;
+
+    let ty = &first.ty;
+    let token = format_ident!("token_{}", first.idx);
+    let tokens = match first.modifier {
+        Some(Modifier::Lazy) => {
+            if let Some(ty) = unwrap_generic(ty, "Option") {
+                parse_lazy(ty, token, parsed_rest)
+            } else {
+                return Err(syn::Error::new(
+                    ty.span(),
+                    "can only decorate `Option<T>` with #[lazy]",
+                ));
             }
         }
+        Some(Modifier::Rest) => parse_rest(ty, token, parsed_rest),
+        Some(Modifier::Flag) => parse_flag(first.name, token, parsed_rest),
+        Some(Modifier::String) => parse_string(ty, token, parsed_rest),
+        None => parse_param(ty, token, parsed_rest),
     };
     Ok(tokens)
 }
