@@ -318,7 +318,22 @@ pub fn generate_prefix_action(inv: &Invocation) -> Result<proc_macro2::TokenStre
         .iter()
         .enumerate()
         .map(|(idx, param)| {
-            get_modifier(param).map(|modifier| PrefixParameter {
+            let modifier = get_modifier(param)?;
+            if let Some(Modifier::Rest) = modifier {
+                if idx != inv.parameters.len() - 1 {
+                    return Err(syn::Error::new(
+                        param.span,
+                        "parameter marked `#[rest]` must come last in the argument list",
+                    ));
+                }
+                if inv.args.discard_spare_arguments {
+                    return Err(syn::Error::new(
+                        param.span,
+                        "cannot combine parameter marked `#[rest]` with `discard_spare_arguments`",
+                    ));
+                }
+            }
+            Ok(PrefixParameter {
                 idx,
                 modifier,
                 ty: param.type_.clone(),
