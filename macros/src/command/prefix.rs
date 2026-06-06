@@ -108,10 +108,43 @@ fn parse_prefix_params(
                          }
                      }
                 }
+            } else if let Some(ty) = unwrap_generic(ty, "Vec") {
+                // Parse `#[lazy] Vec<T>` by trying to parse the shortest `Vec<T>` possible,
+                // including an empty `Vec`.
+                quote::quote! {
+                    #parser_def
+
+                    let mut #token = Vec::new();
+                    let mut args = args;
+                    let mut attachment_idx = attachment_idx;
+
+                    let mut error = None;
+                    loop {
+                        match #parser_name(args, attachment_idx, serenity_ctx, msg).await {
+                            Ok(( #( #parsed_tokens, )* )) => return Ok((#token, #( #parsed_tokens, )* )),
+                            Err(e) => error = Some(e),
+                        }
+
+                        match <#ty as ::poise::PopArgument>::pop_from(
+                            args,
+                            attachment_idx,
+                            serenity_ctx,
+                            msg,
+                        ).await {
+                            Ok((new_args, new_attachment_idx, token)) => {
+                                #token.push(token);
+                                args = new_args;
+                                attachment_idx = new_attachment_idx;
+                            }
+                            Err(_) => break,
+                        }
+                    }
+                    Err(error.unwrap_or_default())
+                }
             } else {
                 return Err(syn::Error::new(
                     ty.span(),
-                    "can only decorate `Option<T>` with #[lazy]",
+                    "can only decorate `Option<T>` or `Vec<T>` with #[lazy]",
                 ));
             }
         }
