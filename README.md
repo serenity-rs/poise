@@ -29,6 +29,7 @@ For each bot, there's a list of notable features for you to take inspiration fro
 - [StatPixel] by [@matteopolak]: modals, buttons, dropdowns, database, localization
 - [CrackTunes] by [@cycle-five]: database, voice, custom prefixes, modals
 - [Claude Bot] by [@wyatt-avilla]: database, reactions, slash commands, attachments
+- [DisQuip Bot] by [@blthayer]: voice (plays audio files), fuzzy search, RNG
 
 You're welcome to add your own bot [via a PR]!
 
@@ -56,6 +57,8 @@ For more projects, see GitHub's [Used by] page.
 [@cycle-five]: https://github.com/cycle-five
 [Claude Bot]: https://github.com/wyatt-avilla/claude-discord-bot
 [@wyatt-avilla]: https://github.com/wyatt-avilla
+[DisQuip Bot]: https://github.com/blthayer/disquip-bot-rs
+[@blthayer]: https://github.com/blthayer
 
 <!-- Badges -->
 [crates.io]: https://crates.io/crates/poise
