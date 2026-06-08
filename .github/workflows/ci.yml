@@ -20,7 +20,7 @@ jobs:
 
         include:
           - name: MSRV
-            toolchain: 1.92.0
+            toolchain: 1.95.0
             # don't do doctests because they rely on new features for brevity
             # copy known Cargo.lock to avoid random dependency MSRV bumps to mess up our test
             command: cp .github/Cargo-msrv.lock Cargo.lock && cargo test --all-features --lib --tests
@@ -51,8 +51,6 @@ jobs:
           toolchain: ${{ matrix.toolchain || 'stable' }}
       - uses: Swatinem/rust-cache@v2
       - run: ${{ matrix.command || 'cargo test --all-features' }}
-        env:
-          RUSTFLAGS: ${{ matrix.rustflags }}
 
   fmt:
     name: Rustfmt
@@ -75,8 +73,6 @@ jobs:
           components: clippy
       - uses: Swatinem/rust-cache@v2
       - run: cargo clippy --all-features -- -D warnings
-        env:
-          RUSTFLAGS: -C target-cpu=haswell # for simd-json
 
   docs:
     name: Build docs
@@ -85,8 +81,6 @@ jobs:
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@nightly
       - run: cargo +nightly rustdoc --all-features -Z rustdoc-scrape-examples -- --cfg doc_nightly -D rustdoc::broken_intra_doc_links
-        env:
-          RUSTFLAGS: -C target-cpu=haswell # for simd-json
 
       # If on current/next branch (as opposed to PR or whatever), publish docs to github pages
       - name: Move files
