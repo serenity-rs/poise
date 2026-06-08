@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"macro":["pin_mut","unsafe_pinned","unsafe_unpinned"]};
+window.SIDEBAR_ITEMS = {"macro":[["pin_mut",1],["unsafe_pinned",1],["unsafe_unpinned",1]]};

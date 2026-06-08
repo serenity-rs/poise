@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"macro":["pin_mut","ready"],"mod":["channel","future","io","lock","never","prelude","sink","stream","task"]};
+window.SIDEBAR_ITEMS = {"macro":[["pin_mut",1],["ready",1]],"mod":["channel","future","io","lock","never","prelude","sink","stream","task"]};
