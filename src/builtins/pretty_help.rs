@@ -259,10 +259,7 @@ async fn pretty_help_single_command<U, E>(
         .reduce(|x, y| format!("{x}\n{y}"))
         .map(|s| ("Subcommands", s, false));
 
-    let fields = invocations
-        .into_iter()
-        .chain(parameters.into_iter())
-        .chain(sbcmds.into_iter());
+    let fields = invocations.into_iter().chain(parameters).chain(sbcmds);
 
     let embed = serenity::CreateEmbed::default()
         .description(description)
