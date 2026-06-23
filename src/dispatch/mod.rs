@@ -92,14 +92,36 @@ pub async fn dispatch_event<U: Send + Sync, E>(
                 error.handle(framework.options).await;
             }
         }
-        serenity::FullEvent::MessageUpdate { event, .. } => {
+        serenity::FullEvent::MessageUpdate {
+            event,
+            old_if_available,
+            ..
+        } => {
             if let Some(edit_tracker) = &framework.options.prefix_options.edit_tracker {
+                #[cfg(feature = "cache")]
+                if framework.options().prefix_options.check_edits_against_cache {
+                    if let Some(old) = old_if_available {
+                        if event
+                            .content
+                            .as_deref()
+                            .is_some_and(|new_content| new_content == old.content)
+                        {
+                            return;
+                        }
+                    }
+                }
+
                 let msg = edit_tracker.write().unwrap().process_message_update(
                     event,
                     framework
                         .options()
                         .prefix_options
                         .ignore_edits_if_not_yet_responded,
+                    framework
+                        .options()
+                        .prefix_options
+                        .tracking_initiation_window
+                        .as_ref(),
                 );
 
                 if let Some((msg, previously_tracked)) = msg {

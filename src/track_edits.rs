@@ -90,7 +90,16 @@ impl EditTracker {
         &mut self,
         user_msg_update: &serenity::MessageUpdateEvent,
         ignore_edits_if_not_yet_responded: bool,
+        tracking_initiation_window: Option<&std::time::Duration>,
     ) -> Option<(serenity::Message, bool)> {
+        if let Some(window) = tracking_initiation_window {
+            let created = user_msg_update.id.created_at().unix_timestamp();
+            let elapsed = serenity::Timestamp::now().unix_timestamp() - created;
+            if elapsed.unsigned_abs() > window.as_secs() {
+                return None;
+            }
+        }
+
         match self
             .cache
             .iter_mut()
@@ -102,11 +111,11 @@ impl EditTracker {
                 }
 
                 // If message content wasn't touched, don't re-run command
-                // Note: this may be Some, but still identical to previous content. We want to
-                // re-run the command in that case too; because that means the user explicitly
-                // edited their message
-                #[allow(clippy::question_mark)]
-                if user_msg_update.content.is_none() {
+                if user_msg_update
+                    .content
+                    .as_deref()
+                    .is_some_and(|content| content == invocation.user_msg.content)
+                {
                     return None;
                 }
 
