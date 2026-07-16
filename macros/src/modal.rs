@@ -72,7 +72,9 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
             return Err(darling::Error::custom(err));
         }
         builders.push(quote::quote! {
-            serenity::CreateModalComponent::TextDisplay(serenity::CreateTextDisplay::new(#content)),
+            serenity::CreateModalComponent::TextDisplay(
+                serenity::CreateTextDisplay::new(#content),
+            ),
         });
     }
 
@@ -89,7 +91,9 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
         // Allow a text display component to be placed above any field.
         if let Some(content) = field_attrs.text_display {
             builders.push(quote::quote! {
-                serenity::CreateModalComponent::TextDisplay(serenity::CreateTextDisplay::new(#content)),
+                serenity::CreateModalComponent::TextDisplay(
+                    serenity::CreateTextDisplay::new(#content),
+                ),
             });
         }
 
@@ -174,16 +178,18 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                     serenity::CreateLabel::file_upload(
                         #label,
                         serenity::CreateFileUpload::new(stringify!(#field_ident))
-                        .required(#required)
-                        #( .min_values(#min_values) )*
-                        #( .max_values(#max_values) )*
+                            .required(#required)
+                            #( .min_values(#min_values) )*
+                            #( .max_values(#max_values) )*
                     )
                     #( .description(#description) )*
                 ),
             });
 
             parsers.push(quote::quote! {
-                #field_ident: poise::find_modal_data(&mut data, stringify!(#field_ident)).attachments #ok_or,
+                #field_ident: poise::find_modal_data(&mut data, stringify!(#field_ident))
+                    .attachments
+                    #ok_or,
             });
 
             continue;
@@ -257,26 +263,25 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                 serenity::CreateModalComponent::Label(
                     serenity::CreateLabel::radio_group(
                         #label,
-                        serenity::CreateRadioGroup::new(
-                            stringify!(#field_ident),
-                            {
-                                let default = if let Some(defaults) = &mut defaults {
-                                    let default = std::mem::take(&mut defaults.#field_ident);
-                                    Option::from(default).unwrap_or_else(|| FixedString::new())
-                                } else {
-                                    FixedString::new()
-                                };
-                                Cow::Owned(vec![#create_option])
-                            }
-                        )
-                        .required(#required)
+                        serenity::CreateRadioGroup::new(stringify!(#field_ident), {
+                            let default = if let Some(defaults) = &mut defaults {
+                                let default = std::mem::take(&mut defaults.#field_ident);
+                                Option::from(default).unwrap_or_else(|| FixedString::new())
+                            } else {
+                                FixedString::new()
+                            };
+                            Cow::Owned(vec![#create_option])
+                        })
+                        .required(#required),
                     )
                     #( .description(#description) )*
                 ),
             });
 
             parsers.push(quote::quote! {
-                #field_ident: poise::find_modal_data(&mut data, stringify!(#field_ident)).radio_option #ok_or,
+                #field_ident: poise::find_modal_data(&mut data, stringify!(#field_ident))
+                    .radio_option
+                    #ok_or,
             });
 
             continue;
@@ -336,18 +341,15 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                 serenity::CreateModalComponent::Label(
                     serenity::CreateLabel::checkbox_group(
                         #label,
-                        serenity::CreateCheckboxGroup::new(
-                            stringify!(#field_ident),
-                            {
-                                let default = if let Some(defaults) = &mut defaults {
-                                    let default = std::mem::take(&mut defaults.#field_ident);
-                                    Option::from(default).unwrap_or_else(|| FixedArray::new())
-                                } else {
-                                    FixedArray::new()
-                                };
-                                Cow::Owned(vec![#create_option])
-                            }
-                        )
+                        serenity::CreateCheckboxGroup::new(stringify!(#field_ident), {
+                            let default = if let Some(defaults) = &mut defaults {
+                                let default = std::mem::take(&mut defaults.#field_ident);
+                                Option::from(default).unwrap_or_else(|| FixedArray::new())
+                            } else {
+                                FixedArray::new()
+                            };
+                            Cow::Owned(vec![#create_option])
+                        })
                         .required(#required)
                         #( .min_values(#min_values) )*
                         #( .max_values(#max_values) )*
@@ -357,7 +359,9 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
             });
 
             parsers.push(quote::quote! {
-                #field_ident: poise::find_modal_data(&mut data, stringify!(#field_ident)).checkbox_options #ok_or,
+                #field_ident: poise::find_modal_data(&mut data, stringify!(#field_ident))
+                    .checkbox_options
+                    #ok_or,
             });
 
             continue;
@@ -472,7 +476,8 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                     {
                         let default_users = if let Some(defaults) = &mut defaults {
                             let default = std::mem::take(&mut defaults.#field_ident);
-                            let default = Option::from(default).unwrap_or_else(|| FixedArray::new());
+                            let default =
+                                Option::from(default).unwrap_or_else(|| FixedArray::new());
                             let default = default.iter().map(|u| u.id).collect::<Vec<_>>();
                             Some(Cow::Owned(default))
                         } else {
@@ -491,7 +496,8 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                     {
                         let default_roles = if let Some(defaults) = &mut defaults {
                             let default = std::mem::take(&mut defaults.#field_ident);
-                            let default = Option::from(default).unwrap_or_else(|| FixedArray::new());
+                            let default =
+                                Option::from(default).unwrap_or_else(|| FixedArray::new());
                             let default = default.iter().map(|r| r.id).collect::<Vec<_>>();
                             Some(Cow::Owned(default))
                         } else {
@@ -508,19 +514,26 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
             } => (
                 quote::quote! {
                     {
-                        let (default_users, default_roles) = if let Some(defaults) = &mut defaults {
-                            let default = std::mem::take(&mut defaults.#field_ident);
-                            let default = Option::from(default).unwrap_or_else(|| poise::Mentionables::default());
-                            let default_users = default.users.iter().map(|u| u.id).collect::<Vec<_>>();
-                            let default_roles = default.roles.iter().map(|r| r.id).collect::<Vec<_>>();
-                            (
-                                Some(Cow::Owned(default_users)),
-                                Some(Cow::Owned(default_roles))
-                            )
-                        } else {
-                            (None, None)
-                        };
-                        serenity::CreateSelectMenuKind::Mentionable { default_users, default_roles }
+                        let (default_users, default_roles) =
+                            if let Some(defaults) = &mut defaults {
+                                let default = std::mem::take(&mut defaults.#field_ident);
+                                let default = Option::from(default)
+                                    .unwrap_or_else(|| poise::Mentionables::default());
+                                let default_users =
+                                    default.users.iter().map(|u| u.id).collect::<Vec<_>>();
+                                let default_roles =
+                                    default.roles.iter().map(|r| r.id).collect::<Vec<_>>();
+                                (
+                                    Some(Cow::Owned(default_users)),
+                                    Some(Cow::Owned(default_roles))
+                                )
+                            } else {
+                                (None, None)
+                            };
+                        serenity::CreateSelectMenuKind::Mentionable {
+                            default_users,
+                            default_roles
+                        }
                     }
                 },
                 quote::quote! { .mentionables },
@@ -542,7 +555,8 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                         {
                             let default_channels = if let Some(defaults) = &mut defaults {
                                 let default = std::mem::take(&mut defaults.#field_ident);
-                                let default = Option::from(default).unwrap_or_else(|| FixedArray::new());
+                                let default =
+                                    Option::from(default).unwrap_or_else(|| FixedArray::new());
                                 Some(Cow::Owned(default.into_vec()))
                             } else {
                                 None
@@ -578,7 +592,9 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
             });
 
             parsers.push(quote::quote! {
-                #field_ident: poise::find_modal_data(&mut data, stringify!(#field_ident)) #kind #ok_or,
+                #field_ident: poise::find_modal_data(&mut data, stringify!(#field_ident))
+                    #kind
+                    #ok_or,
             });
 
             continue;
@@ -595,24 +611,21 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
 
         builders.push(quote::quote! {
             serenity::CreateModalComponent::Label(
-                serenity::CreateLabel::input_text(
-                    #label,
-                    {
-                        let mut b = serenity::CreateInputText::new(#style, stringify!(#field_ident));
-                        if let Some(defaults) = &mut defaults {
-                            // Can use `defaults.#field_ident` directly in Edition 2021 due to more
-                            // specific closure capture rules
-                            let default = std::mem::take(&mut defaults.#field_ident);
-                            // Option::from().unwrap_or_default() dance to handle both T and Option<T>
-                            b = b.value(Option::from(default).unwrap_or_else(FixedString::new));
-                        }
-                        b
+                serenity::CreateLabel::input_text(#label, {
+                    let mut b = serenity::CreateInputText::new(#style, stringify!(#field_ident));
+                    if let Some(defaults) = &mut defaults {
+                        // Can use `defaults.#field_ident` directly in Edition 2021 due to more
+                        // specific closure capture rules
+                        let default = std::mem::take(&mut defaults.#field_ident);
+                        // Option::from().unwrap_or_default() dance to handle both T and Option<T>
+                        b = b.value(Option::from(default).unwrap_or_else(FixedString::new));
+                    }
+                    b
                         #( .placeholder(#placeholder) )*
                         .required(#required)
                         #( .min_length(#min_length) )*
                         #( .max_length(#max_length) )*
-                    }
-                )
+                })
                 #( .description(#description) )*
             ),
         });
@@ -636,9 +649,13 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
         use poise::serenity_prelude as serenity;
         use poise::serenity_prelude::small_fixed_array::{FixedArray, FixedString};
         impl #impl_generics poise::Modal for #struct_ident #ty_generics #where_clause {
-            fn create(mut defaults: Option<Self>, custom_id: String) -> serenity::CreateInteractionResponse<'static> {
+            fn create(
+                mut defaults: Option<Self>,
+                custom_id: String,
+            ) -> serenity::CreateInteractionResponse<'static> {
                 serenity::CreateInteractionResponse::Modal(
-                    serenity::CreateModal::new(custom_id, #modal_title).components(vec!{#( #builders )*})
+                    serenity::CreateModal::new(custom_id, #modal_title)
+                        .components(vec!{#( #builders )*})
                 )
             }
 
