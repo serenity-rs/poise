@@ -3,14 +3,14 @@
 use crate::serenity_prelude as serenity;
 use crate::serenity_prelude::small_fixed_array::{FixedArray, FixedString};
 
-/// The resolved data for selected options in a [`MentionableSelect`][ms] component.
+/// The resolved data for selected options in a [`MentionableSelect`] component.
 ///
-/// [`User`][user] objects resolved from modal interactions include [`PartialMember`][pm]
-/// data in the `member` field.
+/// [`User`] objects resolved from modal interactions include [`PartialMember`] data in the
+/// `member` field.
 ///
-/// [ms]: crate::serenity_prelude::ComponentType::MentionableSelect
-/// [user]: crate::serenity_prelude::User
-/// [pm]: crate::serenity_prelude::PartialMember
+/// [`MentionableSelect`]: crate::serenity_prelude::ComponentType::MentionableSelect
+/// [`User`]: crate::serenity_prelude::User
+/// [`PartialMember`]: crate::serenity_prelude::PartialMember
 #[derive(Clone, Debug, Default)]
 pub struct Mentionables {
     /// The resolved users.
@@ -85,8 +85,8 @@ impl ModalDataResolved {
         }
     }
 
-    /// Used by [`find_modal_data`] to retrieve `values` from [`StringSelect`][ss] components
-    /// and resolved data from all other [`SelectMenu`][sm] components.
+    /// Used by [`find_modal_data`] to retrieve `values` from [`StringSelect`] components and
+    /// resolved data from all other [`SelectMenu`] components.
     ///
     /// `User` and `Role` entity data is _cloned_ since resolved data will be shared between
     /// components when the same entity is selected in multiple components.
@@ -94,8 +94,8 @@ impl ModalDataResolved {
     /// Logs a warning if a value from a component cannot be parsed and used to retrieve the
     /// resolved data for that ID.
     ///
-    /// [sm]: crate::serenity_prelude::all::SelectMenu
-    /// [ss]: crate::serenity_prelude::ComponentType::StringSelect
+    /// [`SelectMenu`]: crate::serenity_prelude::all::SelectMenu
+    /// [`StringSelect`]: crate::serenity_prelude::ComponentType::StringSelect
     #[doc(hidden)]
     fn extract_selections(
         select_menu: &mut serenity::all::SelectMenu,

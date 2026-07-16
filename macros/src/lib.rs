@@ -273,8 +273,8 @@ Use this derive macro on a struct to easily generate a modal interaction, Discor
 of interactive forms.
 
 Modals are made up of components, which define their layout, content, and type of input accepted.
-A single modal can include up to five components, and all [available modal components][components]
-are supported by the macro.
+A single modal can include up to five components, and all [available modal components] are
+supported by the macro.
 
 # Example
 
@@ -322,9 +322,9 @@ pub async fn modal(ctx: ApplicationContext<'_>) -> Result<(), Error> {
 # Struct attributes
 
 - `#[name = ""]`: Sets the modal title. Defaults to struct name if omitted. Max 45 chars.
-- `#[text_display = ""]`: Optional [text display][td] component, shown below the modal title.
-Can include markdown-formatted text, mentions (users, roles, etc.), and emojis. Note that this
-counts toward the maximum total of five components per modal. Max 4000 chars.
+- `#[text_display = ""]`: Optional [text display] component, shown below the modal title. Can
+include markdown-formatted text, mentions (users, roles, etc.), and emojis. Note that this counts
+toward the maximum total of five components per modal. Max 4000 chars.
 
 # Field attributes
 
@@ -354,30 +354,29 @@ The following field attributes are shared by all interactive components:
 - `#[description = ""]`: Adds an optional description under the label. Max 100 chars.
 - `#[placeholder = ""]`: Adds optional placeholder text. Max 100 chars.
 
-The default component is the [text input][ti] component, which returns a `FixedString<u16>`. The
+The default component is the [text input] component, which returns a `FixedString<u16>`. The
 following field attributes are valid for text input components only:
 
 - `#[min_length = 0]`: Minimum number of characters (0-4000).
 - `#[max_length = 1]`: Maximum number of characters (1-4000).
 - `#[paragraph]`: Switches to a multi-line input box. Default is single-line.
 
-Other interactive components supported by the macro include the [file upload][fu],
-[string select][ss], [user select][us], [role select][rs], [mentionable select][ms],
-[channel select][cs], [radio group][rg], [checkbox group][cbg], and [checkbox][cb]
-components. Component type is indicated by using one of the following field attributes
-(**one per field**):
+Other interactive components supported by the macro include the [file upload], [string select],
+[user select], [role select], [mentionable select], [channel select], [radio group], [checkbox
+group], and [checkbox] components. Component type is indicated by using one of the following field
+attributes (**one per field**):
 
-- `#[file_upload]`: Allows the user to upload files (0-10). Returns [`FixedArray<Attachment>`][att].
-- `#[string_select("", "")]`: Supports 1-25 **unique** options (up to 100 chars each), defined
-in the attribute. Returns `FixedArray<String>`.
-- `#[user_select]`: Returns [`FixedArray<User>`][user].
-- `#[role_select]`: Returns [`FixedArray<Role>`][role].
-- `#[mentionable_select]`: Returns [`Mentionables`][mentionables].
-- `#[channel_select]`: Returns [`FixedArray<GenericChannelId>`][gic].
-- `#[radio_group("", "")]`: Supports 2-10 **unique** options (up to 100 chars each), defined
-in the attribute. Returns `FixedString`.
-- `#[checkbox_group("", "")]`: Supports 1-10 **unique** options (up to 100 chars each), defined
-in the attribute. Returns `FixedArray<String>`.
+- `#[file_upload]`: Allows the user to upload files (0-10). Returns [`FixedArray<Attachment>`].
+- `#[string_select("", "")]`: Supports 1-25 **unique** options (up to 100 chars each), defined in
+the attribute. Returns `FixedArray<String>`.
+- `#[user_select]`: Returns [`FixedArray<User>`].
+- `#[role_select]`: Returns [`FixedArray<Role>`].
+- `#[mentionable_select]`: Returns [`Mentionables`].
+- `#[channel_select]`: Returns [`FixedArray<GenericChannelId>`].
+- `#[radio_group("", "")]`: Supports 2-10 **unique** options (up to 100 chars each), defined in
+the attribute. Returns `FixedString`.
+- `#[checkbox_group("", "")]`: Supports 1-10 **unique** options (up to 100 chars each), defined in
+the attribute. Returns `FixedArray<String>`.
 - `#[checkbox]`: Returns `true` if checked, `false` if unchecked.
 
 Optionally, emojis and/or descriptions may be added to string select menu options. Radio group
@@ -409,12 +408,12 @@ static or `<a:NAME:EMOJI_ID>` for animated. Emojis given in an invalid format wi
 selections: Option<FixedArray<String>>
 ```
 
-Minimum and maximum values for file upload select menu, and checkbox group components
-are defined using the following field attributes:
+Minimum and maximum values for file upload select menu, and checkbox group components are defined
+using the following field attributes:
 
 - `#[min_values = 0]`: 0-10 for files/checkbox groups; 0-25 for select menus. Defaults to 1.
-- `#[max_values = 25]`: 1-10 for files/checkbox groups; 1-25 for select menus. Defaults to 1
-for files and select menus; defaults to the number of options for checkbox groups.
+- `#[max_values = 25]`: 1-10 for files/checkbox groups; 1-25 for select menus. Defaults to 1 for
+files and select menus; defaults to the number of options for checkbox groups.
 
 ```rust
 #[name = "Role select menu"]
@@ -423,10 +422,10 @@ for files and select menus; defaults to the number of options for checkbox group
 roles: Option<FixedArray<serenity::Role>>
 ```
 
-Note that file upload, select menu, and checkbox group components can be optional ***and***
-have a `min_values` value defined at the same time. In such cases, the defined minimum only
-comes into effect when input is attempted. In the following example, the user would be able
-to submit the modal with either no mentionables ***or*** at least three mentionables selected.
+Note that file upload, select menu, and checkbox group components can be optional ***and*** have
+a `min_values` value defined at the same time. In such cases, the defined minimum only comes into
+effect when input is attempted. In the following example, the user would be able to submit the
+modal with either no mentionables ***or*** at least three mentionables selected.
 
 ```rust
 #[name = "Mentionable select menu"]
@@ -435,10 +434,10 @@ to submit the modal with either no mentionables ***or*** at least three mentiona
 mentionables: Option<poise::Mentionables>
 ```
 
-For the channel select menu, channel types to include in the list may optionally be defined
-using the following field attribute:
+For the channel select menu, channel types to include in the list may optionally be defined using
+the following field attribute:
 
-- `#[channel_types("", "")]`: See [`ChannelType`][ct] for valid channel types.
+- `#[channel_types("", "")]`: See [`ChannelType`] for valid channel types.
 
 ```rust
 #[name = "Channel select menu"]
@@ -450,8 +449,8 @@ channels: FixedArray<serenity::GenericChannelId>
 # Specifying defaults
 
 Defaults may be provided for text input and select menu components using an initialized instance
-of the modal struct with [`execute_with_defaults()`][ewd], or with [`execute_modal()`][exe] if you
-wish to specify a timeout. For example, assuming the struct from the initial example:
+of the modal struct with [`execute_with_defaults()`], or with [`execute_modal()`] if you wish to
+specify a timeout. For example, assuming the struct from the initial example:
 
 ```rust
 let data = MyModal::execute_with_defaults(
@@ -480,7 +479,7 @@ let data = MyModal::execute_with_defaults(
 .await?;
 ```
 
-And using [`execute_modal()`][exe] with a timeout:
+And using [`execute_modal()`] with a timeout:
 
 ```rust
 let data = poise::execute_modal(
@@ -495,26 +494,26 @@ let data = poise::execute_modal(
 .await?;
 ```
 
-[td]:https://docs.discord.com/developers/components/reference#text-display
-[ti]:https://docs.discord.com/developers/components/reference#text-input
-[fu]:https://docs.discord.com/developers/components/reference#file-upload
-[ss]:https://docs.discord.com/developers/components/reference#string-select
-[us]:https://docs.discord.com/developers/components/reference#user-select
-[rs]:https://docs.discord.com/developers/components/reference#role-select
-[cs]:https://docs.discord.com/developers/components/reference#channel-select
-[ms]:https://docs.discord.com/developers/components/reference#mentionable-select
-[rg]:https://docs.discord.com/developers/components/reference#radio-group
-[cbg]:https://docs.discord.com/developers/components/reference#checkbox-group
-[cb]:https://docs.discord.com/developers/components/reference#checkbox
-[att]:https://docs.rs/serenity/latest/serenity/model/channel/struct.Attachment.html
-[user]:https://docs.rs/serenity/latest/serenity/model/user/struct.User.html
-[role]:https://docs.rs/serenity/latest/serenity/model/guild/struct.Role.html
-[gic]:https://serenity-rs.github.io/serenity/next/serenity/model/id/struct.GenericChannelId.html
-[mentionables]:https://serenity-rs.github.io/poise/next/poise/modal/struct.Mentionables.html
-[ct]:https://docs.rs/serenity/latest/serenity/model/channel/enum.ChannelType.html
-[exe]:https://serenity-rs.github.io/poise/next/poise/modal/fn.execute_modal.html
-[ewd]:https://serenity-rs.github.io/poise/next/poise/modal/trait.Modal.html#method.execute_with_defaults
-[components]:https://docs.discord.com/developers/components/reference#component-object-component-types
+[available modal components]:https://docs.discord.com/developers/components/reference#component-object-component-types
+[text display]:https://docs.discord.com/developers/components/reference#text-display
+[text input]:https://docs.discord.com/developers/components/reference#text-input
+[file upload]:https://docs.discord.com/developers/components/reference#file-upload
+[string select]:https://docs.discord.com/developers/components/reference#string-select
+[user select]:https://docs.discord.com/developers/components/reference#user-select
+[role select]:https://docs.discord.com/developers/components/reference#role-select
+[mentionable select]:https://docs.discord.com/developers/components/reference#mentionable-select
+[channel select]:https://docs.discord.com/developers/components/reference#channel-select
+[radio group]:https://docs.discord.com/developers/components/reference#radio-group
+[checkbox group]:https://docs.discord.com/developers/components/reference#checkbox-group
+[checkbox]:https://docs.discord.com/developers/components/reference#checkbox
+[`FixedArray<Attachment>`]:https://docs.rs/serenity/latest/serenity/model/channel/struct.Attachment.html
+[`FixedArray<User>`]:https://docs.rs/serenity/latest/serenity/model/user/struct.User.html
+[`FixedArray<Role>`]:https://docs.rs/serenity/latest/serenity/model/guild/struct.Role.html
+[`FixedArray<GenericChannelId>`]:https://serenity-rs.github.io/serenity/next/serenity/model/id/struct.GenericChannelId.html
+[`Mentionables`]:https://serenity-rs.github.io/poise/next/poise/modal/struct.Mentionables.html
+[`ChannelType`]:https://docs.rs/serenity/latest/serenity/model/channel/enum.ChannelType.html
+[`execute_modal()`]:https://serenity-rs.github.io/poise/next/poise/modal/fn.execute_modal.html
+[`execute_with_defaults()`]:https://serenity-rs.github.io/poise/next/poise/modal/trait.Modal.html#method.execute_with_defaults
 */
 #[proc_macro_derive(
     Modal,
