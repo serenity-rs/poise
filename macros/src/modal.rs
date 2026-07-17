@@ -608,6 +608,25 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
         };
         let min_length = field_attrs.min_length.into_iter();
         let max_length = field_attrs.max_length.into_iter();
+        if field_attrs.min_length.is_some_and(|min| min > 4000) {
+            let err = "value of `min_length` must be less than or equal to 4000";
+            return Err(err_on_attr(&attrs, err, "min_length"));
+        }
+        if let Some(max) = field_attrs.max_length {
+            if max < 1 {
+                let err = "value of `max_length` must be greater than or equal to 1";
+                return Err(err_on_attr(&attrs, err, "max_length"));
+            }
+            if max > 4000 {
+                let err = "value of `max_length` must be less than or equal to 4000";
+                return Err(err_on_attr(&attrs, err, "max_length"));
+            }
+            if field_attrs.min_length.is_some_and(|min| min > max) {
+                let err =
+                    "value of `min_length` must be less than or equal to that of `max_length`";
+                return Err(err_on_attr(&attrs, err, "min_length"));
+            }
+        }
 
         builders.push(quote::quote! {
             serenity::CreateModalComponent::Label(
