@@ -45,8 +45,8 @@ pub struct ModalDataResolved {
     /// The resolved `User`s and `Role`s from a mentionable select menu component.
     pub mentionables: Option<Mentionables>,
     /// The `GenericChannelId` values from a channel select menu component.
-    /// Resolved data is not used here because `GenericInteractionChannel` includes
-    /// non-exhaustive structs, which would make it impossible to define defaults.
+    // Resolved data is not used here because `GenericInteractionChannel` includes
+    // non-exhaustive structs, which would make it impossible to define defaults.
     // Can be optimized to `Option<FixedArray<serenity::GenericChannelId, u8>>`
     pub channels: Option<FixedArray<serenity::GenericChannelId>>,
     /// The `FixedString` value of the option selected from a radio group component.
@@ -61,26 +61,25 @@ pub struct ModalDataResolved {
 }
 
 impl ModalDataResolved {
-    /// Used by [`find_modal_data`] to retrieve resolved attachment data from a
-    /// `FileUpload` component via _take_.
+    /// Used by [`find_modal_data`] to retrieve resolved attachment data from a [`FileUpload`]
+    /// component.
+    ///
+    /// [`FileUpload`]: crate::serenity_prelude::all::FileUpload
     #[doc(hidden)]
     fn extract_attachments(
         file_upload: &serenity::all::FileUpload,
         resolved: &mut serenity::CommandDataResolved,
     ) -> Self {
-        let mut attachments = Vec::new();
-        for value in &file_upload.values {
-            if let Some(attachment) = resolved.attachments.remove(value) {
-                attachments.push(attachment);
-            }
-        }
-        let attachments = if attachments.is_empty() {
-            None
-        } else {
-            Some(FixedArray::from_vec_trunc(attachments))
-        };
         Self {
-            attachments,
+            attachments: (!resolved.attachments.is_empty()).then(|| {
+                let mut attachments = Vec::with_capacity(10);
+                for value in &file_upload.values {
+                    if let Some(attachment) = resolved.attachments.remove(value) {
+                        attachments.push(attachment);
+                    }
+                }
+                FixedArray::from_vec_trunc(attachments)
+            }),
             ..Default::default()
         }
     }
@@ -101,19 +100,16 @@ impl ModalDataResolved {
         select_menu: &mut serenity::all::SelectMenu,
         resolved: &serenity::CommandDataResolved,
     ) -> Self {
+        if select_menu.values.is_empty() {
+            return Self::default();
+        }
         match select_menu.kind {
-            serenity::SelectMenuKind::String { options: _ } => {
-                let strings = match std::mem::take(&mut select_menu.values) {
-                    val if val.is_empty() => None,
-                    val => Some(val),
-                };
-                Self {
-                    strings,
-                    ..Default::default()
-                }
-            }
+            serenity::SelectMenuKind::String { options: _ } => Self {
+                strings: Some(std::mem::take(&mut select_menu.values)),
+                ..Default::default()
+            },
             serenity::SelectMenuKind::User {} => {
-                let mut users = Vec::new();
+                let mut users = Vec::with_capacity(25);
                 for value in &select_menu.values {
                     if let Ok(id) = value.parse::<u64>() {
                         if let Some(user) = resolved.users.get(&id.into()) {
@@ -129,18 +125,13 @@ impl ModalDataResolved {
                         )
                     }
                 }
-                let users = if users.is_empty() {
-                    None
-                } else {
-                    Some(FixedArray::from_vec_trunc(users))
-                };
                 Self {
-                    users,
+                    users: (!users.is_empty()).then(|| FixedArray::from_vec_trunc(users)),
                     ..Default::default()
                 }
             }
             serenity::SelectMenuKind::Role {} => {
-                let mut roles = Vec::new();
+                let mut roles = Vec::with_capacity(25);
                 for value in &select_menu.values {
                     if let Ok(id) = value.parse::<u64>() {
                         if let Some(role) = resolved.roles.get(&id.into()) {
@@ -152,19 +143,14 @@ impl ModalDataResolved {
                         )
                     }
                 }
-                let roles = if roles.is_empty() {
-                    None
-                } else {
-                    Some(FixedArray::from_vec_trunc(roles))
-                };
                 Self {
-                    roles,
+                    roles: (!roles.is_empty()).then(|| FixedArray::from_vec_trunc(roles)),
                     ..Default::default()
                 }
             }
             serenity::SelectMenuKind::Mentionable {} => {
-                let mut users = Vec::new();
-                let mut roles = Vec::new();
+                let mut users = Vec::with_capacity(25);
+                let mut roles = Vec::with_capacity(25);
                 for value in &select_menu.values {
                     if let Ok(id) = value.parse::<u64>() {
                         if let Some(user) = resolved.users.get(&id.into()) {
@@ -182,34 +168,24 @@ impl ModalDataResolved {
                         )
                     }
                 }
-                let mentionables = if users.is_empty() && roles.is_empty() {
-                    None
-                } else {
-                    Some(Mentionables {
+                Self {
+                    mentionables: (!users.is_empty() || !roles.is_empty()).then(|| Mentionables {
                         users: FixedArray::from_vec_trunc(users),
                         roles: FixedArray::from_vec_trunc(roles),
-                    })
-                };
-                Self {
-                    mentionables,
+                    }),
                     ..Default::default()
                 }
             }
-            serenity::SelectMenuKind::Channel { channel_types: _ } => {
-                let channels = if resolved.channels.is_empty() {
-                    None
-                } else {
-                    let mut channels = Vec::new();
+            serenity::SelectMenuKind::Channel { channel_types: _ } => Self {
+                channels: {
+                    let mut channels = Vec::with_capacity(25);
                     for channel in &resolved.channels {
                         channels.push(channel.id());
                     }
                     Some(FixedArray::from_vec_trunc(channels))
-                };
-                Self {
-                    channels,
-                    ..Default::default()
-                }
-            }
+                },
+                ..Default::default()
+            },
             _ => Self::default(),
         }
     }
@@ -217,13 +193,8 @@ impl ModalDataResolved {
 
 impl From<&mut serenity::all::InputText> for ModalDataResolved {
     fn from(input_text: &mut serenity::all::InputText) -> Self {
-        let text = if input_text.value.is_empty() {
-            None
-        } else {
-            Some(std::mem::take(&mut input_text.value))
-        };
         Self {
-            text,
+            text: (!input_text.value.is_empty()).then(|| std::mem::take(&mut input_text.value)),
             ..Default::default()
         }
     }
@@ -231,13 +202,9 @@ impl From<&mut serenity::all::InputText> for ModalDataResolved {
 
 impl From<&mut serenity::all::RadioGroup> for ModalDataResolved {
     fn from(radio_group: &mut serenity::all::RadioGroup) -> Self {
-        let radio_option = match std::mem::take(&mut radio_group.value) {
-            Some(val) if val.is_empty() => None,
-            Some(val) => Some(val),
-            None => None,
-        };
         Self {
-            radio_option,
+            radio_option: std::mem::take(&mut radio_group.value)
+                .and_then(|val| (!val.is_empty()).then_some(val)),
             ..Default::default()
         }
     }
@@ -245,12 +212,9 @@ impl From<&mut serenity::all::RadioGroup> for ModalDataResolved {
 
 impl From<&mut serenity::all::CheckboxGroup> for ModalDataResolved {
     fn from(checkbox_group: &mut serenity::all::CheckboxGroup) -> Self {
-        let checkbox_options = match std::mem::take(&mut checkbox_group.values) {
-            val if val.is_empty() => None,
-            val => Some(val),
-        };
         Self {
-            checkbox_options,
+            checkbox_options: (!checkbox_group.values.is_empty())
+                .then(|| std::mem::take(&mut checkbox_group.values)),
             ..Default::default()
         }
     }
