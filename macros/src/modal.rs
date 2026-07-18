@@ -266,7 +266,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                         serenity::CreateRadioGroup::new(stringify!(#field_ident), {
                             let default = if let Some(defaults) = &mut defaults {
                                 let default = std::mem::take(&mut defaults.#field_ident);
-                                Option::from(default).unwrap_or_else(|| FixedString::new())
+                                Option::from(default).unwrap_or_else(FixedString::new)
                             } else {
                                 FixedString::new()
                             };
@@ -344,7 +344,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                         serenity::CreateCheckboxGroup::new(stringify!(#field_ident), {
                             let default = if let Some(defaults) = &mut defaults {
                                 let default = std::mem::take(&mut defaults.#field_ident);
-                                Option::from(default).unwrap_or_else(|| FixedArray::new())
+                                Option::from(default).unwrap_or_else(FixedArray::new)
                             } else {
                                 FixedArray::new()
                             };
@@ -456,7 +456,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                         {
                             let default = if let Some(defaults) = &mut defaults {
                                 let default = std::mem::take(&mut defaults.#field_ident);
-                                Option::from(default).unwrap_or_else(|| FixedArray::new())
+                                Option::from(default).unwrap_or_else(FixedArray::new)
                             } else {
                                 FixedArray::new()
                             };
@@ -477,7 +477,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                         let default_users = if let Some(defaults) = &mut defaults {
                             let default = std::mem::take(&mut defaults.#field_ident);
                             let default =
-                                Option::from(default).unwrap_or_else(|| FixedArray::new());
+                                Option::from(default).unwrap_or_else(FixedArray::new);
                             let default = default.iter().map(|u| u.id).collect::<Vec<_>>();
                             Some(Cow::Owned(default))
                         } else {
@@ -497,7 +497,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                         let default_roles = if let Some(defaults) = &mut defaults {
                             let default = std::mem::take(&mut defaults.#field_ident);
                             let default =
-                                Option::from(default).unwrap_or_else(|| FixedArray::new());
+                                Option::from(default).unwrap_or_else(FixedArray::new);
                             let default = default.iter().map(|r| r.id).collect::<Vec<_>>();
                             Some(Cow::Owned(default))
                         } else {
@@ -518,7 +518,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                             if let Some(defaults) = &mut defaults {
                                 let default = std::mem::take(&mut defaults.#field_ident);
                                 let default = Option::from(default)
-                                    .unwrap_or_else(|| poise::Mentionables::default());
+                                    .unwrap_or_else(poise::Mentionables::default);
                                 let default_users =
                                     default.users.iter().map(|u| u.id).collect::<Vec<_>>();
                                 let default_roles =
@@ -556,7 +556,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                             let default_channels = if let Some(defaults) = &mut defaults {
                                 let default = std::mem::take(&mut defaults.#field_ident);
                                 let default =
-                                    Option::from(default).unwrap_or_else(|| FixedArray::new());
+                                    Option::from(default).unwrap_or_else(FixedArray::new);
                                 Some(Cow::Owned(default.into_vec()))
                             } else {
                                 None
