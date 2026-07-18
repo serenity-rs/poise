@@ -326,6 +326,16 @@ pub async fn modal(ctx: ApplicationContext<'_>) -> Result<(), Error> {
 include markdown-formatted text, mentions (users, roles, etc.), and emojis. Note that this counts
 toward the maximum total of five components per modal. Max 4000 chars.
 
+It is possible to create an informational modal with no interactive components by defining an
+empty struct with a text display component.
+
+```rust
+#[derive(Debug, Modal)]
+#[name = "My Informational Modal"]
+#[text_display = "This is my very informative text."]
+struct MyModal {}
+```
+
 # Field attributes
 
 The text display component is the only content component available in modals.
