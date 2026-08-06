@@ -143,12 +143,14 @@ pub struct CommandParameter<U, E> {
     pub description: Option<CowStr>,
     /// Localized descriptions with locale string as the key (slash-only)
     pub description_localizations: CowVec<(CowStr, CowStr)>,
-    /// `true` is this parameter is required, `false` if it's optional or variadic
+    /// `true` if this parameter is required, `false` if it's optional or variadic
     pub required: bool,
     /// If this parameter is a channel, users can only enter these channel types in a slash command
     ///
     /// Prefix commands are currently unaffected by this
     pub channel_types: Option<CowVec<serenity::ChannelType>>,
+    /// If this parameter is an attachment, users can only upload these file types (slash-only)
+    pub file_types: Option<CowVec<CowStr>>,
     /// If this parameter is a choice parameter, this is the fixed list of options
     pub choices: CowVec<CommandParameterChoice>,
     /// Closure that sets this parameter's type and min/max value in the given builder
@@ -204,6 +206,9 @@ impl<U, E> CommandParameter<U, E> {
         }
         if let Some(channel_types) = self.channel_types.as_deref() {
             builder = builder.channel_types(channel_types.to_owned());
+        }
+        if let Some(file_types) = self.file_types.as_deref() {
+            builder = builder.file_types(file_types.to_owned());
         }
         for (i, choice) in self.choices.iter().enumerate() {
             builder = builder.add_int_choice_localized(
