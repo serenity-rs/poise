@@ -22,6 +22,7 @@ struct FieldAttributes {
     paragraph: Option<()>,
     text_display: Option<String>,
     file_upload: Option<()>,
+    file_types: Option<crate::util::List<String>>,
     string_select: Option<crate::util::List<String>>,
     string_select_emojis: Option<crate::util::List<String>>,
     string_select_descriptions: Option<crate::util::List<String>>,
@@ -173,6 +174,16 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
 
         // If field is a file upload component, process and continue.
         if field_attrs.file_upload.is_some() {
+            let file_types = match field_attrs.file_types {
+                Some(crate::util::List(file_types)) => {
+                    if file_types.len() > 10 {
+                        let err = "maximum of 10 file types allowed";
+                        return Err(err_on_attr(&attrs, err, "file_types"));
+                    }
+                    quote::quote! { .file_types( &[ #( Cow::Borrowed(#file_types) ),* ] ) }
+                }
+                None => quote::quote! {},
+            };
             builders.push(quote::quote! {
                 serenity::CreateModalComponent::Label(
                     serenity::CreateLabel::file_upload(
@@ -181,6 +192,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                             .required(#required)
                             #( .min_values(#min_values) )*
                             #( .max_values(#max_values) )*
+                            #file_types
                     )
                     #( .description(#description) )*
                 ),

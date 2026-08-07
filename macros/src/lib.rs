@@ -451,9 +451,21 @@ the following field attribute:
 
 ```rust
 #[name = "Channel select menu"]
-#[channel_select()]
+#[channel_select]
 #[channel_types("Text", "Forum")]
 channels: FixedArray<serenity::GenericChannelId>
+```
+
+For file uploads, allowed file types may optionally be defined using the following field attribute:
+
+- `#[file_types("", "")]`: Valid types include `image`, `video`, `audio`, and any dot-prefixed
+extension such as `.pdf`. See [File Type Filtering] for details. Maximum of 10 types.
+
+```rust
+#[name = "Image or PDF upload"]
+#[file_upload]
+#[file_types("image", ".pdf")]
+files: FixedArray<serenity::Attachment>
 ```
 
 # Specifying defaults
@@ -522,6 +534,7 @@ let data = poise::execute_modal(
 [`FixedArray<GenericChannelId>`]:https://serenity-rs.github.io/serenity/next/serenity/model/id/struct.GenericChannelId.html
 [`Mentionables`]:https://serenity-rs.github.io/poise/next/poise/modal/struct.Mentionables.html
 [`ChannelType`]:https://docs.rs/serenity/latest/serenity/model/channel/enum.ChannelType.html
+[File Type Filtering]: https://docs.discord.com/developers/reference#file-type-filtering
 [`execute_modal()`]:https://serenity-rs.github.io/poise/next/poise/modal/fn.execute_modal.html
 [`execute_with_defaults()`]:https://serenity-rs.github.io/poise/next/poise/modal/trait.Modal.html#method.execute_with_defaults
 */
@@ -536,6 +549,7 @@ let data = poise::execute_modal(
         max_length,
         paragraph,
         file_upload,
+        file_types,
         string_select,
         string_select_emojis,
         string_select_descriptions,
