@@ -247,7 +247,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                 quote::quote! {
                     #({
                         let mut b = serenity::CreateRadioGroupOption::new(#options, #options);
-                        if !default.is_empty() && default.contains(&#options.to_string()) {
+                        if !default.is_empty() && default == #options {
                             b = b.default_selection(true);
                         }
                         b
@@ -262,7 +262,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                 quote::quote! {
                     #({
                         let mut b = serenity::CreateRadioGroupOption::new(#options, #options);
-                        if !default.is_empty() && default.contains(&#options.to_string()) {
+                        if !default.is_empty() && default == #options {
                             b = b.default_selection(true);
                         }
                         b = b.description(#descriptions);
@@ -325,7 +325,9 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                 quote::quote! {
                     #({
                         let mut b = serenity::CreateCheckboxGroupOption::new(#options, #options);
-                        if !default.is_empty() && default.contains(&#options.to_string()) {
+                        if default.as_ref().is_some_and(|default| {
+                            default.contains(&#options.to_string())
+                        }) {
                             b = b.default_selection(true);
                         }
                         b
@@ -340,7 +342,9 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                 quote::quote! {
                     #({
                         let mut b = serenity::CreateCheckboxGroupOption::new(#options, #options);
-                        if !default.is_empty() && default.contains(&#options.to_string()) {
+                        if default.as_ref().is_some_and(|default| {
+                            default.contains(&#options.to_string())
+                        }) {
                             b = b.default_selection(true);
                         }
                         b = b.description(#descriptions);
@@ -356,9 +360,9 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                         serenity::CreateCheckboxGroup::new(stringify!(#field_ident), {
                             let default = if let Some(defaults) = &mut defaults {
                                 let default = std::mem::take(&mut defaults.#field_ident);
-                                Option::from(default).unwrap_or_else(FixedArray::new)
+                                Option::<FixedArray<String>>::from(default)
                             } else {
-                                FixedArray::new()
+                                Option::<FixedArray<String>>::None
                             };
                             Cow::Owned(vec![#create_option])
                         })
@@ -421,7 +425,9 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                     (true, true) => quote::quote! {
                         #({
                             let mut b = serenity::CreateSelectMenuOption::new(#strings, #strings);
-                            if !default.is_empty() && default.contains(&#strings.to_string()) {
+                            if default.as_ref().is_some_and(|default| {
+                                default.contains(&#strings.to_string())
+                            }) {
                                 b = b.default_selection(true);
                             }
                             b
@@ -430,7 +436,9 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                     (true, false) => quote::quote! {
                         #({
                             let mut b = serenity::CreateSelectMenuOption::new(#strings, #strings);
-                            if !default.is_empty() && default.contains(&#strings.to_string()) {
+                            if default.as_ref().is_some_and(|default| {
+                                default.contains(&#strings.to_string())
+                            }) {
                                 b = b.default_selection(true);
                             }
                             b = b.description(#descriptions);
@@ -440,7 +448,9 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                     (false, true) => quote::quote! {
                         #({
                             let mut b = serenity::CreateSelectMenuOption::new(#strings, #strings);
-                            if !default.is_empty() && default.contains(&#strings.to_string()) {
+                            if default.as_ref().is_some_and(|default| {
+                                default.contains(&#strings.to_string())
+                            }) {
                                 b = b.default_selection(true);
                             }
                             if let Ok(emoji) = serenity::ReactionType::try_from(#emojis) {
@@ -452,7 +462,9 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                     (false, false) => quote::quote! {
                         #({
                             let mut b = serenity::CreateSelectMenuOption::new(#strings, #strings);
-                            if !default.is_empty() && default.contains(&#strings.to_string()) {
+                            if default.as_ref().is_some_and(|default| {
+                                default.contains(&#strings.to_string())
+                            }) {
                                 b = b.default_selection(true);
                             }
                             if let Ok(emoji) = serenity::ReactionType::try_from(#emojis) {
@@ -468,9 +480,9 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                         {
                             let default = if let Some(defaults) = &mut defaults {
                                 let default = std::mem::take(&mut defaults.#field_ident);
-                                Option::from(default).unwrap_or_else(FixedArray::new)
+                                Option::<FixedArray<String>>::from(default)
                             } else {
-                                FixedArray::new()
+                                Option::<FixedArray<String>>::None
                             };
                             serenity::CreateSelectMenuKind::String {
                                 options: Cow::Owned(vec![#create_option]),
@@ -488,10 +500,10 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                     {
                         let default_users = if let Some(defaults) = &mut defaults {
                             let default = std::mem::take(&mut defaults.#field_ident);
-                            let default =
-                                Option::from(default).unwrap_or_else(FixedArray::new);
-                            let default = default.iter().map(|u| u.id).collect::<Vec<_>>();
-                            Some(Cow::Owned(default))
+                            Option::<FixedArray<serenity::User>>::from(default).map(|default| {
+                                let default = default.iter().map(|u| u.id).collect::<Vec<_>>();
+                                Cow::Owned(default)
+                            })
                         } else {
                             None
                         };
@@ -508,10 +520,10 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                     {
                         let default_roles = if let Some(defaults) = &mut defaults {
                             let default = std::mem::take(&mut defaults.#field_ident);
-                            let default =
-                                Option::from(default).unwrap_or_else(FixedArray::new);
-                            let default = default.iter().map(|r| r.id).collect::<Vec<_>>();
-                            Some(Cow::Owned(default))
+                            Option::<FixedArray<serenity::Role>>::from(default).map(|default| {
+                                let default = default.iter().map(|r| r.id).collect::<Vec<_>>();
+                                Cow::Owned(default)
+                            })
                         } else {
                             None
                         };
@@ -529,15 +541,18 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                         let (default_users, default_roles) =
                             if let Some(defaults) = &mut defaults {
                                 let default = std::mem::take(&mut defaults.#field_ident);
-                                let default = Option::from(default)
-                                    .unwrap_or_else(poise::Mentionables::default);
-                                let default_users =
-                                    default.users.iter().map(|u| u.id).collect::<Vec<_>>();
-                                let default_roles =
-                                    default.roles.iter().map(|r| r.id).collect::<Vec<_>>();
-                                (
-                                    Some(Cow::Owned(default_users)),
-                                    Some(Cow::Owned(default_roles))
+                                Option::<Mentionables>::from(default).map_or(
+                                    (None, None),
+                                    |default| {
+                                        let default_users =
+                                            default.users.iter().map(|u| u.id).collect::<Vec<_>>();
+                                        let default_roles =
+                                            default.roles.iter().map(|r| r.id).collect::<Vec<_>>();
+                                        (
+                                            Some(Cow::Owned(default_users)),
+                                            Some(Cow::Owned(default_roles))
+                                        )
+                                    },
                                 )
                             } else {
                                 (None, None)
@@ -567,9 +582,8 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                         {
                             let default_channels = if let Some(defaults) = &mut defaults {
                                 let default = std::mem::take(&mut defaults.#field_ident);
-                                let default =
-                                    Option::from(default).unwrap_or_else(FixedArray::new);
-                                Some(Cow::Owned(default.into_vec()))
+                                Option::<FixedArray<serenity::GenericChannelId>>::from(default)
+                                    .map(|default| Cow::Owned(default.into_vec()))
                             } else {
                                 None
                             };
@@ -648,8 +662,10 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                         // Can use `defaults.#field_ident` directly in Edition 2021 due to more
                         // specific closure capture rules
                         let default = std::mem::take(&mut defaults.#field_ident);
-                        // Option::from().unwrap_or_default() dance to handle both T and Option<T>
-                        b = b.value(Option::from(default).unwrap_or_else(FixedString::new));
+                        // Option::from() dance to handle both T and Option<T>
+                        if let Some(default) = Option::<FixedString<u16>>::from(default) {
+                            b = b.value(default);
+                        }
                     }
                     b
                         #( .placeholder(#placeholder) )*
