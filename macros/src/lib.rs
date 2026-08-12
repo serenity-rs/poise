@@ -104,6 +104,7 @@ attributes you can use on parameters:
 ## Input filter (slash only)
 
 - `#[channel_types("", "")]`: For channel parameters, restricts allowed channel types (slash-only)
+- `#[file_types("", "")`: For attachment parameters, restricts allowed file types (slash-only)
 - `#[min = 0]`: Minimum value for this number parameter (slash-only)
 - `#[max = 0]`: Maximum value for this number parameter (slash-only)
 - `#[min_length = 0]`: Minimum length for this string parameter (slash-only)

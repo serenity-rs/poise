@@ -46,6 +46,21 @@ pub async fn voiceinfo(
     Ok(())
 }
 
+/// Demonstrates `#[file_types]`
+#[poise::command(slash_command)]
+pub async fn display_text(
+    ctx: Context<'_>,
+    #[description = "Text file to send as a message"]
+    #[file_types(".txt")]
+    file: serenity::Attachment,
+) -> Result<(), Error> {
+    let file = file.download().await?;
+    let response = str::from_utf8(file.as_slice())?;
+
+    ctx.say(response).await?;
+    Ok(())
+}
+
 /// Parses arguments starting from the end of the string.
 ///
 /// Demonstrates `#[lazy]`

@@ -75,6 +75,7 @@ struct ParamArgs {
     description_localized: Vec<crate::util::Tuple2<String>>,
     autocomplete: Option<syn::Path>,
     channel_types: Option<crate::util::List<syn::Ident>>,
+    file_types: Option<crate::util::List<syn::Lit>>,
     choices: Option<crate::util::List<syn::Lit>>,
     min: Option<syn::Lit>,
     max: Option<syn::Lit>,

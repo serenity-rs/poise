@@ -7,7 +7,7 @@ pub async fn test_reuse_response(ctx: Context<'_>) -> Result<(), Error> {
 
     let embed = serenity::CreateEmbed::default()
         .description("embed 1")
-        .image(image_url);
+        .image(image_url, Some("Serenity logo".into()));
 
     let buttons = [serenity::CreateButton::new("1")
         .label("button 1")
@@ -28,7 +28,7 @@ pub async fn test_reuse_response(ctx: Context<'_>) -> Result<(), Error> {
     let image_url = "https://raw.githubusercontent.com/serenity-rs/serenity/current/examples/e09_create_message_builder/ferris_eyes.png";
     let embed = serenity::CreateEmbed::default()
         .description("embed 2")
-        .image(image_url);
+        .image(image_url, Some("Ferris with big eyes".into()));
 
     let buttons = [serenity::CreateButton::new("2")
         .label("button 2")
