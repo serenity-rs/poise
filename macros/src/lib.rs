@@ -268,10 +268,304 @@ pub fn slash_choice_parameter(input: TokenStream) -> TokenStream {
     choice_parameter(input)
 }
 
-/// See `Modal` trait documentation
+/**
+Use this derive macro on a struct to easily generate a modal interaction, Discord's version
+of interactive forms.
+
+Modals are made up of components, which define their layout, content, and type of input accepted.
+A single modal can include up to five components, and all [available modal components] are
+supported by the macro.
+
+# Example
+
+```rust
+# use poise::serenity_prelude as serenity;
+# use poise::serenity_prelude::small_fixed_array::{FixedArray, FixedString};
+# type Data = ();
+# type Error = serenity::Error;
+use poise::Modal;
+type ApplicationContext<'a> = poise::ApplicationContext<'a, Data, Error>;
+
+#[derive(Debug, Modal)]
+#[name = "Modal Title"] // Struct name by default
+#[text_display = "My *fancy* `modal`, created using [Poise](https://serenity-rs.github.io/) :crab:"]
+struct MyModal {
+    #[name = "First text input"] // Field name by default
+    #[description = "Displayed under name"] // No description by default
+    #[placeholder = "Your first input goes here"] // No placeholder by default
+    #[min_length = 5] // No length restriction by default (up to 4000 chars)
+    #[max_length = 500]
+    first_input: FixedString<u16>,
+    #[name = "Second text input"]
+    #[paragraph] // Switches from single-line to multi-line text box
+    second_input: Option<FixedString<u16>>, // Option means optional input
+    #[name = "File upload"]
+    #[file_upload] // Allows user to upload up to 10 files
+    #[min_values = 2] // Min number of files (0-10 for files)
+    #[max_values = 5]
+    third_input: FixedArray<serenity::Attachment>,
+    #[name = "String select menu"]
+    #[string_select("Option 1", "Option 2")] // Selectable strings
+    #[min_values = 2] // Min number of selections required (0-25 for select menus)
+    fourth_input: FixedArray<String>,
+}
+
+#[poise::command(slash_command)]
+pub async fn modal(ctx: ApplicationContext<'_>) -> Result<(), Error> {
+    let data = MyModal::execute(ctx).await?;
+    println!("Got data: {:?}", data);
+
+    Ok(())
+}
+```
+
+# Struct attributes
+
+- `#[name = ""]`: Sets the modal title. Defaults to struct name if omitted. Max 45 chars.
+- `#[text_display = ""]`: Optional [text display] component, shown below the modal title. Can
+include markdown-formatted text, mentions (users, roles, etc.), and emojis. Note that this counts
+toward the maximum total of five components per modal. Max 4000 chars.
+
+It is possible to create an informational modal with no interactive components by defining an
+empty struct with a text display component.
+
+```rust
+#[derive(Debug, Modal)]
+#[name = "My Informational Modal"]
+#[text_display = "This is my very informative text."]
+struct MyModal {}
+```
+
+# Field attributes
+
+The text display component is the only content component available in modals.
+However, despite not being interactive, text display components still count toward the
+five-component maximum per modal. Text display components can be added above any input
+field using the following attribute:
+
+- `#[text_display = ""]`: Max 4000 chars, shared across all text display components.
+
+Because attributes must be placed above fields, text display components will necessarily
+be paired with interactive (input) components. Position of the attribute relative to the
+interactive component attribute does not matter; the text display will be rendered on top.
+
+```rust
+#[text_display = "**Huge** markdown-friendly text. Shown *above* the `text input` component."]
+#[name = "Input Label #1"]
+text_input_one: Option<FixedString<u16>>,
+#[name = "Input Label #2"]
+#[text_display = "Despite the attribute position, still shows __above__ 'Input Label 2'."]
+text_input_two: Option<FixedString<u16>>,
+```
+
+The following field attributes are shared by all interactive components:
+
+- `#[name = ""]`: Sets the input label. Defaults to field name. Max 45 chars.
+- `#[description = ""]`: Adds an optional description under the label. Max 100 chars.
+- `#[placeholder = ""]`: Adds optional placeholder text. Max 100 chars.
+
+The default component is the [text input] component, which returns a `FixedString<u16>`. The
+following field attributes are valid for text input components only:
+
+- `#[min_length = 0]`: Minimum number of characters (0-4000).
+- `#[max_length = 1]`: Maximum number of characters (1-4000).
+- `#[paragraph]`: Switches to a multi-line input box. Default is single-line.
+
+Other interactive components supported by the macro include the [file upload], [string select],
+[user select], [role select], [mentionable select], [channel select], [radio group], [checkbox
+group], and [checkbox] components. Component type is indicated by using one of the following field
+attributes (**one per field**):
+
+- `#[file_upload]`: Allows the user to upload files (0-10). Returns [`FixedArray<Attachment>`].
+- `#[string_select("", "")]`: Supports 1-25 **unique** options (up to 100 chars each), defined in
+the attribute. Returns `FixedArray<String>`.
+- `#[user_select]`: Returns [`FixedArray<User>`].
+- `#[role_select]`: Returns [`FixedArray<Role>`].
+- `#[mentionable_select]`: Returns [`Mentionables`].
+- `#[channel_select]`: Returns [`FixedArray<GenericChannelId>`].
+- `#[radio_group("", "")]`: Supports 2-10 **unique** options (up to 100 chars each), defined in
+the attribute. Returns `FixedString`.
+- `#[checkbox_group("", "")]`: Supports 1-10 **unique** options (up to 100 chars each), defined in
+the attribute. Returns `FixedArray<String>`.
+- `#[checkbox]`: Returns `true` if checked, `false` if unchecked.
+
+Optionally, emojis and/or descriptions may be added to string select menu options. Radio group
+options and checkbox group options support descriptions, but not emojis.
+
+- `#[string_select_emojis("", "")]`
+- `#[string_select_descriptions("", "")]`: Max 100 chars per description.
+- `#[radio_group_descriptions("", "")]`: Max 100 chars per description.
+- `#[checkbox_group_descriptions("", "")]`: Max 100 chars per description.
+
+If used, the number of emojis and/or descriptions provided must not be less than the number
+of options provided; any additional items will be ignored. Unicode emojis should be inserted
+directly. Custom emojis should use the Discord angle bracket format: `<:NAME:EMOJI_ID>` for
+static or `<a:NAME:EMOJI_ID>` for animated. Emojis given in an invalid format will be ignored.
+
+```rust
+#[name = "My cool select menu"]
+#[string_select("Option 1", "Option 2", "Option 3")]
+#[string_select_emojis(
+    "🦀",
+    "<:ferris_owo:1033109474782761110>",
+    "<a:ferris_bongo:494140332812926981>"
+)]
+#[string_select_descriptions(
+    "Uses a Unicode icon",
+    "Uses a custom static icon",
+    "Uses a custom animated icon"
+)]
+selections: Option<FixedArray<String>>
+```
+
+Minimum and maximum values for file upload select menu, and checkbox group components are defined
+using the following field attributes:
+
+- `#[min_values = 0]`: 0-10 for files/checkbox groups; 0-25 for select menus. Defaults to 1.
+- `#[max_values = 25]`: 1-10 for files/checkbox groups; 1-25 for select menus. Defaults to 1 for
+files and select menus; defaults to the number of options for checkbox groups.
+
+```rust
+#[name = "Role select menu"]
+#[role_select]
+#[max_values = 1]
+roles: Option<FixedArray<serenity::Role>>
+```
+
+Note that file upload, select menu, and checkbox group components can be optional ***and*** have
+a `min_values` value defined at the same time. In such cases, the defined minimum only comes into
+effect when input is attempted. In the following example, the user would be able to submit the
+modal with either no mentionables ***or*** at least three mentionables selected.
+
+```rust
+#[name = "Mentionable select menu"]
+#[mentionable_select]
+#[min_values = 3]
+mentionables: Option<poise::Mentionables>
+```
+
+For the channel select menu, channel types to include in the list may optionally be defined using
+the following field attribute:
+
+- `#[channel_types("", "")]`: See [`ChannelType`] for valid channel types.
+
+```rust
+#[name = "Channel select menu"]
+#[channel_select]
+#[channel_types("Text", "Forum")]
+channels: FixedArray<serenity::GenericChannelId>
+```
+
+For file uploads, allowed file types may optionally be defined using the following field attribute:
+
+- `#[file_types("", "")]`: Valid types include `image`, `video`, `audio`, and any dot-prefixed
+extension such as `.pdf`. See [File Type Filtering] for details. Maximum of 10 types.
+
+```rust
+#[name = "Image or PDF upload"]
+#[file_upload]
+#[file_types("image", ".pdf")]
+files: FixedArray<serenity::Attachment>
+```
+
+# Specifying defaults
+
+Defaults may be provided for text input and select menu components using an initialized instance
+of the modal struct with [`execute_with_defaults()`], or with [`execute_modal()`] if you wish to
+specify a timeout. For example, assuming the struct from the initial example:
+
+```rust
+let data = MyModal::execute_with_defaults(
+    ctx,
+    MyModal {
+        first_input: FixedString::from_static_trunc("Default text input"),
+        second_input: None,
+        third_input: FixedArray::new(),
+        fourth_input: FixedArray::from_vec_trunc(vec!["Option 2".to_string()]),
+    },
+)
+.await?;
+```
+
+Alternatively, if the struct also derives `Default`:
+
+```rust
+let data = MyModal::execute_with_defaults(
+    ctx,
+    MyModal {
+        first_input: FixedString::from_static_trunc("Default text input"),
+        fourth_input: FixedArray::from_vec_trunc(vec!["Option 2".to_string()]),
+        ..Default::default()
+    },
+)
+.await?;
+```
+
+And using [`execute_modal()`] with a timeout:
+
+```rust
+let data = poise::execute_modal(
+    ctx,
+    Some(MyModal {
+        first_input: FixedString::from_static_trunc("Default text input"),
+        fourth_input: FixedArray::from_vec_trunc(vec!["Option 2".to_string()]),
+        ..Default::default()
+    }),
+    Some(std::time::Duration::from_secs(300)),
+)
+.await?;
+```
+
+[available modal components]:https://docs.discord.com/developers/components/reference#component-object-component-types
+[text display]:https://docs.discord.com/developers/components/reference#text-display
+[text input]:https://docs.discord.com/developers/components/reference#text-input
+[file upload]:https://docs.discord.com/developers/components/reference#file-upload
+[string select]:https://docs.discord.com/developers/components/reference#string-select
+[user select]:https://docs.discord.com/developers/components/reference#user-select
+[role select]:https://docs.discord.com/developers/components/reference#role-select
+[mentionable select]:https://docs.discord.com/developers/components/reference#mentionable-select
+[channel select]:https://docs.discord.com/developers/components/reference#channel-select
+[radio group]:https://docs.discord.com/developers/components/reference#radio-group
+[checkbox group]:https://docs.discord.com/developers/components/reference#checkbox-group
+[checkbox]:https://docs.discord.com/developers/components/reference#checkbox
+[`FixedArray<Attachment>`]:https://docs.rs/serenity/latest/serenity/model/channel/struct.Attachment.html
+[`FixedArray<User>`]:https://docs.rs/serenity/latest/serenity/model/user/struct.User.html
+[`FixedArray<Role>`]:https://docs.rs/serenity/latest/serenity/model/guild/struct.Role.html
+[`FixedArray<GenericChannelId>`]:https://serenity-rs.github.io/serenity/next/serenity/model/id/struct.GenericChannelId.html
+[`Mentionables`]:https://serenity-rs.github.io/poise/next/poise/modal/struct.Mentionables.html
+[`ChannelType`]:https://docs.rs/serenity/latest/serenity/model/channel/enum.ChannelType.html
+[File Type Filtering]: https://docs.discord.com/developers/reference#file-type-filtering
+[`execute_modal()`]:https://serenity-rs.github.io/poise/next/poise/modal/fn.execute_modal.html
+[`execute_with_defaults()`]:https://serenity-rs.github.io/poise/next/poise/modal/trait.Modal.html#method.execute_with_defaults
+*/
 #[proc_macro_derive(
     Modal,
-    attributes(name, placeholder, min_length, max_length, paragraph)
+    attributes(
+        name,
+        text_display,
+        description,
+        placeholder,
+        min_length,
+        max_length,
+        paragraph,
+        file_upload,
+        file_types,
+        string_select,
+        string_select_emojis,
+        string_select_descriptions,
+        user_select,
+        role_select,
+        mentionable_select,
+        channel_select,
+        channel_types,
+        radio_group,
+        radio_group_descriptions,
+        checkbox_group,
+        checkbox_group_descriptions,
+        checkbox,
+        min_values,
+        max_values,
+    )
 )]
 pub fn modal(input: TokenStream) -> TokenStream {
     let struct_ = syn::parse_macro_input!(input as syn::DeriveInput);
