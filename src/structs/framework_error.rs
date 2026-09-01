@@ -61,6 +61,7 @@ pub enum FrameworkError<'a, U, E> {
         ///
         /// The reason the original [`Box<dyn Any + Send>`] payload isn't provided here is that it
         /// would make [`FrameworkError`] not [`Sync`] anymore.
+        // TODO: Switch to `FixedString` when merged into `serenity-next`.
         payload: Option<String>,
         /// Command context
         ctx: crate::Context<'a, U, E>,
@@ -71,6 +72,7 @@ pub enum FrameworkError<'a, U, E> {
         /// Error which was thrown by the parameter type's parsing routine
         error: Box<dyn std::error::Error + Send + Sync>,
         /// If applicable, the input on which parsing failed
+        // TODO: Switch to `FixedString` when merged into `serenity-next`.
         input: Option<String>,
         /// General context
         ctx: crate::Context<'a, U, E>,
