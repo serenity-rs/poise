@@ -47,7 +47,7 @@ impl std::fmt::Display for CodeBlock {
             f,
             "```{}\n{}\n```",
             self.language.as_deref().unwrap_or(""),
-            &self.code
+            self.code
         )
     }
 }

@@ -373,11 +373,11 @@ pub fn generate_prefix_action(inv: &Invocation) -> Result<proc_macro2::TokenStre
                 error,
             ))?;
 
-            let is_framework_cooldown = !ctx.command.manual_cooldowns
+            let is_framework_cooldown = !ctx.command().manual_cooldowns
                 .unwrap_or_else(|| ctx.framework.options.manual_cooldowns);
 
             if is_framework_cooldown {
-                ctx.command.cooldowns.lock().unwrap().start_cooldown(ctx.cooldown_context());
+                ctx.command().cooldowns.lock().unwrap().start_cooldown(ctx.cooldown_context());
             }
 
             inner(ctx.into(), #( #param_idents, )* )
