@@ -319,13 +319,34 @@ context_methods! {
         }
     }
 
-    /// If the invoked command was a subcommand, these are the parent commands, ordered top-level
-    /// downwards.
+    /// Returns a reference to the full command tree of the invoked command, ordered top-down
+    /// from parent commands to invoked command.
+    ///
+    /// For example, if `/x y z` or `?x y z` is invoked, this will contain `x, y, z`.
+    (command_tree self)
+    (pub fn command_tree(self) -> &'a [&'a crate::Command<U, E>]) {
+        match self {
+            Self::Prefix(x) => x.command_tree,
+            Self::Application(x) => x.command_tree,
+        }
+    }
+
+    /// If the invoked command was a subcommand, returns a reference to the parent commands,
+    /// ordered top-down.
+    // Field removed from Context, so this is for backward-compatibility.
     (parent_commands self)
     (pub fn parent_commands(self) -> &'a [&'a crate::Command<U, E>]) {
         match self {
-            Self::Prefix(x) => x.parent_commands,
-            Self::Application(x) => x.parent_commands,
+            Self::Prefix(x) => x
+                .command_tree
+                .split_last()
+                .map(|(_, parent_commands)| parent_commands)
+                .unwrap_or_default(),
+            Self::Application(x) => x
+                .command_tree
+                .split_last()
+                .map(|(_, parent_commands)| parent_commands)
+                .unwrap_or_default(),
         }
     }
 
@@ -333,8 +354,8 @@ context_methods! {
     (command self)
     (pub fn command(self) -> &'a crate::Command<U, E>) {
         match self {
-            Self::Prefix(x) => x.parent_commands.last().unwrap(),
-            Self::Application(x) => x.parent_commands.last().unwrap(),
+            Self::Prefix(x) => x.command_tree.last().unwrap(),
+            Self::Application(x) => x.command_tree.last().unwrap(),
         }
     }
 
@@ -388,11 +409,12 @@ context_methods! {
         match self {
             Context::Application(ctx) => {
                 let mut string = String::from("/");
-                for parent_command in ctx.parent_commands {
-                    string += &parent_command.name;
-                    string += " ";
+                for (i, command) in ctx.command_tree.iter().enumerate() {
+                    string += &command.name;
+                    if i < ctx.command_tree.len() - 1 {
+                        string += " ";
+                    }
                 }
-                string += &ctx.command().name;
                 for arg in ctx.args {
                     #[allow(unused_imports)] // required for simd-json
                     use ::serenity::json::*;
@@ -529,6 +551,8 @@ context_methods! {
 impl<'a, U, E> Context<'a, U, E> {
     /// Actual implementation of rerun() that returns `FrameworkError` for implementation convenience
     async fn rerun_inner(self) -> Result<(), crate::FrameworkError<'a, U, E>> {
+        // TODO: When merging into `serenity-next`, either set `U: Send + Sync + 'static` in the
+        // impl trait bounds or manually match and retrieve the command from `self.command_tree`.
         let command = self.command();
         match self {
             Self::Application(ctx) => {

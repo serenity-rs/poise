@@ -36,10 +36,11 @@ pub struct ApplicationContext<'a, U, E> {
     /// Useful if you need the list of commands, for example for a custom help command
     #[derivative(Debug = "ignore")]
     pub framework: crate::FrameworkContext<'a, U, E>,
-    /// The command invoked by this message.
+    /// The command invoked by this interaction.
     ///
-    /// If the invoked command was a subcommand, after that are the parent commands, ordered top down.
-    pub parent_commands: &'a [&'a crate::Command<U, E>],
+    /// This includes the full command tree, ordered top-down from parent commands to invoked
+    /// command. For example, if `/x y z` is invoked, this contains `&[&x, &y, &z]`.
+    pub command_tree: &'a [&'a crate::Command<U, E>],
     /// Custom user data carried across a single command invocation
     pub invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
     // #[non_exhaustive] forbids struct update syntax for ?? reason
