@@ -55,7 +55,7 @@ pub struct CooldownTracker {
 /// Possible types of command cooldowns.
 ///
 /// Currently used for [CooldownTracker::set_last_invocation]
-#[non_exhaustive]
+#[cfg_attr(any(not(feature = "unstable_exhaustive_types"), doc), non_exhaustive)]
 pub enum CooldownType {
     /// A global cooldown that applies to all users, channels, and guilds.
     Global,

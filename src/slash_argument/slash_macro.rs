@@ -13,13 +13,13 @@ pub enum SlashArgError {
     ///
     /// Most often the result of the bot not having registered the command in Discord, so Discord
     /// stores an outdated version of the command and its parameters.
-    #[non_exhaustive]
+    #[cfg_attr(any(not(feature = "unstable_exhaustive_types"), doc), non_exhaustive)]
     CommandStructureMismatch {
         /// A short string describing what specifically is wrong/unexpected
         description: &'static str,
     },
     /// A string parameter was found, but it could not be parsed into the target type.
-    #[non_exhaustive]
+    #[cfg_attr(any(not(feature = "unstable_exhaustive_types"), doc), non_exhaustive)]
     Parse {
         /// Error that occurred while parsing the string into the target type
         error: Box<dyn std::error::Error + Send + Sync>,
@@ -27,7 +27,7 @@ pub enum SlashArgError {
         input: String,
     },
     /// The argument passed by the user is invalid in this context. E.g. a Member parameter in DMs
-    #[non_exhaustive]
+    #[cfg_attr(any(not(feature = "unstable_exhaustive_types"), doc), non_exhaustive)]
     Invalid(
         /// Human readable description of the error
         &'static str,
