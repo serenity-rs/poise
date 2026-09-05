@@ -6,19 +6,18 @@ use super::{CowStr, CowVec};
 
 /// Type returned from `#[poise::command]` annotated functions, which contains all of the generated
 /// prefix and application commands
-#[derive(derivative::Derivative)]
-#[derivative(Default(bound = ""), Debug(bound = ""))]
+#[derive_where::derive_where(Debug)]
 pub struct Command<U, E> {
     // =============
     /// Callback to execute when this command is invoked in a prefix context
-    #[derivative(Debug = "ignore")]
+    #[derive_where(skip)]
     pub prefix_action: Option<
         for<'a> fn(
             crate::PrefixContext<'a, U, E>,
         ) -> BoxFuture<'a, Result<(), crate::FrameworkError<'a, U, E>>>,
     >,
     /// Callback to execute when this command is invoked in a slash context
-    #[derivative(Debug = "ignore")]
+    #[derive_where(skip)]
     pub slash_action: Option<
         for<'a> fn(
             crate::ApplicationContext<'a, U, E>,
@@ -107,17 +106,16 @@ pub struct Command<U, E> {
     /// If true, the command may only run in NSFW channels
     pub nsfw_only: bool,
     /// Command-specific override for [`crate::FrameworkOptions::on_error`]
-    #[derivative(Debug = "ignore")]
+    #[derive_where(skip)]
     pub on_error: Option<fn(crate::FrameworkError<'_, U, E>) -> BoxFuture<'_, ()>>,
     /// If any of these functions returns false, this command will not be executed.
-    #[derivative(Debug = "ignore")]
+    #[derive_where(skip)]
     pub checks: Vec<fn(crate::Context<'_, U, E>) -> BoxFuture<'_, Result<bool, E>>>,
     /// List of parameters for this command
     ///
     /// Used for registering and parsing slash commands. Can also be used in help commands
     pub parameters: Vec<crate::CommandParameter<U, E>>,
     /// Arbitrary data, useful for storing custom metadata about your commands
-    #[derivative(Default(value = "Box::new(())"))]
     pub custom_data: Box<dyn std::any::Any + Send + Sync>,
 
     // ============= Prefix-specific data
@@ -273,5 +271,51 @@ impl<U, E> Command<U, E> {
         }
 
         Some(builder)
+    }
+}
+
+impl<U, E> Default for Command<U, E> {
+    fn default() -> Self {
+        Self {
+            prefix_action: None,
+            slash_action: None,
+            context_menu_action: None,
+            subcommands: Vec::new(),
+            subcommand_required: false,
+            name: CowStr::default(),
+            name_localizations: CowVec::default(),
+            qualified_name: CowStr::default(),
+            identifying_name: CowStr::default(),
+            source_code_name: CowStr::default(),
+            category: None,
+            hide_in_help: false,
+            description: None,
+            description_localizations: CowVec::default(),
+            help_text: None,
+            manual_cooldowns: None,
+            cooldowns: std::sync::Mutex::default(),
+            cooldown_config: std::sync::RwLock::default(),
+            reuse_response: false,
+            default_member_permissions: serenity::Permissions::empty(),
+            required_permissions: serenity::Permissions::empty(),
+            required_bot_permissions: serenity::Permissions::empty(),
+            owners_only: false,
+            guild_only: false,
+            dm_only: false,
+            nsfw_only: false,
+            on_error: None,
+            checks: Vec::new(),
+            parameters: Vec::new(),
+            custom_data: Box::new(()),
+            aliases: CowVec::default(),
+            invoke_on_edit: false,
+            track_deletion: false,
+            broadcast_typing: false,
+            context_menu_name: None,
+            ephemeral: false,
+            install_context: None,
+            interaction_context: None,
+            __non_exhaustive: (),
+        }
     }
 }
