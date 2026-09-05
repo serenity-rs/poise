@@ -8,8 +8,8 @@ fn find_matching_command<'a, 'b, U, E>(
     interaction_kind: serenity::CommandType,
     interaction_options: &'b [serenity::ResolvedOption<'b>],
     commands: &'a [crate::Command<U, E>],
-    parent_commands: &mut Vec<&'a crate::Command<U, E>>,
-) -> Option<(&'a crate::Command<U, E>, &'b [serenity::ResolvedOption<'b>])> {
+    command_tree: &mut Vec<&'a crate::Command<U, E>>,
+) -> Option<&'b [serenity::ResolvedOption<'b>]> {
     commands.iter().find_map(|cmd| {
         if interaction_name != cmd.name
             && Some(interaction_name) != cmd.context_menu_name.as_deref()
@@ -30,6 +30,7 @@ fn find_matching_command<'a, 'b, U, E>(
             _ => unimplemented!(),
         }
 
+        command_tree.push(cmd);
         if let Some((sub_name, sub_interaction)) =
             interaction_options
                 .iter()
@@ -39,16 +40,15 @@ fn find_matching_command<'a, 'b, U, E>(
                     _ => None,
                 })
         {
-            parent_commands.push(cmd);
             find_matching_command(
                 sub_name,
                 interaction_kind,
                 sub_interaction,
                 &cmd.subcommands,
-                parent_commands,
+                command_tree,
             )
         } else {
-            Some((cmd, interaction_options))
+            Some(interaction_options)
         }
     })
 }
@@ -57,8 +57,6 @@ fn find_matching_command<'a, 'b, U, E>(
 ///
 /// After this, the [`crate::ApplicationContext`] should be passed into [`run_command`] or
 /// [`run_autocomplete`].
-#[allow(clippy::too_many_arguments)] // We need to pass them all in to create Context.
-#[allow(clippy::result_large_err)] // We cannot fix this without breaking
 fn extract_command<'a, U, E>(
     framework: crate::FrameworkContext<'a, U, E>,
     interaction: &'a serenity::CommandInteraction,
@@ -66,36 +64,35 @@ fn extract_command<'a, U, E>(
     has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
     invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
     options: &'a [serenity::ResolvedOption<'a>],
-    parent_commands: &'a mut Vec<&'a crate::Command<U, E>>,
+    command_tree: &'a mut Vec<&'a crate::Command<U, E>>,
 ) -> Result<crate::ApplicationContext<'a, U, E>, crate::FrameworkError<'a, U, E>> {
-    let search_result = find_matching_command(
+    let Some(leaf_interaction_options) = find_matching_command(
         &interaction.data.name,
         interaction.data.kind,
         options,
         &framework.options.commands,
-        parent_commands,
-    );
-    let (command, leaf_interaction_options) =
-        search_result.ok_or(crate::FrameworkError::UnknownInteraction {
+        command_tree,
+    ) else {
+        return Err(crate::FrameworkError::UnknownInteraction {
             framework,
             interaction,
-        })?;
+        });
+    };
 
     Ok(crate::ApplicationContext {
         framework,
         interaction,
         interaction_type,
         args: leaf_interaction_options,
-        command,
-        parent_commands,
+        command_tree,
         has_sent_initial_response,
         invocation_data,
         __non_exhaustive: (),
     })
 }
 
-/// Given an interaction, finds the matching framework command and checks if the user is allowed access
-#[allow(clippy::too_many_arguments)] // We need to pass them all in to create Context.
+/// Given an interaction, finds the matching framework command and checks if the user is allowed
+/// access.
 pub async fn extract_command_and_run_checks<'a, U, E>(
     framework: crate::FrameworkContext<'a, U, E>,
     interaction: &'a serenity::CommandInteraction,
@@ -103,7 +100,7 @@ pub async fn extract_command_and_run_checks<'a, U, E>(
     has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
     invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
     options: &'a [serenity::ResolvedOption<'a>],
-    parent_commands: &'a mut Vec<&'a crate::Command<U, E>>,
+    command_tree: &'a mut Vec<&'a crate::Command<U, E>>,
 ) -> Result<crate::ApplicationContext<'a, U, E>, crate::FrameworkError<'a, U, E>> {
     let ctx = extract_command(
         framework,
@@ -112,7 +109,7 @@ pub async fn extract_command_and_run_checks<'a, U, E>(
         has_sent_initial_response,
         invocation_data,
         options,
-        parent_commands,
+        command_tree,
     )?;
     super::common::check_permissions_and_cooldown(ctx.into()).await?;
     Ok(ctx)
@@ -134,19 +131,17 @@ async fn run_command<U, E>(
         description: "received interaction type but command contained no \
                 matching action or interaction contained no matching context menu object",
     };
+
+    let command = ctx.command();
     let action_result = match ctx.interaction.data.kind {
         serenity::CommandType::ChatInput => {
-            let action = ctx
-                .command
+            let action = command
                 .slash_action
                 .ok_or(command_structure_mismatch_error)?;
             action(ctx).await
         }
         serenity::CommandType::User => {
-            match (
-                ctx.command.context_menu_action,
-                &ctx.interaction.data.target(),
-            ) {
+            match (command.context_menu_action, &ctx.interaction.data.target()) {
                 (
                     Some(crate::ContextMenuCommandAction::User(action)),
                     Some(serenity::ResolvedTarget::User(user, member)),
@@ -159,10 +154,7 @@ async fn run_command<U, E>(
             }
         }
         serenity::CommandType::Message => {
-            match (
-                ctx.command.context_menu_action,
-                &ctx.interaction.data.target(),
-            ) {
+            match (command.context_menu_action, &ctx.interaction.data.target()) {
                 (
                     Some(crate::ContextMenuCommandAction::Message(action)),
                     Some(serenity::ResolvedTarget::Message(message)),
@@ -192,7 +184,7 @@ pub async fn dispatch_interaction<'a, U, E>(
     invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
     // Need to pass this in from outside because of lifetime issues
     options: &'a [serenity::ResolvedOption<'a>],
-    parent_commands: &'a mut Vec<&'a crate::Command<U, E>>,
+    command_tree: &'a mut Vec<&'a crate::Command<U, E>>,
 ) -> Result<(), crate::FrameworkError<'a, U, E>> {
     let ctx = extract_command(
         framework,
@@ -201,7 +193,7 @@ pub async fn dispatch_interaction<'a, U, E>(
         has_sent_initial_response,
         invocation_data,
         options,
-        parent_commands,
+        command_tree,
     )?;
 
     crate::catch_unwind_maybe(run_command(ctx))
@@ -234,7 +226,7 @@ async fn run_autocomplete<U, E>(
     };
 
     // Find the matching parameter from our Command object
-    let parameters = &ctx.command.parameters;
+    let parameters = &ctx.command().parameters;
     let focused_parameter = parameters
         .iter()
         .find(|p| &p.name == focused_option_name)
@@ -279,7 +271,7 @@ pub async fn dispatch_autocomplete<'a, U, E>(
     has_sent_initial_response: &'a std::sync::atomic::AtomicBool,
     invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
     options: &'a [serenity::ResolvedOption<'a>],
-    parent_commands: &'a mut Vec<&'a crate::Command<U, E>>,
+    command_tree: &'a mut Vec<&'a crate::Command<U, E>>,
 ) -> Result<(), crate::FrameworkError<'a, U, E>> {
     let ctx = extract_command(
         framework,
@@ -288,7 +280,7 @@ pub async fn dispatch_autocomplete<'a, U, E>(
         has_sent_initial_response,
         invocation_data,
         options,
-        parent_commands,
+        command_tree,
     )?;
 
     crate::catch_unwind_maybe(run_autocomplete(ctx))

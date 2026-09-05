@@ -2,7 +2,8 @@
 #![doc(test(attr(deny(deprecated))))]
 // native #[non_exhaustive] is awful because you can't do struct update syntax with it (??)
 #![allow(clippy::manual_non_exhaustive)]
-// Fixing would require breaking changes, so allow on `current`.
+// Triggered by `serenity::Error`, but fixed on `next` branch so ignore here.
+// TODO: Remove when merged into `serenity-next`.
 #![allow(clippy::result_large_err)]
 #![allow(clippy::type_complexity)]
 #![warn(
