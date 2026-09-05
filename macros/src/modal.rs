@@ -72,8 +72,10 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                     // Can use `defaults.#field_ident` directly in Edition 2021 due to more
                     // specific closure capture rules
                     let default = std::mem::take(&mut defaults.#field_ident);
-                    // Option::from().unwrap_or_default() dance to handle both T and Option<T>
-                    b = b.value(Option::from(default).unwrap_or_else(String::new));
+                    // Option::from() dance to handle both T and Option<T>
+                    if let Some(default) = Option::<String>::from(default) {
+                        b = b.value(default);
+                    }
                 }
                 b
                     #( .placeholder(#placeholder) )*
