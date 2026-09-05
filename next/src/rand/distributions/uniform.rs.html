@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rand-0.8.5/src/distributions/uniform.rs`."><title>uniform.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../static.files/rustdoc-1ed95124.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rand" data-themes="" data-resource-suffix="" data-rustdoc-version="1.98.0-nightly (f428d123a 2026-06-19)" data-channel="nightly" data-search-js="search-fd9372ac.js" data-stringdex-js="stringdex-2da4960a.js" data-settings-js="settings-170eb4bf.js" ><script src="../../../static.files/storage-41dd4d93.js"></script><script defer src="../../../static.files/src-script-813739b1.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-e779430a.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-f7c3ffd8.css"></noscript><link rel="icon" href="https://www.rust-lang.org/favicon.ico"></head><body class="rustdoc src"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><h1><div class="sub-heading">rand/distributions/</div>uniform.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-4"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="comment">// Copyright 2018-2020 Developers of the Rand project.
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rand-0.8.5/src/distributions/uniform.rs`."><title>uniform.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../static.files/rustdoc-203241e4.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="rand" data-themes="" data-resource-suffix="" data-rustdoc-version="1.100.0-nightly (0ed41eb41 2026-09-04)" data-channel="nightly" data-search-js="search-b167f383.js" data-stringdex-js="stringdex-b5109af9.js" data-settings-js="settings-170eb4bf.js" ><script src="../../../static.files/storage-41dd4d93.js"></script><script defer src="../../../static.files/src-script-813739b1.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-1814ead3.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-9f56287d.css"></noscript><link rel="icon" href="https://www.rust-lang.org/favicon.ico"></head><body class="rustdoc src"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><h1><div class="sub-heading">rand/distributions/</div>uniform.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-4"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="comment">// Copyright 2018-2020 Developers of the Rand project.
 <a href=#2 id=2 data-nosnippet>2</a>// Copyright 2017 The Rust Project Developers.
 <a href=#3 id=3 data-nosnippet>3</a>//
 <a href=#4 id=4 data-nosnippet>4</a>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or
@@ -491,7 +491,7 @@
 <a href=#491 id=491 data-nosnippet>491</a>                    <span class="kw">let </span>unsigned_max = ::core::<span class="macro-nonterminal">$u_large::MAX</span>;
 <a href=#492 id=492 data-nosnippet>492</a>                    <span class="kw">let </span>zone = unsigned_max - (<span class="self">self</span>.z <span class="kw">as </span><span class="macro-nonterminal">$unsigned </span><span class="kw">as </span><span class="macro-nonterminal">$u_large</span>);
 <a href=#493 id=493 data-nosnippet>493</a>                    <span class="kw">loop </span>{
-<a href=#494 id=494 data-nosnippet>494</a>                        <span class="kw">let </span>v: <span class="macro-nonterminal">$u_large </span>= rng.<span class="kw">gen</span>();
+<a href=#494 id=494 data-nosnippet>494</a>                        <span class="kw">let </span>v: <span class="macro-nonterminal">$u_large </span>= rng.gen();
 <a href=#495 id=495 data-nosnippet>495</a>                        <span class="kw">let </span>(hi, lo) = v.wmul(range);
 <a href=#496 id=496 data-nosnippet>496</a>                        <span class="kw">if </span>lo &lt;= zone {
 <a href=#497 id=497 data-nosnippet>497</a>                            <span class="kw">return </span><span class="self">self</span>.low.wrapping_add(hi <span class="kw">as </span><span class="macro-nonterminal">$ty</span>);
@@ -499,7 +499,7 @@
 <a href=#499 id=499 data-nosnippet>499</a>                    }
 <a href=#500 id=500 data-nosnippet>500</a>                } <span class="kw">else </span>{
 <a href=#501 id=501 data-nosnippet>501</a>                    <span class="comment">// Sample from the entire integer range.
-<a href=#502 id=502 data-nosnippet>502</a>                    </span>rng.<span class="kw">gen</span>()
+<a href=#502 id=502 data-nosnippet>502</a>                    </span>rng.gen()
 <a href=#503 id=503 data-nosnippet>503</a>                }
 <a href=#504 id=504 data-nosnippet>504</a>            }
 <a href=#505 id=505 data-nosnippet>505</a>
@@ -528,7 +528,7 @@
 <a href=#528 id=528 data-nosnippet>528</a>                <span class="comment">// If the above resulted in wrap-around to 0, the range is $ty::MIN..=$ty::MAX,
 <a href=#529 id=529 data-nosnippet>529</a>                // and any integer will do.
 <a href=#530 id=530 data-nosnippet>530</a>                </span><span class="kw">if </span>range == <span class="number">0 </span>{
-<a href=#531 id=531 data-nosnippet>531</a>                    <span class="kw">return </span>rng.<span class="kw">gen</span>();
+<a href=#531 id=531 data-nosnippet>531</a>                    <span class="kw">return </span>rng.gen();
 <a href=#532 id=532 data-nosnippet>532</a>                }
 <a href=#533 id=533 data-nosnippet>533</a>
 <a href=#534 id=534 data-nosnippet>534</a>                <span class="kw">let </span>zone = <span class="kw">if </span>::core::<span class="macro-nonterminal">$unsigned::MAX </span>&lt;= ::core::u16::MAX <span class="kw">as </span><span class="macro-nonterminal">$unsigned </span>{
@@ -545,7 +545,7 @@
 <a href=#545 id=545 data-nosnippet>545</a>                };
 <a href=#546 id=546 data-nosnippet>546</a>
 <a href=#547 id=547 data-nosnippet>547</a>                <span class="kw">loop </span>{
-<a href=#548 id=548 data-nosnippet>548</a>                    <span class="kw">let </span>v: <span class="macro-nonterminal">$u_large </span>= rng.<span class="kw">gen</span>();
+<a href=#548 id=548 data-nosnippet>548</a>                    <span class="kw">let </span>v: <span class="macro-nonterminal">$u_large </span>= rng.gen();
 <a href=#549 id=549 data-nosnippet>549</a>                    <span class="kw">let </span>(hi, lo) = v.wmul(range);
 <a href=#550 id=550 data-nosnippet>550</a>                    <span class="kw">if </span>lo &lt;= zone {
 <a href=#551 id=551 data-nosnippet>551</a>                        <span class="kw">return </span>low.wrapping_add(hi <span class="kw">as </span><span class="macro-nonterminal">$ty</span>);
@@ -646,7 +646,7 @@
 <a href=#646 id=646 data-nosnippet>646</a>                // rejection. The replacement method does however add a little
 <a href=#647 id=647 data-nosnippet>647</a>                // overhead. Benchmarking or calculating probabilities might
 <a href=#648 id=648 data-nosnippet>648</a>                // reveal contexts where this replacement method is slower.
-<a href=#649 id=649 data-nosnippet>649</a>                </span><span class="kw">let </span><span class="kw-2">mut </span>v: <span class="macro-nonterminal">$unsigned </span>= rng.<span class="kw">gen</span>();
+<a href=#649 id=649 data-nosnippet>649</a>                </span><span class="kw">let </span><span class="kw-2">mut </span>v: <span class="macro-nonterminal">$unsigned </span>= rng.gen();
 <a href=#650 id=650 data-nosnippet>650</a>                <span class="kw">loop </span>{
 <a href=#651 id=651 data-nosnippet>651</a>                    <span class="kw">let </span>(hi, lo) = v.wmul(range);
 <a href=#652 id=652 data-nosnippet>652</a>                    <span class="kw">let </span>mask = lo.le(zone);
@@ -661,7 +661,7 @@
 <a href=#661 id=661 data-nosnippet>661</a>                        <span class="kw">return </span>range.gt(<span class="macro-nonterminal">$unsigned::splat</span>(<span class="number">0</span>)).select(result, v);
 <a href=#662 id=662 data-nosnippet>662</a>                    }
 <a href=#663 id=663 data-nosnippet>663</a>                    <span class="comment">// Replace only the failing lanes
-<a href=#664 id=664 data-nosnippet>664</a>                    </span>v = mask.select(v, rng.<span class="kw">gen</span>());
+<a href=#664 id=664 data-nosnippet>664</a>                    </span>v = mask.select(v, rng.gen());
 <a href=#665 id=665 data-nosnippet>665</a>                }
 <a href=#666 id=666 data-nosnippet>666</a>            }
 <a href=#667 id=667 data-nosnippet>667</a>        }
@@ -899,7 +899,7 @@
 <a href=#899 id=899 data-nosnippet>899</a>
 <a href=#900 id=900 data-nosnippet>900</a>            <span class="kw">fn </span>sample&lt;R: Rng + <span class="question-mark">?</span>Sized&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, rng: <span class="kw-2">&amp;mut </span>R) -&gt; <span class="self">Self</span>::X {
 <a href=#901 id=901 data-nosnippet>901</a>                <span class="comment">// Generate a value in the range [1, 2)
-<a href=#902 id=902 data-nosnippet>902</a>                </span><span class="kw">let </span>value1_2 = (rng.<span class="kw">gen</span>::&lt;<span class="macro-nonterminal">$uty</span>&gt;() &gt;&gt; <span class="macro-nonterminal">$bits_to_discard</span>).into_float_with_exponent(<span class="number">0</span>);
+<a href=#902 id=902 data-nosnippet>902</a>                </span><span class="kw">let </span>value1_2 = (rng.gen::&lt;<span class="macro-nonterminal">$uty</span>&gt;() &gt;&gt; <span class="macro-nonterminal">$bits_to_discard</span>).into_float_with_exponent(<span class="number">0</span>);
 <a href=#903 id=903 data-nosnippet>903</a>
 <a href=#904 id=904 data-nosnippet>904</a>                <span class="comment">// Get a value in the range [0, 1) in order to avoid
 <a href=#905 id=905 data-nosnippet>905</a>                // overflowing into infinity when multiplying with scale
@@ -939,7 +939,7 @@
 <a href=#939 id=939 data-nosnippet>939</a>                <span class="kw">loop </span>{
 <a href=#940 id=940 data-nosnippet>940</a>                    <span class="comment">// Generate a value in the range [1, 2)
 <a href=#941 id=941 data-nosnippet>941</a>                    </span><span class="kw">let </span>value1_2 =
-<a href=#942 id=942 data-nosnippet>942</a>                        (rng.<span class="kw">gen</span>::&lt;<span class="macro-nonterminal">$uty</span>&gt;() &gt;&gt; <span class="macro-nonterminal">$bits_to_discard</span>).into_float_with_exponent(<span class="number">0</span>);
+<a href=#942 id=942 data-nosnippet>942</a>                        (rng.gen::&lt;<span class="macro-nonterminal">$uty</span>&gt;() &gt;&gt; <span class="macro-nonterminal">$bits_to_discard</span>).into_float_with_exponent(<span class="number">0</span>);
 <a href=#943 id=943 data-nosnippet>943</a>
 <a href=#944 id=944 data-nosnippet>944</a>                    <span class="comment">// Get a value in the range [0, 1) in order to avoid
 <a href=#945 id=945 data-nosnippet>945</a>                    // overflowing into infinity when multiplying with scale
