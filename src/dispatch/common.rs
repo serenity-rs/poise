@@ -119,14 +119,12 @@ async fn check_permissions_and_cooldown_single<'a, U, E>(
 /// Doesn't actually start the cooldown timer! This should be done by the caller later, after
 /// argument parsing.
 /// (A command that didn't even get past argument parsing shouldn't trigger cooldowns)
-#[allow(clippy::needless_lifetimes)] // false positive (clippy issue 7271)
 pub async fn check_permissions_and_cooldown<'a, U, E>(
     ctx: crate::Context<'a, U, E>,
 ) -> Result<(), crate::FrameworkError<'a, U, E>> {
-    for parent_command in ctx.parent_commands() {
-        check_permissions_and_cooldown_single(ctx, parent_command).await?;
+    for command in ctx.command_tree() {
+        check_permissions_and_cooldown_single(ctx, command).await?;
     }
-    check_permissions_and_cooldown_single(ctx, ctx.command()).await?;
 
     Ok(())
 }

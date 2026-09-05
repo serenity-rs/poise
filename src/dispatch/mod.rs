@@ -78,14 +78,14 @@ pub async fn dispatch_event<U: Send + Sync, E>(
     match &event {
         serenity::FullEvent::Message { new_message } => {
             let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
-            let mut parent_commands = Vec::new();
+            let mut command_tree = Vec::new();
             let trigger = crate::MessageDispatchTrigger::MessageCreate;
             if let Err(error) = prefix::dispatch_message(
                 framework,
                 new_message,
                 trigger,
                 &invocation_data,
-                &mut parent_commands,
+                &mut command_tree,
             )
             .await
             {
@@ -104,7 +104,7 @@ pub async fn dispatch_event<U: Send + Sync, E>(
 
                 if let Some((msg, previously_tracked)) = msg {
                     let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
-                    let mut parent_commands = Vec::new();
+                    let mut command_tree = Vec::new();
                     let trigger = match previously_tracked {
                         true => crate::MessageDispatchTrigger::MessageEdit,
                         false => crate::MessageDispatchTrigger::MessageEditFromInvalid,
@@ -114,7 +114,7 @@ pub async fn dispatch_event<U: Send + Sync, E>(
                         &msg,
                         trigger,
                         &invocation_data,
-                        &mut parent_commands,
+                        &mut command_tree,
                     )
                     .await
                     {
@@ -142,14 +142,14 @@ pub async fn dispatch_event<U: Send + Sync, E>(
             interaction: serenity::Interaction::Command(interaction),
         } => {
             let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
-            let mut parent_commands = Vec::new();
+            let mut command_tree = Vec::new();
             if let Err(error) = slash::dispatch_interaction(
                 framework,
                 interaction,
                 &std::sync::atomic::AtomicBool::new(false),
                 &invocation_data,
                 &interaction.data.options(),
-                &mut parent_commands,
+                &mut command_tree,
             )
             .await
             {
@@ -160,14 +160,14 @@ pub async fn dispatch_event<U: Send + Sync, E>(
             interaction: serenity::Interaction::Autocomplete(interaction),
         } => {
             let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
-            let mut parent_commands = Vec::new();
+            let mut command_tree = Vec::new();
             if let Err(error) = slash::dispatch_autocomplete(
                 framework,
                 interaction,
                 &std::sync::atomic::AtomicBool::new(false),
                 &invocation_data,
                 &interaction.data.options(),
-                &mut parent_commands,
+                &mut command_tree,
             )
             .await
             {

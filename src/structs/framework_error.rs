@@ -61,6 +61,7 @@ pub enum FrameworkError<'a, U, E> {
         ///
         /// The reason the original [`Box<dyn Any + Send>`] payload isn't provided here is that it
         /// would make [`FrameworkError`] not [`Sync`] anymore.
+        // TODO: Switch to `FixedString` when merged into `serenity-next`.
         payload: Option<String>,
         /// Command context
         ctx: crate::Context<'a, U, E>,
@@ -71,6 +72,7 @@ pub enum FrameworkError<'a, U, E> {
         /// Error which was thrown by the parameter type's parsing routine
         error: Box<dyn std::error::Error + Send + Sync>,
         /// If applicable, the input on which parsing failed
+        // TODO: Switch to `FixedString` when merged into `serenity-next`.
         input: Option<String>,
         /// General context
         ctx: crate::Context<'a, U, E>,
@@ -171,12 +173,8 @@ pub enum FrameworkError<'a, U, E> {
     UnknownCommand {
         /// The message in question
         msg: &'a serenity::Message,
-        /// The prefix that was recognized
-        prefix: &'a str,
-        /// The rest of the message (after the prefix) which was not recognized as a command
-        ///
-        /// This is a single field instead of two fields (command name and args) due to subcommands
-        msg_content: &'a str,
+        /// The position in the message that the prefix ends.
+        content_start: u16,
         /// Framework context
         #[derivative(Debug = "ignore")]
         framework: crate::FrameworkContext<'a, U, E>,
@@ -417,7 +415,10 @@ impl<U, E: std::fmt::Display> std::fmt::Display for FrameworkError<'_, U, E> {
                     msg.content
                 )
             }
-            Self::UnknownCommand { msg_content, .. } => {
+            Self::UnknownCommand {
+                content_start, msg, ..
+            } => {
+                let msg_content = &msg.content[(*content_start).into()..];
                 write!(f, "unknown command `{}`", msg_content)
             }
             Self::UnknownInteraction { interaction, .. } => {
