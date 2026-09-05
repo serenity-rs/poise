@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.41.1/src/io/util/mem.rs`."><title>mem.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-203241e4.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.100.0-nightly (0ed41eb41 2026-09-04)" data-channel="nightly" data-search-js="search-b167f383.js" data-stringdex-js="stringdex-b5109af9.js" data-settings-js="settings-170eb4bf.js" ><script src="../../../../static.files/storage-41dd4d93.js"></script><script defer src="../../../../static.files/src-script-813739b1.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-1814ead3.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-9f56287d.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><h1><div class="sub-heading">tokio/io/util/</div>mem.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-3"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="doccomment">//! In-process memory IO types.
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.53.1/src/io/util/mem.rs`."><title>mem.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-203241e4.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.100.0-nightly (0ed41eb41 2026-09-04)" data-channel="nightly" data-search-js="search-b167f383.js" data-stringdex-js="stringdex-b5109af9.js" data-settings-js="settings-170eb4bf.js" ><script src="../../../../static.files/storage-41dd4d93.js"></script><script defer src="../../../../static.files/src-script-813739b1.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-1814ead3.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-9f56287d.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><h1><div class="sub-heading">tokio/io/util/</div>mem.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-3"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="doccomment">//! In-process memory IO types.
 <a href=#2 id=2 data-nosnippet>2</a>
 <a href=#3 id=3 data-nosnippet>3</a></span><span class="kw">use </span><span class="kw">crate</span>::io::{split, AsyncRead, AsyncWrite, ReadBuf, ReadHalf, WriteHalf};
 <a href=#4 id=4 data-nosnippet>4</a><span class="kw">use </span><span class="kw">crate</span>::loom::sync::Mutex;
@@ -185,7 +185,7 @@
 <a href=#185 id=185 data-nosnippet>185</a></span><span class="doccomment">/// Creates unidirectional buffer that acts like in memory pipe.
 <a href=#186 id=186 data-nosnippet>186</a>///
 <a href=#187 id=187 data-nosnippet>187</a>/// The `max_buf_size` argument is the maximum amount of bytes that can be
-<a href=#188 id=188 data-nosnippet>188</a>/// written to a buffer before the it returns `Poll::Pending`.
+<a href=#188 id=188 data-nosnippet>188</a>/// written to a buffer before it returns `Poll::Pending`.
 <a href=#189 id=189 data-nosnippet>189</a>///
 <a href=#190 id=190 data-nosnippet>190</a>/// # Unify reader and writer
 <a href=#191 id=191 data-nosnippet>191</a>///
@@ -197,8 +197,8 @@
 <a href=#197 id=197 data-nosnippet>197</a>/// ```
 <a href=#198 id=198 data-nosnippet>198</a>/// # async fn ex() -&gt; std::io::Result&lt;()&gt; {
 <a href=#199 id=199 data-nosnippet>199</a>/// # use tokio::io::{AsyncReadExt, AsyncWriteExt};
-<a href=#200 id=200 data-nosnippet>200</a>/// let (writer, reader) = tokio::io::simplex(64);
-<a href=#201 id=201 data-nosnippet>201</a>/// let mut simplex_stream = writer.unsplit(reader);
+<a href=#200 id=200 data-nosnippet>200</a>/// let (reader, writer) = tokio::io::simplex(64);
+<a href=#201 id=201 data-nosnippet>201</a>/// let mut simplex_stream = reader.unsplit(writer);
 <a href=#202 id=202 data-nosnippet>202</a>/// simplex_stream.write_all(b"hello").await?;
 <a href=#203 id=203 data-nosnippet>203</a>///
 <a href=#204 id=204 data-nosnippet>204</a>/// let mut buf = [0u8; 5];
@@ -217,7 +217,7 @@
 <a href=#217 id=217 data-nosnippet>217</a>    /// version with separate reader and writer you can use [`simplex`] function.
 <a href=#218 id=218 data-nosnippet>218</a>    ///
 <a href=#219 id=219 data-nosnippet>219</a>    /// The `max_buf_size` argument is the maximum amount of bytes that can be
-<a href=#220 id=220 data-nosnippet>220</a>    /// written to a buffer before the it returns `Poll::Pending`.
+<a href=#220 id=220 data-nosnippet>220</a>    /// written to a buffer before it returns `Poll::Pending`.
 <a href=#221 id=221 data-nosnippet>221</a>    </span><span class="attr">#[cfg_attr(docsrs, doc(cfg(feature = <span class="string">"io-util"</span>)))]
 <a href=#222 id=222 data-nosnippet>222</a>    </span><span class="kw">pub fn </span>new_unsplit(max_buf_size: usize) -&gt; SimplexStream {
 <a href=#223 id=223 data-nosnippet>223</a>        SimplexStream {
@@ -331,8 +331,8 @@
 <a href=#331 id=331 data-nosnippet>331</a>            cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;,
 <a href=#332 id=332 data-nosnippet>332</a>            buf: <span class="kw-2">&amp;mut </span>ReadBuf&lt;<span class="lifetime">'_</span>&gt;,
 <a href=#333 id=333 data-nosnippet>333</a>        ) -&gt; Poll&lt;std::io::Result&lt;()&gt;&gt; {
-<a href=#334 id=334 data-nosnippet>334</a>            <span class="macro">ready!</span>(<span class="kw">crate</span>::trace::trace_leaf(cx));
-<a href=#335 id=335 data-nosnippet>335</a>            <span class="kw">let </span>coop = <span class="macro">ready!</span>(<span class="kw">crate</span>::runtime::coop::poll_proceed(cx));
+<a href=#334 id=334 data-nosnippet>334</a>            <span class="macro">ready!</span>(<span class="kw">crate</span>::trace::trace_leaf());
+<a href=#335 id=335 data-nosnippet>335</a>            <span class="kw">let </span>coop = <span class="macro">ready!</span>(<span class="kw">crate</span>::task::coop::poll_proceed(cx));
 <a href=#336 id=336 data-nosnippet>336</a>
 <a href=#337 id=337 data-nosnippet>337</a>            <span class="kw">let </span>ret = <span class="self">self</span>.poll_read_internal(cx, buf);
 <a href=#338 id=338 data-nosnippet>338</a>            <span class="kw">if </span>ret.is_ready() {
@@ -348,7 +348,7 @@
 <a href=#348 id=348 data-nosnippet>348</a>            cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;,
 <a href=#349 id=349 data-nosnippet>349</a>            buf: <span class="kw-2">&amp;mut </span>ReadBuf&lt;<span class="lifetime">'_</span>&gt;,
 <a href=#350 id=350 data-nosnippet>350</a>        ) -&gt; Poll&lt;std::io::Result&lt;()&gt;&gt; {
-<a href=#351 id=351 data-nosnippet>351</a>            <span class="macro">ready!</span>(<span class="kw">crate</span>::trace::trace_leaf(cx));
+<a href=#351 id=351 data-nosnippet>351</a>            <span class="macro">ready!</span>(<span class="kw">crate</span>::trace::trace_leaf());
 <a href=#352 id=352 data-nosnippet>352</a>            <span class="self">self</span>.poll_read_internal(cx, buf)
 <a href=#353 id=353 data-nosnippet>353</a>        }
 <a href=#354 id=354 data-nosnippet>354</a>    }
@@ -361,8 +361,8 @@
 <a href=#361 id=361 data-nosnippet>361</a>            cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;,
 <a href=#362 id=362 data-nosnippet>362</a>            buf: <span class="kw-2">&amp;</span>[u8],
 <a href=#363 id=363 data-nosnippet>363</a>        ) -&gt; Poll&lt;std::io::Result&lt;usize&gt;&gt; {
-<a href=#364 id=364 data-nosnippet>364</a>            <span class="macro">ready!</span>(<span class="kw">crate</span>::trace::trace_leaf(cx));
-<a href=#365 id=365 data-nosnippet>365</a>            <span class="kw">let </span>coop = <span class="macro">ready!</span>(<span class="kw">crate</span>::runtime::coop::poll_proceed(cx));
+<a href=#364 id=364 data-nosnippet>364</a>            <span class="macro">ready!</span>(<span class="kw">crate</span>::trace::trace_leaf());
+<a href=#365 id=365 data-nosnippet>365</a>            <span class="kw">let </span>coop = <span class="macro">ready!</span>(<span class="kw">crate</span>::task::coop::poll_proceed(cx));
 <a href=#366 id=366 data-nosnippet>366</a>
 <a href=#367 id=367 data-nosnippet>367</a>            <span class="kw">let </span>ret = <span class="self">self</span>.poll_write_internal(cx, buf);
 <a href=#368 id=368 data-nosnippet>368</a>            <span class="kw">if </span>ret.is_ready() {
@@ -378,7 +378,7 @@
 <a href=#378 id=378 data-nosnippet>378</a>            cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;,
 <a href=#379 id=379 data-nosnippet>379</a>            buf: <span class="kw-2">&amp;</span>[u8],
 <a href=#380 id=380 data-nosnippet>380</a>        ) -&gt; Poll&lt;std::io::Result&lt;usize&gt;&gt; {
-<a href=#381 id=381 data-nosnippet>381</a>            <span class="macro">ready!</span>(<span class="kw">crate</span>::trace::trace_leaf(cx));
+<a href=#381 id=381 data-nosnippet>381</a>            <span class="macro">ready!</span>(<span class="kw">crate</span>::trace::trace_leaf());
 <a href=#382 id=382 data-nosnippet>382</a>            <span class="self">self</span>.poll_write_internal(cx, buf)
 <a href=#383 id=383 data-nosnippet>383</a>        }
 <a href=#384 id=384 data-nosnippet>384</a>    }
@@ -389,8 +389,8 @@
 <a href=#389 id=389 data-nosnippet>389</a>            cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;,
 <a href=#390 id=390 data-nosnippet>390</a>            bufs: <span class="kw-2">&amp;</span>[std::io::IoSlice&lt;<span class="lifetime">'_</span>&gt;],
 <a href=#391 id=391 data-nosnippet>391</a>        ) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize, std::io::Error&gt;&gt; {
-<a href=#392 id=392 data-nosnippet>392</a>            <span class="macro">ready!</span>(<span class="kw">crate</span>::trace::trace_leaf(cx));
-<a href=#393 id=393 data-nosnippet>393</a>            <span class="kw">let </span>coop = <span class="macro">ready!</span>(<span class="kw">crate</span>::runtime::coop::poll_proceed(cx));
+<a href=#392 id=392 data-nosnippet>392</a>            <span class="macro">ready!</span>(<span class="kw">crate</span>::trace::trace_leaf());
+<a href=#393 id=393 data-nosnippet>393</a>            <span class="kw">let </span>coop = <span class="macro">ready!</span>(<span class="kw">crate</span>::task::coop::poll_proceed(cx));
 <a href=#394 id=394 data-nosnippet>394</a>
 <a href=#395 id=395 data-nosnippet>395</a>            <span class="kw">let </span>ret = <span class="self">self</span>.poll_write_vectored_internal(cx, bufs);
 <a href=#396 id=396 data-nosnippet>396</a>            <span class="kw">if </span>ret.is_ready() {
@@ -406,7 +406,7 @@
 <a href=#406 id=406 data-nosnippet>406</a>            cx: <span class="kw-2">&amp;mut </span>task::Context&lt;<span class="lifetime">'_</span>&gt;,
 <a href=#407 id=407 data-nosnippet>407</a>            bufs: <span class="kw-2">&amp;</span>[std::io::IoSlice&lt;<span class="lifetime">'_</span>&gt;],
 <a href=#408 id=408 data-nosnippet>408</a>        ) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;usize, std::io::Error&gt;&gt; {
-<a href=#409 id=409 data-nosnippet>409</a>            <span class="macro">ready!</span>(<span class="kw">crate</span>::trace::trace_leaf(cx));
+<a href=#409 id=409 data-nosnippet>409</a>            <span class="macro">ready!</span>(<span class="kw">crate</span>::trace::trace_leaf());
 <a href=#410 id=410 data-nosnippet>410</a>            <span class="self">self</span>.poll_write_vectored_internal(cx, bufs)
 <a href=#411 id=411 data-nosnippet>411</a>        }
 <a href=#412 id=412 data-nosnippet>412</a>    }

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["codec","either","io","sync"]};
+window.SIDEBAR_ITEMS = {"mod":["codec","either","future","io","sync"]};

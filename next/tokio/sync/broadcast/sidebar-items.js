@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["channel"],"mod":["error"],"struct":["Receiver","Sender"]};
+window.SIDEBAR_ITEMS = {"fn":["channel"],"mod":["error"],"struct":["Receiver","Sender","WeakSender"]};

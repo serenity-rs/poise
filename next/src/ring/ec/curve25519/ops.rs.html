@@ -1,12 +1,12 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ring-0.17.8/src/ec/curve25519/ops.rs`."><title>ops.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-203241e4.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.100.0-nightly (0ed41eb41 2026-09-04)" data-channel="nightly" data-search-js="search-b167f383.js" data-stringdex-js="stringdex-b5109af9.js" data-settings-js="settings-170eb4bf.js" ><script src="../../../../static.files/storage-41dd4d93.js"></script><script defer src="../../../../static.files/src-script-813739b1.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-1814ead3.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-9f56287d.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><h1><div class="sub-heading">ring/ec/curve25519/</div>ops.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-3"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="comment">// Copyright 2015-2017 Brian Smith.
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ring-0.17.14/src/ec/curve25519/ops.rs`."><title>ops.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-203241e4.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="ring" data-themes="" data-resource-suffix="" data-rustdoc-version="1.100.0-nightly (0ed41eb41 2026-09-04)" data-channel="nightly" data-search-js="search-b167f383.js" data-stringdex-js="stringdex-b5109af9.js" data-settings-js="settings-170eb4bf.js" ><script src="../../../../static.files/storage-41dd4d93.js"></script><script defer src="../../../../static.files/src-script-813739b1.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-1814ead3.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-9f56287d.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><h1><div class="sub-heading">ring/ec/curve25519/</div>ops.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-3"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="comment">// Copyright 2015-2017 Brian Smith.
 <a href=#2 id=2 data-nosnippet>2</a>//
 <a href=#3 id=3 data-nosnippet>3</a>// Permission to use, copy, modify, and/or distribute this software for any
 <a href=#4 id=4 data-nosnippet>4</a>// purpose with or without fee is hereby granted, provided that the above
 <a href=#5 id=5 data-nosnippet>5</a>// copyright notice and this permission notice appear in all copies.
 <a href=#6 id=6 data-nosnippet>6</a>//
-<a href=#7 id=7 data-nosnippet>7</a>// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHORS DISCLAIM ALL WARRANTIES
+<a href=#7 id=7 data-nosnippet>7</a>// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
 <a href=#8 id=8 data-nosnippet>8</a>// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-<a href=#9 id=9 data-nosnippet>9</a>// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY
+<a href=#9 id=9 data-nosnippet>9</a>// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
 <a href=#10 id=10 data-nosnippet>10</a>// SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
 <a href=#11 id=11 data-nosnippet>11</a>// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
 <a href=#12 id=12 data-nosnippet>12</a>// OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
@@ -17,10 +17,10 @@
 <a href=#17 id=17 data-nosnippet>17</a>
 <a href=#18 id=18 data-nosnippet>18</a></span><span class="kw">pub use </span><span class="kw">super</span>::scalar::{MaskedScalar, Scalar, SCALAR_LEN};
 <a href=#19 id=19 data-nosnippet>19</a><span class="kw">use crate</span>::{
-<a href=#20 id=20 data-nosnippet>20</a>    bssl, c, cpu, error,
+<a href=#20 id=20 data-nosnippet>20</a>    bssl, cpu, error,
 <a href=#21 id=21 data-nosnippet>21</a>    limb::{Limb, LIMB_BITS},
 <a href=#22 id=22 data-nosnippet>22</a>};
-<a href=#23 id=23 data-nosnippet>23</a><span class="kw">use </span>core::marker::PhantomData;
+<a href=#23 id=23 data-nosnippet>23</a><span class="kw">use </span>core::{ffi::c_int, marker::PhantomData};
 <a href=#24 id=24 data-nosnippet>24</a>
 <a href=#25 id=25 data-nosnippet>25</a><span class="comment">// Elem&lt;T&gt;` is `fe` in curve25519/internal.h.
 <a href=#26 id=26 data-nosnippet>26</a>// Elem&lt;L&gt; is `fe_loose` in curve25519/internal.h.
@@ -74,7 +74,7 @@
 <a href=#74 id=74 data-nosnippet>74</a>
 <a href=#75 id=75 data-nosnippet>75</a><span class="kw">impl </span>ExtPoint {
 <a href=#76 id=76 data-nosnippet>76</a>    <span class="comment">// Returns the result of multiplying the base point by the scalar in constant time.
-<a href=#77 id=77 data-nosnippet>77</a>    </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>from_scalarmult_base_consttime(scalar: <span class="kw-2">&amp;</span>Scalar, cpu: cpu::Features) -&gt; <span class="self">Self </span>{
+<a href=#77 id=77 data-nosnippet>77</a>    </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>from_scalarmult_base(scalar: <span class="kw-2">&amp;</span>Scalar, cpu: cpu::Features) -&gt; <span class="self">Self </span>{
 <a href=#78 id=78 data-nosnippet>78</a>        <span class="kw">let </span><span class="kw-2">mut </span>r = <span class="self">Self </span>{
 <a href=#79 id=79 data-nosnippet>79</a>            x: Elem::zero(),
 <a href=#80 id=80 data-nosnippet>80</a>            y: Elem::zero(),
@@ -82,7 +82,7 @@
 <a href=#82 id=82 data-nosnippet>82</a>            t: Elem::zero(),
 <a href=#83 id=83 data-nosnippet>83</a>        };
 <a href=#84 id=84 data-nosnippet>84</a>        <span class="macro">prefixed_extern!</span> {
-<a href=#85 id=85 data-nosnippet>85</a>            <span class="kw">fn </span>x25519_ge_scalarmult_base(h: <span class="kw-2">&amp;mut </span>ExtPoint, a: <span class="kw-2">&amp;</span>Scalar, has_fe25519_adx: c::int);
+<a href=#85 id=85 data-nosnippet>85</a>            <span class="kw">fn </span>x25519_ge_scalarmult_base(h: <span class="kw-2">&amp;mut </span>ExtPoint, a: <span class="kw-2">&amp;</span>Scalar, has_fe25519_adx: c_int);
 <a href=#86 id=86 data-nosnippet>86</a>        }
 <a href=#87 id=87 data-nosnippet>87</a>        <span class="kw">unsafe </span>{
 <a href=#88 id=88 data-nosnippet>88</a>            x25519_ge_scalarmult_base(<span class="kw-2">&amp;mut </span>r, scalar, has_fe25519_adx(cpu).into());
@@ -101,11 +101,11 @@
 <a href=#101 id=101 data-nosnippet>101</a>        Result::from(<span class="kw">unsafe </span>{ x25519_ge_frombytes_vartime(<span class="kw-2">&amp;mut </span>point, encoded) }).map(|()| point)
 <a href=#102 id=102 data-nosnippet>102</a>    }
 <a href=#103 id=103 data-nosnippet>103</a>
-<a href=#104 id=104 data-nosnippet>104</a>    <span class="kw">pub fn </span>into_encoded_point(<span class="self">self</span>) -&gt; EncodedPoint {
-<a href=#105 id=105 data-nosnippet>105</a>        encode_point(<span class="self">self</span>.x, <span class="self">self</span>.y, <span class="self">self</span>.z)
+<a href=#104 id=104 data-nosnippet>104</a>    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>into_encoded_point(<span class="self">self</span>, cpu_features: cpu::Features) -&gt; EncodedPoint {
+<a href=#105 id=105 data-nosnippet>105</a>        encode_point(<span class="self">self</span>.x, <span class="self">self</span>.y, <span class="self">self</span>.z, cpu_features)
 <a href=#106 id=106 data-nosnippet>106</a>    }
 <a href=#107 id=107 data-nosnippet>107</a>
-<a href=#108 id=108 data-nosnippet>108</a>    <span class="kw">pub fn </span>invert_vartime(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+<a href=#108 id=108 data-nosnippet>108</a>    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>invert_vartime(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
 <a href=#109 id=109 data-nosnippet>109</a>        <span class="self">self</span>.x.negate();
 <a href=#110 id=110 data-nosnippet>110</a>        <span class="self">self</span>.t.negate();
 <a href=#111 id=111 data-nosnippet>111</a>    }
@@ -128,12 +128,12 @@
 <a href=#128 id=128 data-nosnippet>128</a>        }
 <a href=#129 id=129 data-nosnippet>129</a>    }
 <a href=#130 id=130 data-nosnippet>130</a>
-<a href=#131 id=131 data-nosnippet>131</a>    <span class="kw">pub fn </span>into_encoded_point(<span class="self">self</span>) -&gt; EncodedPoint {
-<a href=#132 id=132 data-nosnippet>132</a>        encode_point(<span class="self">self</span>.x, <span class="self">self</span>.y, <span class="self">self</span>.z)
+<a href=#131 id=131 data-nosnippet>131</a>    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>into_encoded_point(<span class="self">self</span>, cpu_features: cpu::Features) -&gt; EncodedPoint {
+<a href=#132 id=132 data-nosnippet>132</a>        encode_point(<span class="self">self</span>.x, <span class="self">self</span>.y, <span class="self">self</span>.z, cpu_features)
 <a href=#133 id=133 data-nosnippet>133</a>    }
 <a href=#134 id=134 data-nosnippet>134</a>}
 <a href=#135 id=135 data-nosnippet>135</a>
-<a href=#136 id=136 data-nosnippet>136</a><span class="kw">fn </span>encode_point(x: Elem&lt;T&gt;, y: Elem&lt;T&gt;, z: Elem&lt;T&gt;) -&gt; EncodedPoint {
+<a href=#136 id=136 data-nosnippet>136</a><span class="kw">fn </span>encode_point(x: Elem&lt;T&gt;, y: Elem&lt;T&gt;, z: Elem&lt;T&gt;, _cpu_features: cpu::Features) -&gt; EncodedPoint {
 <a href=#137 id=137 data-nosnippet>137</a>    <span class="kw">let </span><span class="kw-2">mut </span>bytes = [<span class="number">0</span>; ELEM_LEN];
 <a href=#138 id=138 data-nosnippet>138</a>
 <a href=#139 id=139 data-nosnippet>139</a>    <span class="kw">let </span>sign_bit: u8 = <span class="kw">unsafe </span>{
@@ -157,28 +157,25 @@
 <a href=#157 id=157 data-nosnippet>157</a>    bytes
 <a href=#158 id=158 data-nosnippet>158</a>}
 <a href=#159 id=159 data-nosnippet>159</a>
-<a href=#160 id=160 data-nosnippet>160</a><span class="macro">cfg_if::cfg_if!</span> {
-<a href=#161 id=161 data-nosnippet>161</a>    <span class="kw">if </span><span class="attr">#[cfg(all(target_arch = <span class="string">"x86_64"</span>, not(target_os = <span class="string">"windows"</span>)))] </span>{
-<a href=#162 id=162 data-nosnippet>162</a>        <span class="attr">#[inline(always)]
-<a href=#163 id=163 data-nosnippet>163</a>        </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>has_fe25519_adx(cpu: cpu::Features) -&gt; bool {
-<a href=#164 id=164 data-nosnippet>164</a>            cpu::intel::ADX.available(cpu)
-<a href=#165 id=165 data-nosnippet>165</a>            &amp;&amp; cpu::intel::BMI1.available(cpu)
-<a href=#166 id=166 data-nosnippet>166</a>            &amp;&amp; cpu::intel::BMI2.available(cpu)
-<a href=#167 id=167 data-nosnippet>167</a>        }
-<a href=#168 id=168 data-nosnippet>168</a>    } <span class="kw">else </span>{
-<a href=#169 id=169 data-nosnippet>169</a>        <span class="attr">#[inline(always)]
-<a href=#170 id=170 data-nosnippet>170</a>        </span><span class="kw">pub </span>(<span class="kw">super</span>) <span class="kw">fn </span>has_fe25519_adx(_cpu: cpu::Features) -&gt; bool {
-<a href=#171 id=171 data-nosnippet>171</a>            <span class="bool-val">false
-<a href=#172 id=172 data-nosnippet>172</a>        </span>}
-<a href=#173 id=173 data-nosnippet>173</a>    }
-<a href=#174 id=174 data-nosnippet>174</a>}
-<a href=#175 id=175 data-nosnippet>175</a>
-<a href=#176 id=176 data-nosnippet>176</a><span class="macro">prefixed_extern!</span> {
-<a href=#177 id=177 data-nosnippet>177</a>    <span class="kw">fn </span>x25519_fe_invert(out: <span class="kw-2">&amp;mut </span>Elem&lt;T&gt;, z: <span class="kw-2">&amp;</span>Elem&lt;T&gt;);
-<a href=#178 id=178 data-nosnippet>178</a>    <span class="kw">fn </span>x25519_fe_isnegative(elem: <span class="kw-2">&amp;</span>Elem&lt;T&gt;) -&gt; u8;
-<a href=#179 id=179 data-nosnippet>179</a>    <span class="kw">fn </span>x25519_fe_mul_ttt(h: <span class="kw-2">&amp;mut </span>Elem&lt;T&gt;, f: <span class="kw-2">&amp;</span>Elem&lt;T&gt;, g: <span class="kw-2">&amp;</span>Elem&lt;T&gt;);
-<a href=#180 id=180 data-nosnippet>180</a>    <span class="kw">fn </span>x25519_fe_neg(f: <span class="kw-2">&amp;mut </span>Elem&lt;T&gt;);
-<a href=#181 id=181 data-nosnippet>181</a>    <span class="kw">fn </span>x25519_fe_tobytes(bytes: <span class="kw-2">&amp;mut </span>EncodedPoint, elem: <span class="kw-2">&amp;</span>Elem&lt;T&gt;);
-<a href=#182 id=182 data-nosnippet>182</a>    <span class="kw">fn </span>x25519_ge_frombytes_vartime(h: <span class="kw-2">&amp;mut </span>ExtPoint, s: <span class="kw-2">&amp;</span>EncodedPoint) -&gt; bssl::Result;
-<a href=#183 id=183 data-nosnippet>183</a>}
+<a href=#160 id=160 data-nosnippet>160</a><span class="attr">#[inline(always)]
+<a href=#161 id=161 data-nosnippet>161</a></span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>has_fe25519_adx(cpu: cpu::Features) -&gt; bool {
+<a href=#162 id=162 data-nosnippet>162</a>    <span class="macro">cfg_if::cfg_if!</span> {
+<a href=#163 id=163 data-nosnippet>163</a>        <span class="kw">if </span><span class="attr">#[cfg(all(target_arch = <span class="string">"x86_64"</span>, not(target_os = <span class="string">"windows"</span>)))] </span>{
+<a href=#164 id=164 data-nosnippet>164</a>            <span class="kw">use </span>cpu::{intel::{Adx, Bmi1, Bmi2}, GetFeature <span class="kw">as _</span>};
+<a href=#165 id=165 data-nosnippet>165</a>            <span class="macro">matches!</span>(cpu.get_feature(), <span class="prelude-val">Some</span>((Adx { .. }, Bmi1 { .. }, Bmi2 { .. })))
+<a href=#166 id=166 data-nosnippet>166</a>        } <span class="kw">else </span>{
+<a href=#167 id=167 data-nosnippet>167</a>            <span class="kw">let _ </span>= cpu;
+<a href=#168 id=168 data-nosnippet>168</a>            <span class="bool-val">false
+<a href=#169 id=169 data-nosnippet>169</a>        </span>}
+<a href=#170 id=170 data-nosnippet>170</a>    }
+<a href=#171 id=171 data-nosnippet>171</a>}
+<a href=#172 id=172 data-nosnippet>172</a>
+<a href=#173 id=173 data-nosnippet>173</a><span class="macro">prefixed_extern!</span> {
+<a href=#174 id=174 data-nosnippet>174</a>    <span class="kw">fn </span>x25519_fe_invert(out: <span class="kw-2">&amp;mut </span>Elem&lt;T&gt;, z: <span class="kw-2">&amp;</span>Elem&lt;T&gt;);
+<a href=#175 id=175 data-nosnippet>175</a>    <span class="kw">fn </span>x25519_fe_isnegative(elem: <span class="kw-2">&amp;</span>Elem&lt;T&gt;) -&gt; u8;
+<a href=#176 id=176 data-nosnippet>176</a>    <span class="kw">fn </span>x25519_fe_mul_ttt(h: <span class="kw-2">&amp;mut </span>Elem&lt;T&gt;, f: <span class="kw-2">&amp;</span>Elem&lt;T&gt;, g: <span class="kw-2">&amp;</span>Elem&lt;T&gt;);
+<a href=#177 id=177 data-nosnippet>177</a>    <span class="kw">fn </span>x25519_fe_neg(f: <span class="kw-2">&amp;mut </span>Elem&lt;T&gt;);
+<a href=#178 id=178 data-nosnippet>178</a>    <span class="kw">fn </span>x25519_fe_tobytes(bytes: <span class="kw-2">&amp;mut </span>EncodedPoint, elem: <span class="kw-2">&amp;</span>Elem&lt;T&gt;);
+<a href=#179 id=179 data-nosnippet>179</a>    <span class="kw">fn </span>x25519_ge_frombytes_vartime(h: <span class="kw-2">&amp;mut </span>ExtPoint, s: <span class="kw-2">&amp;</span>EncodedPoint) -&gt; bssl::Result;
+<a href=#180 id=180 data-nosnippet>180</a>}
 </code></pre></div></section></main></body></html>

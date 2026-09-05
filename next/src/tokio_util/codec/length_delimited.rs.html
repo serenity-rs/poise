@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-util-0.7.12/src/codec/length_delimited.rs`."><title>length_delimited.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../static.files/rustdoc-203241e4.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio_util" data-themes="" data-resource-suffix="" data-rustdoc-version="1.100.0-nightly (0ed41eb41 2026-09-04)" data-channel="nightly" data-search-js="search-b167f383.js" data-stringdex-js="stringdex-b5109af9.js" data-settings-js="settings-170eb4bf.js" ><script src="../../../static.files/storage-41dd4d93.js"></script><script defer src="../../../static.files/src-script-813739b1.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-1814ead3.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-9f56287d.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><h1><div class="sub-heading">tokio_util/codec/</div>length_delimited.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-4"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="doccomment">//! Frame a stream of bytes based on a length prefix
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-util-0.7.19/src/codec/length_delimited.rs`."><title>length_delimited.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../static.files/rustdoc-203241e4.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="tokio_util" data-themes="" data-resource-suffix="" data-rustdoc-version="1.100.0-nightly (0ed41eb41 2026-09-04)" data-channel="nightly" data-search-js="search-b167f383.js" data-stringdex-js="stringdex-b5109af9.js" data-settings-js="settings-170eb4bf.js" ><script src="../../../static.files/storage-41dd4d93.js"></script><script defer src="../../../static.files/src-script-813739b1.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-1814ead3.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-9f56287d.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><h1><div class="sub-heading">tokio_util/codec/</div>length_delimited.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-4"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="doccomment">//! Frame a stream of bytes based on a length prefix
 <a href=#2 id=2 data-nosnippet>2</a>//!
 <a href=#3 id=3 data-nosnippet>3</a>//! Many protocols delimit their frames by prefacing frame data with a
 <a href=#4 id=4 data-nosnippet>4</a>//! frame head that specifies the length of the frame. The
@@ -81,7 +81,7 @@
 <a href=#81 id=81 data-nosnippet>81</a>//! ```
 <a href=#82 id=82 data-nosnippet>82</a>//! # use tokio_stream::StreamExt;
 <a href=#83 id=83 data-nosnippet>83</a>//! # use tokio_util::codec::LengthDelimitedCodec;
-<a href=#84 id=84 data-nosnippet>84</a>//! # #[tokio::main]
+<a href=#84 id=84 data-nosnippet>84</a>//! # #[tokio::main(flavor = "current_thread")]
 <a href=#85 id=85 data-nosnippet>85</a>//! # async fn main() {
 <a href=#86 id=86 data-nosnippet>86</a>//! # let io: &amp;[u8] = b"\x00\x0BHello world";
 <a href=#87 id=87 data-nosnippet>87</a>//! let mut reader = LengthDelimitedCodec::builder()
@@ -117,7 +117,7 @@
 <a href=#117 id=117 data-nosnippet>117</a>//! ```
 <a href=#118 id=118 data-nosnippet>118</a>//! # use tokio_stream::StreamExt;
 <a href=#119 id=119 data-nosnippet>119</a>//! # use tokio_util::codec::LengthDelimitedCodec;
-<a href=#120 id=120 data-nosnippet>120</a>//! # #[tokio::main]
+<a href=#120 id=120 data-nosnippet>120</a>//! # #[tokio::main(flavor = "current_thread")]
 <a href=#121 id=121 data-nosnippet>121</a>//! # async fn main() {
 <a href=#122 id=122 data-nosnippet>122</a>//! # let io: &amp;[u8] = b"\x00\x0BHello world";
 <a href=#123 id=123 data-nosnippet>123</a>//! let mut reader = LengthDelimitedCodec::builder()
@@ -154,7 +154,7 @@
 <a href=#154 id=154 data-nosnippet>154</a>//! ```
 <a href=#155 id=155 data-nosnippet>155</a>//! # use tokio_stream::StreamExt;
 <a href=#156 id=156 data-nosnippet>156</a>//! # use tokio_util::codec::LengthDelimitedCodec;
-<a href=#157 id=157 data-nosnippet>157</a>//! # #[tokio::main]
+<a href=#157 id=157 data-nosnippet>157</a>//! # #[tokio::main(flavor = "current_thread")]
 <a href=#158 id=158 data-nosnippet>158</a>//! # async fn main() {
 <a href=#159 id=159 data-nosnippet>159</a>//! # let io: &amp;[u8] = b"\x00\x0DHello world";
 <a href=#160 id=160 data-nosnippet>160</a>//! let mut reader = LengthDelimitedCodec::builder()
@@ -190,7 +190,7 @@
 <a href=#190 id=190 data-nosnippet>190</a>//! ```
 <a href=#191 id=191 data-nosnippet>191</a>//! # use tokio_stream::StreamExt;
 <a href=#192 id=192 data-nosnippet>192</a>//! # use tokio_util::codec::LengthDelimitedCodec;
-<a href=#193 id=193 data-nosnippet>193</a>//! # #[tokio::main]
+<a href=#193 id=193 data-nosnippet>193</a>//! # #[tokio::main(flavor = "current_thread")]
 <a href=#194 id=194 data-nosnippet>194</a>//! # async fn main() {
 <a href=#195 id=195 data-nosnippet>195</a>//! # let io: &amp;[u8] = b"\x00\x00\x0B\xCA\xFEHello world";
 <a href=#196 id=196 data-nosnippet>196</a>//! let mut reader = LengthDelimitedCodec::builder()
@@ -237,7 +237,7 @@
 <a href=#237 id=237 data-nosnippet>237</a>//! ```
 <a href=#238 id=238 data-nosnippet>238</a>//! # use tokio_stream::StreamExt;
 <a href=#239 id=239 data-nosnippet>239</a>//! # use tokio_util::codec::LengthDelimitedCodec;
-<a href=#240 id=240 data-nosnippet>240</a>//! # #[tokio::main]
+<a href=#240 id=240 data-nosnippet>240</a>//! # #[tokio::main(flavor = "current_thread")]
 <a href=#241 id=241 data-nosnippet>241</a>//! # async fn main() {
 <a href=#242 id=242 data-nosnippet>242</a>//! # let io: &amp;[u8] = b"\xCA\x00\x0B\xFEHello world";
 <a href=#243 id=243 data-nosnippet>243</a>//! let mut reader = LengthDelimitedCodec::builder()
@@ -286,7 +286,7 @@
 <a href=#286 id=286 data-nosnippet>286</a>//! ```
 <a href=#287 id=287 data-nosnippet>287</a>//! # use tokio_stream::StreamExt;
 <a href=#288 id=288 data-nosnippet>288</a>//! # use tokio_util::codec::LengthDelimitedCodec;
-<a href=#289 id=289 data-nosnippet>289</a>//! # #[tokio::main]
+<a href=#289 id=289 data-nosnippet>289</a>//! # #[tokio::main(flavor = "current_thread")]
 <a href=#290 id=290 data-nosnippet>290</a>//! # async fn main() {
 <a href=#291 id=291 data-nosnippet>291</a>//! # let io: &amp;[u8] = b"\xCA\x00\x0F\xFEHello world";
 <a href=#292 id=292 data-nosnippet>292</a>//! let mut reader = LengthDelimitedCodec::builder()
@@ -329,7 +329,7 @@
 <a href=#329 id=329 data-nosnippet>329</a>//! ```
 <a href=#330 id=330 data-nosnippet>330</a>//! # use tokio_stream::StreamExt;
 <a href=#331 id=331 data-nosnippet>331</a>//! # use tokio_util::codec::LengthDelimitedCodec;
-<a href=#332 id=332 data-nosnippet>332</a>//! # #[tokio::main]
+<a href=#332 id=332 data-nosnippet>332</a>//! # #[tokio::main(flavor = "current_thread")]
 <a href=#333 id=333 data-nosnippet>333</a>//! # async fn main() {
 <a href=#334 id=334 data-nosnippet>334</a>//! # let io: &amp;[u8] = b"\x00\x00\x0B\xFFHello world";
 <a href=#335 id=335 data-nosnippet>335</a>//! let mut reader = LengthDelimitedCodec::builder()

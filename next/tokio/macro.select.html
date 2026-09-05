@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Waits on multiple concurrent branches, returning when the first branch completes, cancelling the remaining branches."><title>select in tokio - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../static.files/rustdoc-203241e4.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.100.0-nightly (0ed41eb41 2026-09-04)" data-channel="nightly" data-search-js="search-b167f383.js" data-stringdex-js="stringdex-b5109af9.js" data-settings-js="settings-170eb4bf.js" ><script src="../static.files/storage-41dd4d93.js"></script><script defer src="sidebar-items.js"></script><script defer src="../static.files/main-1814ead3.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-9f56287d.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-044be391.svg"></head><body class="rustdoc macro"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><rustdoc-topbar><h2><a href="#">select</a></h2></rustdoc-topbar><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../tokio/index.html">tokio</a><span class="version">1.41.1</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">select</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#runtime-characteristics" title="Runtime characteristics">Runtime characteristics</a></li><li><a href="#fairness" title="Fairness">Fairness</a></li><li><a href="#panics" title="Panics">Panics</a></li><li><a href="#cancellation-safety" title="Cancellation safety">Cancellation safety</a></li><li><a href="#examples" title="Examples">Examples</a><ul><li><a href="#avoid-racy-if-preconditions" title="Avoid racy `if` preconditions">Avoid racy <code>if</code> preconditions</a></li></ul></li></ul></section><div id="rustdoc-modnav"><h2 class="in-crate"><a href="index.html">In crate tokio</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="index.html">tokio</a></div><h1>Macro <span class="macro">select</span>&nbsp;<button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../src/tokio/macros/select.rs.html#408-422">Source</a> </span></div><pre class="rust item-decl"><code>macro_rules! select {
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Waits on multiple concurrent branches, returning when the first branch completes, cancelling the remaining branches."><title>select in tokio - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../static.files/rustdoc-203241e4.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.100.0-nightly (0ed41eb41 2026-09-04)" data-channel="nightly" data-search-js="search-b167f383.js" data-stringdex-js="stringdex-b5109af9.js" data-settings-js="settings-170eb4bf.js" ><script src="../static.files/storage-41dd4d93.js"></script><script defer src="sidebar-items.js"></script><script defer src="../static.files/main-1814ead3.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-9f56287d.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-044be391.svg"></head><body class="rustdoc macro"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><rustdoc-topbar><h2><a href="#">select</a></h2></rustdoc-topbar><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../tokio/index.html">tokio</a><span class="version">1.53.1</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">select</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#runtime-characteristics" title="Runtime characteristics">Runtime characteristics</a></li><li><a href="#fairness" title="Fairness">Fairness</a></li><li><a href="#panics" title="Panics">Panics</a></li><li><a href="#cancellation-safety" title="Cancellation safety">Cancellation safety</a></li><li><a href="#examples" title="Examples">Examples</a><ul><li><a href="#avoid-racy-if-preconditions" title="Avoid racy `if` preconditions">Avoid racy <code>if</code> preconditions</a></li></ul></li><li><a href="#alternatives-from-the-ecosystem" title="Alternatives from the Ecosystem">Alternatives from the Ecosystem</a><ul><li><a href="#merging-streams" title="Merging Streams">Merging Streams</a></li><li><a href="#racing-futures" title="Racing Futures">Racing Futures</a></li></ul></li></ul></section><div id="rustdoc-modnav"><h2 class="in-crate"><a href="index.html">In crate tokio</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="index.html">tokio</a></div><h1>Macro <span class="macro">select</span>&nbsp;<button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../src/tokio/macros/select.rs.html#559-573">Source</a> </span></div><pre class="rust item-decl"><code>macro_rules! select {
     {
         $(
             biased;
@@ -82,6 +82,10 @@ you should make sure that the receive call is cancellation safe to avoid
 losing messages. This section goes through various common methods and
 describes whether they are cancel safe.  The lists in this section are not
 exhaustive.</p>
+<p>Cancellation safety describes what happens when a future is dropped
+before it completes. Whether something is cancellation safe depends on
+the behavior of the future passed to <code>select!</code>, which may come from an
+async method, an async expression, or another future-producing operation.</p>
 <p>The following methods are cancellation safe:</p>
 <ul>
 <li><a href="sync/mpsc/struct.Receiver.html#method.recv" title="method tokio::sync::mpsc::Receiver::recv"><code>tokio::sync::mpsc::Receiver::recv</code></a></li>
@@ -140,57 +144,48 @@ read data is lost.</p>
     <span class="comment">// more here
 </span>}
 
-<span class="attr">#[tokio::main]
-</span><span class="kw">async fn </span>main() {
-    <span class="macro">tokio::select!</span> {
-        <span class="kw">_ </span>= do_stuff_async() =&gt; {
-            <span class="macro">println!</span>(<span class="string">"do_stuff_async() completed first"</span>)
-        }
-        <span class="kw">_ </span>= more_async_work() =&gt; {
-            <span class="macro">println!</span>(<span class="string">"more_async_work() completed first"</span>)
-        }
-    };
-}</code></pre></div>
+<span class="macro">tokio::select!</span> {
+    <span class="kw">_ </span>= do_stuff_async() =&gt; {
+        <span class="macro">println!</span>(<span class="string">"do_stuff_async() completed first"</span>)
+    }
+    <span class="kw">_ </span>= more_async_work() =&gt; {
+        <span class="macro">println!</span>(<span class="string">"more_async_work() completed first"</span>)
+    }
+};</code></pre></div>
 <p>Basic stream selecting.</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>tokio_stream::{<span class="self">self </span><span class="kw">as </span>stream, StreamExt};
 
-<span class="attr">#[tokio::main]
-</span><span class="kw">async fn </span>main() {
-    <span class="kw">let </span><span class="kw-2">mut </span>stream1 = stream::iter(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]);
-    <span class="kw">let </span><span class="kw-2">mut </span>stream2 = stream::iter(<span class="macro">vec!</span>[<span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>]);
+<span class="kw">let </span><span class="kw-2">mut </span>stream1 = stream::iter(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]);
+<span class="kw">let </span><span class="kw-2">mut </span>stream2 = stream::iter(<span class="macro">vec!</span>[<span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>]);
 
-    <span class="kw">let </span>next = <span class="macro">tokio::select!</span> {
-        v = stream1.next() =&gt; v.unwrap(),
-        v = stream2.next() =&gt; v.unwrap(),
-    };
+<span class="kw">let </span>next = <span class="macro">tokio::select!</span> {
+    v = stream1.next() =&gt; v.unwrap(),
+    v = stream2.next() =&gt; v.unwrap(),
+};
 
-    <span class="macro">assert!</span>(next == <span class="number">1 </span>|| next == <span class="number">4</span>);
-}</code></pre></div>
+<span class="macro">assert!</span>(next == <span class="number">1 </span>|| next == <span class="number">4</span>);</code></pre></div>
 <p>Collect the contents of two streams. In this example, we rely on pattern
 matching and the fact that <code>stream::iter</code> is “fused”, i.e. once the stream
 is complete, all calls to <code>next()</code> return <code>None</code>.</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>tokio_stream::{<span class="self">self </span><span class="kw">as </span>stream, StreamExt};
 
-<span class="attr">#[tokio::main]
-</span><span class="kw">async fn </span>main() {
-    <span class="kw">let </span><span class="kw-2">mut </span>stream1 = stream::iter(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]);
-    <span class="kw">let </span><span class="kw-2">mut </span>stream2 = stream::iter(<span class="macro">vec!</span>[<span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>]);
+<span class="kw">let </span><span class="kw-2">mut </span>stream1 = stream::iter(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]);
+<span class="kw">let </span><span class="kw-2">mut </span>stream2 = stream::iter(<span class="macro">vec!</span>[<span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>]);
 
-    <span class="kw">let </span><span class="kw-2">mut </span>values = <span class="macro">vec!</span>[];
+<span class="kw">let </span><span class="kw-2">mut </span>values = <span class="macro">vec!</span>[];
 
-    <span class="kw">loop </span>{
-        <span class="macro">tokio::select!</span> {
-            <span class="prelude-val">Some</span>(v) = stream1.next() =&gt; values.push(v),
-            <span class="prelude-val">Some</span>(v) = stream2.next() =&gt; values.push(v),
-            <span class="kw">else </span>=&gt; <span class="kw">break</span>,
-        }
+<span class="kw">loop </span>{
+    <span class="macro">tokio::select!</span> {
+        <span class="prelude-val">Some</span>(v) = stream1.next() =&gt; values.push(v),
+        <span class="prelude-val">Some</span>(v) = stream2.next() =&gt; values.push(v),
+        <span class="kw">else </span>=&gt; <span class="kw">break</span>,
     }
+}
 
-    values.sort();
-    <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>], <span class="kw-2">&amp;</span>values[..]);
-}</code></pre></div>
+values.sort();
+<span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>], <span class="kw-2">&amp;</span>values[..]);</code></pre></div>
 <p>Using the same future in multiple <code>select!</code> expressions can be done by passing
 a reference to the future. Doing so requires the future to be <a href="https://doc.rust-lang.org/nightly/core/marker/trait.Unpin.html" title="trait core::marker::Unpin"><code>Unpin</code></a>. A
 future can be made <a href="https://doc.rust-lang.org/nightly/core/marker/trait.Unpin.html" title="trait core::marker::Unpin"><code>Unpin</code></a> by either using <a href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html#method.pin" title="associated function alloc::boxed::Box::pin"><code>Box::pin</code></a> or stack pinning.</p>
@@ -199,25 +194,22 @@ future can be made <a href="https://doc.rust-lang.org/nightly/core/marker/trait.
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>tokio_stream::{<span class="self">self </span><span class="kw">as </span>stream, StreamExt};
 <span class="kw">use </span>tokio::time::{<span class="self">self</span>, Duration};
 
-<span class="attr">#[tokio::main]
-</span><span class="kw">async fn </span>main() {
-    <span class="kw">let </span><span class="kw-2">mut </span>stream = stream::iter(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]);
-    <span class="kw">let </span>sleep = time::sleep(Duration::from_secs(<span class="number">1</span>));
-    <span class="macro">tokio::pin!</span>(sleep);
+<span class="kw">let </span><span class="kw-2">mut </span>stream = stream::iter(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]);
+<span class="kw">let </span>sleep = time::sleep(Duration::from_secs(<span class="number">1</span>));
+<span class="macro">tokio::pin!</span>(sleep);
 
-    <span class="kw">loop </span>{
-        <span class="macro">tokio::select!</span> {
-            maybe_v = stream.next() =&gt; {
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = maybe_v {
-                    <span class="macro">println!</span>(<span class="string">"got = {}"</span>, v);
-                } <span class="kw">else </span>{
-                    <span class="kw">break</span>;
-                }
-            }
-            <span class="kw">_ </span>= <span class="kw-2">&amp;mut </span>sleep =&gt; {
-                <span class="macro">println!</span>(<span class="string">"timeout"</span>);
+<span class="kw">loop </span>{
+    <span class="macro">tokio::select!</span> {
+        maybe_v = stream.next() =&gt; {
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(v) = maybe_v {
+                <span class="macro">println!</span>(<span class="string">"got = {}"</span>, v);
+            } <span class="kw">else </span>{
                 <span class="kw">break</span>;
             }
+        }
+        <span class="kw">_ </span>= <span class="kw-2">&amp;mut </span>sleep =&gt; {
+            <span class="macro">println!</span>(<span class="string">"timeout"</span>);
+            <span class="kw">break</span>;
         }
     }
 }</code></pre></div>
@@ -225,69 +217,63 @@ future can be made <a href="https://doc.rust-lang.org/nightly/core/marker/trait.
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>tokio::sync::oneshot;
 
-<span class="attr">#[tokio::main]
-</span><span class="kw">async fn </span>main() {
-    <span class="kw">let </span>(tx1, <span class="kw-2">mut </span>rx1) = oneshot::channel();
-    <span class="kw">let </span>(tx2, <span class="kw-2">mut </span>rx2) = oneshot::channel();
+<span class="kw">let </span>(tx1, <span class="kw-2">mut </span>rx1) = oneshot::channel();
+<span class="kw">let </span>(tx2, <span class="kw-2">mut </span>rx2) = oneshot::channel();
 
-    tokio::spawn(<span class="kw">async move </span>{
-        tx1.send(<span class="string">"first"</span>).unwrap();
-    });
+tokio::spawn(<span class="kw">async move </span>{
+    tx1.send(<span class="string">"first"</span>).unwrap();
+});
 
-    tokio::spawn(<span class="kw">async move </span>{
-        tx2.send(<span class="string">"second"</span>).unwrap();
-    });
+tokio::spawn(<span class="kw">async move </span>{
+    tx2.send(<span class="string">"second"</span>).unwrap();
+});
 
-    <span class="kw">let </span><span class="kw-2">mut </span>a = <span class="prelude-val">None</span>;
-    <span class="kw">let </span><span class="kw-2">mut </span>b = <span class="prelude-val">None</span>;
+<span class="kw">let </span><span class="kw-2">mut </span>a = <span class="prelude-val">None</span>;
+<span class="kw">let </span><span class="kw-2">mut </span>b = <span class="prelude-val">None</span>;
 
-    <span class="kw">while </span>a.is_none() || b.is_none() {
-        <span class="macro">tokio::select!</span> {
-            v1 = (<span class="kw-2">&amp;mut </span>rx1), <span class="kw">if </span>a.is_none() =&gt; a = <span class="prelude-val">Some</span>(v1.unwrap()),
-            v2 = (<span class="kw-2">&amp;mut </span>rx2), <span class="kw">if </span>b.is_none() =&gt; b = <span class="prelude-val">Some</span>(v2.unwrap()),
-        }
+<span class="kw">while </span>a.is_none() || b.is_none() {
+    <span class="macro">tokio::select!</span> {
+        v1 = (<span class="kw-2">&amp;mut </span>rx1), <span class="kw">if </span>a.is_none() =&gt; a = <span class="prelude-val">Some</span>(v1.unwrap()),
+        v2 = (<span class="kw-2">&amp;mut </span>rx2), <span class="kw">if </span>b.is_none() =&gt; b = <span class="prelude-val">Some</span>(v2.unwrap()),
     }
+}
 
-    <span class="kw">let </span>res = (a.unwrap(), b.unwrap());
+<span class="kw">let </span>res = (a.unwrap(), b.unwrap());
 
-    <span class="macro">assert_eq!</span>(res.<span class="number">0</span>, <span class="string">"first"</span>);
-    <span class="macro">assert_eq!</span>(res.<span class="number">1</span>, <span class="string">"second"</span>);
-}</code></pre></div>
+<span class="macro">assert_eq!</span>(res.<span class="number">0</span>, <span class="string">"first"</span>);
+<span class="macro">assert_eq!</span>(res.<span class="number">1</span>, <span class="string">"second"</span>);</code></pre></div>
 <p>Using the <code>biased;</code> mode to control polling order.</p>
 
-<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="attr">#[tokio::main]
-</span><span class="kw">async fn </span>main() {
-    <span class="kw">let </span><span class="kw-2">mut </span>count = <span class="number">0u8</span>;
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span><span class="kw-2">mut </span>count = <span class="number">0u8</span>;
 
-    <span class="kw">loop </span>{
-        <span class="macro">tokio::select!</span> {
-            <span class="comment">// If you run this example without `biased;`, the polling order is
-            // pseudo-random, and the assertions on the value of count will
-            // (probably) fail.
-            </span>biased;
+<span class="kw">loop </span>{
+    <span class="macro">tokio::select!</span> {
+        <span class="comment">// If you run this example without `biased;`, the polling order is
+        // pseudo-random, and the assertions on the value of count will
+        // (probably) fail.
+        </span>biased;
 
-            <span class="kw">_ </span>= <span class="kw">async </span>{}, <span class="kw">if </span>count &lt; <span class="number">1 </span>=&gt; {
-                count += <span class="number">1</span>;
-                <span class="macro">assert_eq!</span>(count, <span class="number">1</span>);
-            }
-            <span class="kw">_ </span>= <span class="kw">async </span>{}, <span class="kw">if </span>count &lt; <span class="number">2 </span>=&gt; {
-                count += <span class="number">1</span>;
-                <span class="macro">assert_eq!</span>(count, <span class="number">2</span>);
-            }
-            <span class="kw">_ </span>= <span class="kw">async </span>{}, <span class="kw">if </span>count &lt; <span class="number">3 </span>=&gt; {
-                count += <span class="number">1</span>;
-                <span class="macro">assert_eq!</span>(count, <span class="number">3</span>);
-            }
-            <span class="kw">_ </span>= <span class="kw">async </span>{}, <span class="kw">if </span>count &lt; <span class="number">4 </span>=&gt; {
-                count += <span class="number">1</span>;
-                <span class="macro">assert_eq!</span>(count, <span class="number">4</span>);
-            }
+        <span class="kw">_ </span>= <span class="kw">async </span>{}, <span class="kw">if </span>count &lt; <span class="number">1 </span>=&gt; {
+            count += <span class="number">1</span>;
+            <span class="macro">assert_eq!</span>(count, <span class="number">1</span>);
+        }
+        <span class="kw">_ </span>= <span class="kw">async </span>{}, <span class="kw">if </span>count &lt; <span class="number">2 </span>=&gt; {
+            count += <span class="number">1</span>;
+            <span class="macro">assert_eq!</span>(count, <span class="number">2</span>);
+        }
+        <span class="kw">_ </span>= <span class="kw">async </span>{}, <span class="kw">if </span>count &lt; <span class="number">3 </span>=&gt; {
+            count += <span class="number">1</span>;
+            <span class="macro">assert_eq!</span>(count, <span class="number">3</span>);
+        }
+        <span class="kw">_ </span>= <span class="kw">async </span>{}, <span class="kw">if </span>count &lt; <span class="number">4 </span>=&gt; {
+            count += <span class="number">1</span>;
+            <span class="macro">assert_eq!</span>(count, <span class="number">4</span>);
+        }
 
-            <span class="kw">else </span>=&gt; {
-                <span class="kw">break</span>;
-            }
-        };
-    }
+        <span class="kw">else </span>=&gt; {
+            <span class="kw">break</span>;
+        }
+    };
 }</code></pre></div><h3 id="avoid-racy-if-preconditions"><a class="doc-anchor" href="#avoid-racy-if-preconditions">§</a>Avoid racy <code>if</code> preconditions</h3>
 <p>Given that <code>if</code> preconditions are used to disable <code>select!</code> branches, some
 caution must be used to avoid missing values.</p>
@@ -301,24 +287,21 @@ However, there is a potential for the <code>sleep</code> completion to be missed
     <span class="comment">// do work
 </span>}
 
-<span class="attr">#[tokio::main]
-</span><span class="kw">async fn </span>main() {
-    <span class="kw">let </span>sleep = time::sleep(Duration::from_millis(<span class="number">50</span>));
-    <span class="macro">tokio::pin!</span>(sleep);
+<span class="kw">let </span>sleep = time::sleep(Duration::from_millis(<span class="number">50</span>));
+<span class="macro">tokio::pin!</span>(sleep);
 
-    <span class="kw">while </span>!sleep.is_elapsed() {
-        <span class="macro">tokio::select!</span> {
-            <span class="kw">_ </span>= <span class="kw-2">&amp;mut </span>sleep, <span class="kw">if </span>!sleep.is_elapsed() =&gt; {
-                <span class="macro">println!</span>(<span class="string">"operation timed out"</span>);
-            }
-            <span class="kw">_ </span>= some_async_work() =&gt; {
-                <span class="macro">println!</span>(<span class="string">"operation completed"</span>);
-            }
+<span class="kw">while </span>!sleep.is_elapsed() {
+    <span class="macro">tokio::select!</span> {
+        <span class="kw">_ </span>= <span class="kw-2">&amp;mut </span>sleep, <span class="kw">if </span>!sleep.is_elapsed() =&gt; {
+            <span class="macro">println!</span>(<span class="string">"operation timed out"</span>);
+        }
+        <span class="kw">_ </span>= some_async_work() =&gt; {
+            <span class="macro">println!</span>(<span class="string">"operation completed"</span>);
         }
     }
+}
 
-    <span class="macro">panic!</span>(<span class="string">"This example shows how not to do it!"</span>);
-}</code></pre></div>
+<span class="macro">panic!</span>(<span class="string">"This example shows how not to do it!"</span>);</code></pre></div>
 <p>In the above example, <code>sleep.is_elapsed()</code> may return <code>true</code> even if
 <code>sleep.poll()</code> never returned <code>Ready</code>. This opens up a potential race
 condition where <code>sleep</code> expires between the <code>while !sleep.is_elapsed()</code>
@@ -332,20 +315,133 @@ run uninterrupted despite the sleep having elapsed.</p>
     <span class="comment">// do work
 </span>}
 
-<span class="attr">#[tokio::main]
-</span><span class="kw">async fn </span>main() {
-    <span class="kw">let </span>sleep = time::sleep(Duration::from_millis(<span class="number">50</span>));
-    <span class="macro">tokio::pin!</span>(sleep);
+<span class="kw">let </span>sleep = time::sleep(Duration::from_millis(<span class="number">50</span>));
+<span class="macro">tokio::pin!</span>(sleep);
 
-    <span class="kw">loop </span>{
-        <span class="macro">tokio::select!</span> {
-            <span class="kw">_ </span>= <span class="kw-2">&amp;mut </span>sleep =&gt; {
-                <span class="macro">println!</span>(<span class="string">"operation timed out"</span>);
-                <span class="kw">break</span>;
-            }
-            <span class="kw">_ </span>= some_async_work() =&gt; {
-                <span class="macro">println!</span>(<span class="string">"operation completed"</span>);
-            }
+<span class="kw">loop </span>{
+    <span class="macro">tokio::select!</span> {
+        <span class="kw">_ </span>= <span class="kw-2">&amp;mut </span>sleep =&gt; {
+            <span class="macro">println!</span>(<span class="string">"operation timed out"</span>);
+            <span class="kw">break</span>;
+        }
+        <span class="kw">_ </span>= some_async_work() =&gt; {
+            <span class="macro">println!</span>(<span class="string">"operation completed"</span>);
         }
     }
+}</code></pre></div><h2 id="alternatives-from-the-ecosystem"><a class="doc-anchor" href="#alternatives-from-the-ecosystem">§</a>Alternatives from the Ecosystem</h2>
+<p>The <code>select!</code> macro is a powerful tool for managing multiple asynchronous
+branches, enabling tasks to run concurrently within the same thread. However,
+its use can introduce challenges, particularly around cancellation safety, which
+can lead to subtle and hard-to-debug errors. For many use cases, ecosystem
+alternatives may be preferable as they mitigate these concerns by offering
+clearer syntax, more predictable control flow, and reducing the need to manually
+handle issues like fuse semantics or cancellation safety.</p>
+<h3 id="merging-streams"><a class="doc-anchor" href="#merging-streams">§</a>Merging Streams</h3>
+<p>For cases where <code>loop { select! { ... } }</code> is used to poll multiple tasks,
+stream merging offers a concise alternative, inherently handle cancellation-safe
+processing, removing the risk of data loss. Libraries such as <a href="https://docs.rs/tokio-stream/latest/tokio_stream/"><code>tokio_stream</code></a>,
+<a href="https://docs.rs/futures/latest/futures/stream/"><code>futures::stream</code></a> and <a href="https://docs.rs/futures-concurrency/latest/futures_concurrency/"><code>futures_concurrency</code></a> provide tools for merging
+streams and handling their outputs sequentially.</p>
+<h4 id="example-with-select"><a class="doc-anchor" href="#example-with-select">§</a>Example with <code>select!</code></h4>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">struct </span>File;
+<span class="kw">struct </span>Channel;
+<span class="kw">struct </span>Socket;
+
+<span class="kw">impl </span>Socket {
+    <span class="kw">async fn </span>read_packet(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; Vec&lt;u8&gt; {
+        <span class="macro">vec!</span>[]
+    }
+}
+
+<span class="kw">async fn </span>read_send(_file: <span class="kw-2">&amp;mut </span>File, _channel: <span class="kw-2">&amp;mut </span>Channel) {
+    <span class="comment">// do work that is not cancel safe
+</span>}
+
+<span class="comment">// open our IO types
+</span><span class="kw">let </span><span class="kw-2">mut </span>file = File;
+<span class="kw">let </span><span class="kw-2">mut </span>channel = Channel;
+<span class="kw">let </span><span class="kw-2">mut </span>socket = Socket;
+
+<span class="kw">loop </span>{
+    <span class="macro">tokio::select!</span> {
+        <span class="kw">_ </span>= read_send(<span class="kw-2">&amp;mut </span>file, <span class="kw-2">&amp;mut </span>channel) =&gt; { <span class="comment">/* ... */ </span>},
+        _data = socket.read_packet() =&gt; { <span class="comment">/* ... */ </span>}
+        <span class="kw">_ </span>= futures::future::ready(()) =&gt; <span class="kw">break
+    </span>}
+}</code></pre></div><h4 id="moving-to-merge"><a class="doc-anchor" href="#moving-to-merge">§</a>Moving to <code>merge</code></h4>
+<p>By using merge, you can unify multiple asynchronous tasks into a single stream,
+eliminating the need to manage tasks manually and reducing the risk of
+unintended behavior like data loss.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>std::pin::pin;
+
+<span class="kw">use </span>futures::stream::unfold;
+<span class="kw">use </span>tokio_stream::StreamExt;
+
+<span class="kw">struct </span>File;
+<span class="kw">struct </span>Channel;
+<span class="kw">struct </span>Socket;
+
+<span class="kw">impl </span>Socket {
+    <span class="kw">async fn </span>read_packet(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; Vec&lt;u8&gt; {
+        <span class="macro">vec!</span>[]
+    }
+}
+
+<span class="kw">async fn </span>read_send(_file: <span class="kw-2">&amp;mut </span>File, _channel: <span class="kw-2">&amp;mut </span>Channel) {
+    <span class="comment">// do work that is not cancel safe
+</span>}
+
+<span class="kw">enum </span>Message {
+    Stop,
+    Sent,
+    Data(Vec&lt;u8&gt;),
+}
+
+<span class="comment">// open our IO types
+</span><span class="kw">let </span>file = File;
+<span class="kw">let </span>channel = Channel;
+<span class="kw">let </span>socket = Socket;
+
+<span class="kw">let </span>a = unfold((file, channel), |(<span class="kw-2">mut </span>file, <span class="kw-2">mut </span>channel)| <span class="kw">async </span>{
+    read_send(<span class="kw-2">&amp;mut </span>file, <span class="kw-2">&amp;mut </span>channel).<span class="kw">await</span>;
+    <span class="prelude-val">Some</span>((Message::Sent, (file, channel)))
+});
+<span class="kw">let </span>b = unfold(socket, |<span class="kw-2">mut </span>socket| <span class="kw">async </span>{
+    <span class="kw">let </span>data = socket.read_packet().<span class="kw">await</span>;
+    <span class="prelude-val">Some</span>((Message::Data(data), socket))
+});
+<span class="kw">let </span>c = tokio_stream::iter([Message::Stop]);
+
+<span class="kw">let </span><span class="kw-2">mut </span>s = <span class="macro">pin!</span>(a.merge(b).merge(c));
+<span class="kw">while let </span><span class="prelude-val">Some</span>(msg) = s.next().<span class="kw">await </span>{
+    <span class="kw">match </span>msg {
+        Message::Data(_data) =&gt; { <span class="comment">/* ... */ </span>}
+        Message::Sent =&gt; <span class="kw">continue</span>,
+        Message::Stop =&gt; <span class="kw">break</span>,
+    }
+}</code></pre></div><h3 id="racing-futures"><a class="doc-anchor" href="#racing-futures">§</a>Racing Futures</h3>
+<p>If you need to wait for the first completion among several asynchronous tasks,
+ecosystem utilities such as
+<a href="https://docs.rs/futures/latest/futures/"><code>futures</code></a>,
+<a href="https://docs.rs/futures-lite/latest/futures_lite/"><code>futures-lite</code></a> or
+<a href="https://docs.rs/futures-concurrency/latest/futures_concurrency/"><code>futures-concurrency</code></a>
+provide streamlined syntax for racing futures:</p>
+<ul>
+<li><a href="https://docs.rs/futures-concurrency/latest/futures_concurrency/future/trait.Race.html"><code>futures_concurrency::future::Race</code></a></li>
+<li><a href="https://docs.rs/futures/latest/futures/macro.select.html"><code>futures::select</code></a></li>
+<li><a href="https://docs.rs/futures/latest/futures/stream/select_all/index.html"><code>futures::stream::select_all</code></a> (for streams)</li>
+<li><a href="https://docs.rs/futures-lite/latest/futures_lite/future/fn.or.html"><code>futures_lite::future::or</code></a></li>
+<li><a href="https://docs.rs/futures-lite/latest/futures_lite/future/fn.race.html"><code>futures_lite::future::race</code></a></li>
+</ul>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>futures_concurrency::future::Race;
+
+<span class="kw">let </span>task_a = <span class="kw">async </span>{ <span class="prelude-val">Ok</span>(<span class="string">"ok"</span>) };
+<span class="kw">let </span>task_b = <span class="kw">async </span>{ <span class="prelude-val">Err</span>(<span class="string">"error"</span>) };
+<span class="kw">let </span>result = (task_a, task_b).race().<span class="kw">await</span>;
+
+<span class="kw">match </span>result {
+    <span class="prelude-val">Ok</span>(output) =&gt; <span class="macro">println!</span>(<span class="string">"First task completed with: {output}"</span>),
+    <span class="prelude-val">Err</span>(err) =&gt; <span class="macro">eprintln!</span>(<span class="string">"Error occurred: {err}"</span>),
 }</code></pre></div></div></details></section></div></main></body></html>

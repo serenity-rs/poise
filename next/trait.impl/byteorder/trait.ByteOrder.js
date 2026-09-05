@@ -1,9 +1,9 @@
 (function() {
-    const implementors = Object.fromEntries([["byteorder",[]],["zerocopy",[]]]);
+    const implementors = Object.fromEntries([["byteorder",[]]]);
     if (window.register_implementors) {
         window.register_implementors(implementors);
     } else {
         window.pending_implementors = implementors;
     }
 })()
-//{"start":59,"fragment_lengths":[16,16]}
+//{"start":59,"fragment_lengths":[16]}

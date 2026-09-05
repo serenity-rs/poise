@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["Drain","IntoIter","Iter","IterMut","Slab","VacantEntry"]};
+window.SIDEBAR_ITEMS = {"enum":["GetDisjointMutError"],"struct":["Drain","IntoIter","Iter","IterMut","Slab","VacantEntry"]};

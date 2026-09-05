@@ -1,0 +1,1222 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="A `T` that has been split into two possibly-overlapping parts."><title>Split in zerocopy - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../static.files/rustdoc-203241e4.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="zerocopy" data-themes="" data-resource-suffix="" data-rustdoc-version="1.100.0-nightly (0ed41eb41 2026-09-04)" data-channel="nightly" data-search-js="search-b167f383.js" data-stringdex-js="stringdex-b5109af9.js" data-settings-js="settings-170eb4bf.js" ><script src="../static.files/storage-41dd4d93.js"></script><script defer src="sidebar-items.js"></script><script defer src="../static.files/main-1814ead3.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-9f56287d.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-044be391.svg"></head><body class="rustdoc struct"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><rustdoc-topbar><h2><a href="#">Split</a></h2></rustdoc-topbar><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../zerocopy/index.html">zerocopy</a><span class="version">0.8.56</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Split</a></h2><h3><a href="#implementations">Methods</a></h3><ul class="block method"><li><a href="#method.via_immutable" title="via_immutable">via_immutable</a></li><li><a href="#method.via_into_bytes" title="via_into_bytes">via_into_bytes</a></li><li><a href="#method.via_into_bytes-1" title="via_into_bytes">via_into_bytes</a></li><li><a href="#method.via_runtime_check" title="via_runtime_check">via_runtime_check</a></li><li><a href="#method.via_runtime_check-1" title="via_runtime_check">via_runtime_check</a></li><li><a href="#method.via_unaligned" title="via_unaligned">via_unaligned</a></li><li><a href="#method.via_unaligned-1" title="via_unaligned">via_unaligned</a></li><li><a href="#method.via_unchecked" title="via_unchecked">via_unchecked</a></li><li><a href="#method.via_unchecked-1" title="via_unchecked">via_unchecked</a></li></ul><h3><a href="#trait-implementations">Trait Implementations</a></h3><ul class="block trait-implementation"><li><a href="#impl-Debug-for-Split%3CT%3E" title="Debug">Debug</a></li></ul><h3><a href="#synthetic-implementations">Auto Trait Implementations</a></h3><ul class="block synthetic-implementation"><li><a href="#impl-Freeze-for-Split%3CT%3E" title="Freeze">Freeze</a></li><li><a href="#impl-RefUnwindSafe-for-Split%3CT%3E" title="RefUnwindSafe">RefUnwindSafe</a></li><li><a href="#impl-Send-for-Split%3CT%3E" title="Send">Send</a></li><li><a href="#impl-Sync-for-Split%3CT%3E" title="Sync">Sync</a></li><li><a href="#impl-Unpin-for-Split%3CT%3E" title="Unpin">Unpin</a></li><li><a href="#impl-UnsafeUnpin-for-Split%3CT%3E" title="UnsafeUnpin">UnsafeUnpin</a></li><li><a href="#impl-UnwindSafe-for-Split%3CT%3E" title="UnwindSafe">UnwindSafe</a></li></ul><h3><a href="#blanket-implementations">Blanket Implementations</a></h3><ul class="block blanket-implementation"><li><a href="#impl-Any-for-T" title="Any">Any</a></li><li><a href="#impl-Borrow%3CT%3E-for-T" title="Borrow&#60;T&#62;">Borrow&#60;T&#62;</a></li><li><a href="#impl-BorrowMut%3CT%3E-for-T" title="BorrowMut&#60;T&#62;">BorrowMut&#60;T&#62;</a></li><li><a href="#impl-From%3CT%3E-for-T" title="From&#60;T&#62;">From&#60;T&#62;</a></li><li><a href="#impl-Into%3CU%3E-for-T" title="Into&#60;U&#62;">Into&#60;U&#62;</a></li><li><a href="#impl-TryFrom%3CU%3E-for-T" title="TryFrom&#60;U&#62;">TryFrom&#60;U&#62;</a></li><li><a href="#impl-TryInto%3CU%3E-for-T" title="TryInto&#60;U&#62;">TryInto&#60;U&#62;</a></li></ul></section><div id="rustdoc-modnav"><h2 class="in-crate"><a href="index.html">In crate zerocopy</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="index.html">zerocopy</a></div><h1>Struct <span class="struct">Split</span>&nbsp;<button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../src/zerocopy/split_at.rs.html#278-288">Source</a> </span></div><pre class="rust item-decl"><code>pub struct Split&lt;T&gt; { <span class="comment">/* private fields */</span> }</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>A <code>T</code> that has been split into two possibly-overlapping parts.</p>
+<p>For some dynamically sized types, the padding that appears after the
+trailing slice field <a href="trait.KnownLayout.html#slice-dst-layout" title="trait zerocopy::KnownLayout">is a dynamic function of the trailing slice
+length</a>. If <code>T</code> is split at a length that
+requires trailing padding, the trailing padding of the left part of the
+split <code>T</code> will overlap the right part. If <code>T</code> is a mutable reference or
+permits interior mutation, you must ensure that the left and right parts do
+not overlap. You can do this at zero-cost using using
+<a href="struct.Split.html#method.via_immutable" title="method zerocopy::Split::via_immutable"><code>Self::via_immutable</code></a>, <a href="struct.Split.html#method.via_into_bytes" title="method zerocopy::Split::via_into_bytes"><code>Self::via_into_bytes</code></a>, or
+<a href="struct.Split.html#method.via_unaligned" title="method zerocopy::Split::via_unaligned"><code>Self::via_unaligned</code></a>, or with a dynamic check by using
+<a href="struct.Split.html#method.via_runtime_check" title="method zerocopy::Split::via_runtime_check"><code>Self::via_runtime_check</code></a>.</p>
+</div></details><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-Split%3C%26T%3E" class="impl"><a class="src rightside" href="../src/zerocopy/split_at.rs.html#302-598">Source</a><a href="#impl-Split%3C%26T%3E" class="anchor">§</a><h3 class="code-header">impl&lt;'a, T&gt; <a class="struct" href="struct.Split.html" title="struct zerocopy::Split">Split</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/core/primitive.reference.html">&amp;'a T</a>&gt;<div class="where">where
+    T: ?<a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a> + <a class="trait" href="trait.SplitAt.html" title="trait zerocopy::SplitAt">SplitAt</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.via_immutable" class="method"><a class="src rightside" href="../src/zerocopy/split_at.rs.html#369-375">Source</a><h4 class="code-header">pub fn <a href="#method.via_immutable" class="fn">via_immutable</a>(self) -&gt; (<a class="primitive" href="https://doc.rust-lang.org/nightly/core/primitive.reference.html">&amp;'a T</a>, &amp;'a [T::<a class="associatedtype" href="trait.SplitAt.html#associatedtype.Elem" title="type zerocopy::SplitAt::Elem">Elem</a>])<div class="where">where
+    T: <a class="trait" href="trait.Immutable.html" title="trait zerocopy::Immutable">Immutable</a>,</div></h4></section></summary><div class="docblock"><p>Produces the split parts of <code>self</code>, using <a href="trait.Immutable.html" title="trait zerocopy::Immutable"><code>Immutable</code></a> to ensure that
+it is sound to have concurrent references to both parts.</p>
+<h5 id="examples"><a class="doc-anchor" href="#examples">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>zerocopy::{SplitAt, FromBytes};
+
+<span class="attr">#[derive(SplitAt, FromBytes, KnownLayout, Immutable)]
+#[repr(C)]
+</span><span class="kw">struct </span>Packet {
+    length: u8,
+    body: [u8],
+}
+
+<span class="comment">// These bytes encode a `Packet`.
+</span><span class="kw">let </span>bytes = <span class="kw-2">&amp;</span>[<span class="number">4</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>][..];
+
+<span class="kw">let </span>packet = Packet::ref_from_bytes(bytes).unwrap();
+
+<span class="macro">assert_eq!</span>(packet.length, <span class="number">4</span>);
+<span class="macro">assert_eq!</span>(packet.body, [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>]);
+
+<span class="comment">// Attempt to split `packet` at `length`.
+</span><span class="kw">let </span>split = packet.split_at(packet.length <span class="kw">as </span>usize).unwrap();
+
+<span class="comment">// Use the `Immutable` bound on `Packet` to prove that it's okay to
+// return concurrent references to `packet` and `rest`.
+</span><span class="kw">let </span>(packet, rest) = split.via_immutable();
+
+<span class="macro">assert_eq!</span>(packet.length, <span class="number">4</span>);
+<span class="macro">assert_eq!</span>(packet.body, [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>]);
+<span class="macro">assert_eq!</span>(rest, [<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>]);</code></pre></div><h5 id='method.split_via_immutable.codegen'>
+    <a class='doc-anchor' href='#method.split_via_immutable.codegen'>§</a>
+    Code Generation
+</h5>
+<p>This abstraction is safe and cheap, but does not necessarily
+have zero runtime cost. The codegen you experience in practice
+will depend on optimization level, the layout of the destination
+type, and what the compiler can prove about the source.</p>
+<p>The below examples illustrate typical codegen for
+increasingly complex types:</p>
+<div class='codegen-tabs' style='--arity: 2'>
+    <details name='tab-split_via_immutable' style='--n: 1'open>
+        <summary><h6>Unsized</h6></summary>
+        <div>
+<div class='codegen-tabs' style='--arity: 4'>
+    <details name='tab-split_via_immutable_dynamic_size' style='--n: 1'>
+        <summary><h6>Format</h6></summary>
+        <div>
+
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>zerocopy_derive::<span class="kw-2">*</span>;
+
+<span class="comment">// The only valid value of this type are the bytes `0xC0C0`.
+</span><span class="attr">#[derive(TryFromBytes, KnownLayout, Immutable, IntoBytes)]
+#[repr(u16)]
+</span><span class="kw">pub enum </span>C0C0 {
+   _XC0C0 = <span class="number">0xC0C0</span>,
+}
+
+<span class="macro">macro_rules!</span> define_packet {
+   (<span class="macro-nonterminal">$name</span>: ident, <span class="macro-nonterminal">$trait</span>: ident, <span class="macro-nonterminal">$leading_field</span>: ty) =&gt; {
+       <span class="attr">#[derive(<span class="macro-nonterminal">$trait</span>, KnownLayout, Immutable, IntoBytes, SplitAt)]
+       #[repr(C, align(<span class="number">2</span>))]
+       </span><span class="kw">pub struct </span><span class="macro-nonterminal">$name </span>{
+           magic_number: <span class="macro-nonterminal">$leading_field</span>,
+           mug_size: u8,
+           temperature: u8,
+           marshmallows: [[u8; <span class="number">2</span>]],
+       }
+   };
+}
+
+<span class="doccomment">/// Packet begins with bytes 0xC0C0.
+</span><span class="macro">define_packet!</span>(CocoPacket, TryFromBytes, C0C0);
+
+<span class="doccomment">/// Packet begins with any two bytes.
+</span><span class="macro">define_packet!</span>(LocoPacket, FromBytes, [u8; <span class="number">2</span>]);
+</code></pre></div></div>
+    </details>
+    <details name='tab-split_via_immutable_dynamic_size' style='--n: 2'>
+        <summary><h6>Benchmark</h6></summary>
+        <div>
+
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>zerocopy::<span class="kw-2">*</span>;
+
+<span class="attr">#[path = <span class="string">"formats/coco_dynamic_size.rs"</span>]
+</span><span class="kw">mod </span>format;
+
+<span class="attr">#[<span class="kw">unsafe</span>(no_mangle)]
+</span><span class="kw">fn </span>bench_split_via_immutable_dynamic_size(
+   split: Split&lt;<span class="kw-2">&amp;</span>format::CocoPacket&gt;,
+) -&gt; (<span class="kw-2">&amp;</span>format::CocoPacket, <span class="kw-2">&amp;</span>[[u8; <span class="number">2</span>]]) {
+   split.via_immutable()
+}
+</code></pre></div></div>
+    </details>
+    <details name='tab-split_via_immutable_dynamic_size' style='--n: 3'open>
+        <summary><h6>Assembly</h6></summary>
+        <div>
+<div class="example-wrap"><pre class="language-plain"><code>bench_split_via_immutable_dynamic_size:
+   mov rax, rdi
+   mov rcx, qword ptr [rsi]
+   mov rdx, qword ptr [rsi + 8]
+   mov rsi, qword ptr [rsi + 16]
+   lea rdi, [rcx + 2*rsi]
+   add rdi, 4
+   sub rdx, rsi
+   mov qword ptr [rax], rcx
+   mov qword ptr [rax + 8], rsi
+   mov qword ptr [rax + 16], rdi
+   mov qword ptr [rax + 24], rdx
+   ret
+</code></pre></div></div>
+    </details>
+    <details name='tab-split_via_immutable_dynamic_size' style='--n: 4'>
+        <summary><h6>Machine Code Analysis</h6></summary>
+        <div>
+<div class="example-wrap"><pre class="language-plain"><code>Iterations:        100
+Instructions:      1200
+Total Cycles:      509
+Total uOps:        1200
+
+Dispatch Width:    4
+uOps Per Cycle:    2.36
+IPC:               2.36
+Block RThroughput: 4.0
+
+
+Instruction Info:
+[1]: #uOps
+[2]: Latency
+[3]: RThroughput
+[4]: MayLoad
+[5]: MayStore
+[6]: HasSideEffects (U)
+
+[1]    [2]    [3]    [4]    [5]    [6]    Instructions:
+1      1     0.33                        mov	rax, rdi
+1      5     0.50    *                   mov	rcx, qword ptr [rsi]
+1      5     0.50    *                   mov	rdx, qword ptr [rsi + 8]
+1      5     0.50    *                   mov	rsi, qword ptr [rsi + 16]
+1      1     0.50                        lea	rdi, [rcx + 2*rsi]
+1      1     0.33                        add	rdi, 4
+1      1     0.33                        sub	rdx, rsi
+1      1     1.00           *            mov	qword ptr [rax], rcx
+1      1     1.00           *            mov	qword ptr [rax + 8], rsi
+1      1     1.00           *            mov	qword ptr [rax + 16], rdi
+1      1     1.00           *            mov	qword ptr [rax + 24], rdx
+1      1     1.00                  U     ret
+
+
+Resources:
+[0]   - SBDivider
+[1]   - SBFPDivider
+[2]   - SBPort0
+[3]   - SBPort1
+[4]   - SBPort4
+[5]   - SBPort5
+[6.0] - SBPort23
+[6.1] - SBPort23
+
+
+Resource pressure per iteration:
+[0]    [1]    [2]    [3]    [4]    [5]    [6.0]  [6.1]  
+-      -     1.66   1.66   4.00   1.68   3.50   3.50   
+
+Resource pressure by instruction:
+[0]    [1]    [2]    [3]    [4]    [5]    [6.0]  [6.1]  Instructions:
+-      -     0.34   0.33    -     0.33    -      -     mov	rax, rdi
+-      -      -      -      -      -     0.49   0.51   mov	rcx, qword ptr [rsi]
+-      -      -      -      -      -     0.51   0.49   mov	rdx, qword ptr [rsi + 8]
+-      -      -      -      -      -     0.01   0.99   mov	rsi, qword ptr [rsi + 16]
+-      -     0.33   0.67    -      -      -      -     lea	rdi, [rcx + 2*rsi]
+-      -     0.63   0.34    -     0.03    -      -     add	rdi, 4
+-      -     0.36   0.32    -     0.32    -      -     sub	rdx, rsi
+-      -      -      -     1.00    -     0.50   0.50   mov	qword ptr [rax], rcx
+-      -      -      -     1.00    -     0.50   0.50   mov	qword ptr [rax + 8], rsi
+-      -      -      -     1.00    -     0.98   0.02   mov	qword ptr [rax + 16], rdi
+-      -      -      -     1.00    -     0.51   0.49   mov	qword ptr [rax + 24], rdx
+-      -      -      -      -     1.00    -      -     ret
+</code></pre></div></div>
+    </details></div>
+</div>
+    </details>
+    <details name='tab-split_via_immutable' style='--n: 2'>
+        <summary><h6>Dynamically Padded</h6></summary>
+        <div>
+<div class='codegen-tabs' style='--arity: 4'>
+    <details name='tab-split_via_immutable_dynamic_padding' style='--n: 1'>
+        <summary><h6>Format</h6></summary>
+        <div>
+
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>zerocopy_derive::<span class="kw-2">*</span>;
+
+<span class="comment">// The only valid value of this type are the bytes `0xC0C0`.
+</span><span class="attr">#[derive(TryFromBytes, KnownLayout, Immutable)]
+#[repr(u16)]
+</span><span class="kw">pub enum </span>C0C0 {
+   _XC0C0 = <span class="number">0xC0C0</span>,
+}
+
+<span class="attr">#[derive(FromBytes, KnownLayout, Immutable, SplitAt)]
+#[repr(C, align(<span class="number">4</span>))]
+</span><span class="kw">pub struct </span>Packet&lt;Magic&gt; {
+   magic_number: Magic,
+   milk: u8,
+   mug_size: u8,
+   temperature: [u8; <span class="number">5</span>],
+   marshmallows: [[u8; <span class="number">3</span>]],
+}
+
+<span class="doccomment">/// A packet begining with the magic number `0xC0C0`.
+</span><span class="kw">pub type </span>CocoPacket = Packet&lt;C0C0&gt;;
+
+<span class="doccomment">/// A packet beginning with any two initialized bytes.
+</span><span class="kw">pub type </span>LocoPacket = Packet&lt;[u8; <span class="number">2</span>]&gt;;
+</code></pre></div></div>
+    </details>
+    <details name='tab-split_via_immutable_dynamic_padding' style='--n: 2'>
+        <summary><h6>Benchmark</h6></summary>
+        <div>
+
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>zerocopy::<span class="kw-2">*</span>;
+
+<span class="attr">#[path = <span class="string">"formats/coco_dynamic_padding.rs"</span>]
+</span><span class="kw">mod </span>format;
+
+<span class="attr">#[<span class="kw">unsafe</span>(no_mangle)]
+</span><span class="kw">fn </span>bench_split_via_immutable_dynamic_padding(
+   split: Split&lt;<span class="kw-2">&amp;</span>format::CocoPacket&gt;,
+) -&gt; (<span class="kw-2">&amp;</span>format::CocoPacket, <span class="kw-2">&amp;</span>[[u8; <span class="number">3</span>]]) {
+   split.via_immutable()
+}
+</code></pre></div></div>
+    </details>
+    <details name='tab-split_via_immutable_dynamic_padding' style='--n: 3'open>
+        <summary><h6>Assembly</h6></summary>
+        <div>
+<div class="example-wrap"><pre class="language-plain"><code>bench_split_via_immutable_dynamic_padding:
+   mov rax, rdi
+   mov rcx, qword ptr [rsi]
+   mov rdx, qword ptr [rsi + 8]
+   mov rsi, qword ptr [rsi + 16]
+   lea rdi, [rsi + 2*rsi]
+   add rdi, rcx
+   add rdi, 9
+   sub rdx, rsi
+   mov qword ptr [rax], rcx
+   mov qword ptr [rax + 8], rsi
+   mov qword ptr [rax + 16], rdi
+   mov qword ptr [rax + 24], rdx
+   ret
+</code></pre></div></div>
+    </details>
+    <details name='tab-split_via_immutable_dynamic_padding' style='--n: 4'>
+        <summary><h6>Machine Code Analysis</h6></summary>
+        <div>
+<div class="example-wrap"><pre class="language-plain"><code>Iterations:        100
+Instructions:      1300
+Total Cycles:      510
+Total uOps:        1300
+
+Dispatch Width:    4
+uOps Per Cycle:    2.55
+IPC:               2.55
+Block RThroughput: 4.0
+
+
+Instruction Info:
+[1]: #uOps
+[2]: Latency
+[3]: RThroughput
+[4]: MayLoad
+[5]: MayStore
+[6]: HasSideEffects (U)
+
+[1]    [2]    [3]    [4]    [5]    [6]    Instructions:
+1      1     0.33                        mov	rax, rdi
+1      5     0.50    *                   mov	rcx, qword ptr [rsi]
+1      5     0.50    *                   mov	rdx, qword ptr [rsi + 8]
+1      5     0.50    *                   mov	rsi, qword ptr [rsi + 16]
+1      1     0.50                        lea	rdi, [rsi + 2*rsi]
+1      1     0.33                        add	rdi, rcx
+1      1     0.33                        add	rdi, 9
+1      1     0.33                        sub	rdx, rsi
+1      1     1.00           *            mov	qword ptr [rax], rcx
+1      1     1.00           *            mov	qword ptr [rax + 8], rsi
+1      1     1.00           *            mov	qword ptr [rax + 16], rdi
+1      1     1.00           *            mov	qword ptr [rax + 24], rdx
+1      1     1.00                  U     ret
+
+
+Resources:
+[0]   - SBDivider
+[1]   - SBFPDivider
+[2]   - SBPort0
+[3]   - SBPort1
+[4]   - SBPort4
+[5]   - SBPort5
+[6.0] - SBPort23
+[6.1] - SBPort23
+
+
+Resource pressure per iteration:
+[0]    [1]    [2]    [3]    [4]    [5]    [6.0]  [6.1]  
+-      -     2.00   2.00   4.00   2.00   3.50   3.50   
+
+Resource pressure by instruction:
+[0]    [1]    [2]    [3]    [4]    [5]    [6.0]  [6.1]  Instructions:
+-      -     0.03   0.93    -     0.04    -      -     mov	rax, rdi
+-      -      -      -      -      -     0.49   0.51   mov	rcx, qword ptr [rsi]
+-      -      -      -      -      -     1.00    -     mov	rdx, qword ptr [rsi + 8]
+-      -      -      -      -      -     0.01   0.99   mov	rsi, qword ptr [rsi + 16]
+-      -     0.93   0.07    -      -      -      -     lea	rdi, [rsi + 2*rsi]
+-      -     0.05   0.02    -     0.93    -      -     add	rdi, rcx
+-      -     0.49   0.49    -     0.02    -      -     add	rdi, 9
+-      -     0.50   0.49    -     0.01    -      -     sub	rdx, rsi
+-      -      -      -     1.00    -     0.50   0.50   mov	qword ptr [rax], rcx
+-      -      -      -     1.00    -     0.50   0.50   mov	qword ptr [rax + 8], rsi
+-      -      -      -     1.00    -     0.49   0.51   mov	qword ptr [rax + 16], rdi
+-      -      -      -     1.00    -     0.51   0.49   mov	qword ptr [rax + 24], rdx
+-      -      -      -      -     1.00    -      -     ret
+</code></pre></div></div>
+    </details></div>
+</div>
+    </details></div></div></details><details class="toggle method-toggle" open><summary><section id="method.via_into_bytes" class="method"><a class="src rightside" href="../src/zerocopy/split_at.rs.html#418-424">Source</a><h4 class="code-header">pub fn <a href="#method.via_into_bytes" class="fn">via_into_bytes</a>(self) -&gt; (<a class="primitive" href="https://doc.rust-lang.org/nightly/core/primitive.reference.html">&amp;'a T</a>, &amp;'a [T::<a class="associatedtype" href="trait.SplitAt.html#associatedtype.Elem" title="type zerocopy::SplitAt::Elem">Elem</a>])<div class="where">where
+    T: <a class="trait" href="trait.IntoBytes.html" title="trait zerocopy::IntoBytes">IntoBytes</a>,</div></h4></section></summary><div class="docblock"><p>Produces the split parts of <code>self</code>, using <a href="trait.IntoBytes.html" title="trait zerocopy::IntoBytes"><code>IntoBytes</code></a> to ensure that
+it is sound to have concurrent references to both parts.</p>
+<h5 id="examples-1"><a class="doc-anchor" href="#examples-1">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>zerocopy::{SplitAt, FromBytes};
+
+<span class="attr">#[derive(SplitAt, FromBytes, KnownLayout, Immutable, IntoBytes)]
+#[repr(C)]
+</span><span class="kw">struct </span>Packet&lt;B: <span class="question-mark">?</span>Sized&gt; {
+    length: u8,
+    body: B,
+}
+
+<span class="comment">// These bytes encode a `Packet`.
+</span><span class="kw">let </span>bytes = <span class="kw-2">&amp;</span>[<span class="number">4</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>][..];
+
+<span class="kw">let </span>packet = Packet::&lt;[u8]&gt;::ref_from_bytes(bytes).unwrap();
+
+<span class="macro">assert_eq!</span>(packet.length, <span class="number">4</span>);
+<span class="macro">assert_eq!</span>(packet.body, [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>]);
+
+<span class="comment">// Attempt to split `packet` at `length`.
+</span><span class="kw">let </span>split = packet.split_at(packet.length <span class="kw">as </span>usize).unwrap();
+
+<span class="comment">// Use the `IntoBytes` bound on `Packet` to prove that it's okay to
+// return concurrent references to `packet` and `rest`.
+</span><span class="kw">let </span>(packet, rest) = split.via_into_bytes();
+
+<span class="macro">assert_eq!</span>(packet.length, <span class="number">4</span>);
+<span class="macro">assert_eq!</span>(packet.body, [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>]);
+<span class="macro">assert_eq!</span>(rest, [<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>]);</code></pre></div><h5 id='method.split_via_into_bytes.codegen'>
+    <a class='doc-anchor' href='#method.split_via_into_bytes.codegen'>§</a>
+    Code Generation
+</h5>
+<p>See <a href="#method.split_via_immutable.codegen"><code>Split::via_immutable</code></a>.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.via_unaligned" class="method"><a class="src rightside" href="../src/zerocopy/split_at.rs.html#467-473">Source</a><h4 class="code-header">pub fn <a href="#method.via_unaligned" class="fn">via_unaligned</a>(self) -&gt; (<a class="primitive" href="https://doc.rust-lang.org/nightly/core/primitive.reference.html">&amp;'a T</a>, &amp;'a [T::<a class="associatedtype" href="trait.SplitAt.html#associatedtype.Elem" title="type zerocopy::SplitAt::Elem">Elem</a>])<div class="where">where
+    T: <a class="trait" href="trait.Unaligned.html" title="trait zerocopy::Unaligned">Unaligned</a>,</div></h4></section></summary><div class="docblock"><p>Produces the split parts of <code>self</code>, using <a href="trait.Unaligned.html" title="trait zerocopy::Unaligned"><code>Unaligned</code></a> to ensure that
+it is sound to have concurrent references to both parts.</p>
+<h5 id="examples-2"><a class="doc-anchor" href="#examples-2">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>zerocopy::{SplitAt, FromBytes};
+
+<span class="attr">#[derive(SplitAt, FromBytes, KnownLayout, Immutable, Unaligned)]
+#[repr(C)]
+</span><span class="kw">struct </span>Packet {
+    length: u8,
+    body: [u8],
+}
+
+<span class="comment">// These bytes encode a `Packet`.
+</span><span class="kw">let </span>bytes = <span class="kw-2">&amp;</span>[<span class="number">4</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>][..];
+
+<span class="kw">let </span>packet = Packet::ref_from_bytes(bytes).unwrap();
+
+<span class="macro">assert_eq!</span>(packet.length, <span class="number">4</span>);
+<span class="macro">assert_eq!</span>(packet.body, [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>]);
+
+<span class="comment">// Attempt to split `packet` at `length`.
+</span><span class="kw">let </span>split = packet.split_at(packet.length <span class="kw">as </span>usize).unwrap();
+
+<span class="comment">// Use the `Unaligned` bound on `Packet` to prove that it's okay to
+// return concurrent references to `packet` and `rest`.
+</span><span class="kw">let </span>(packet, rest) = split.via_unaligned();
+
+<span class="macro">assert_eq!</span>(packet.length, <span class="number">4</span>);
+<span class="macro">assert_eq!</span>(packet.body, [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>]);
+<span class="macro">assert_eq!</span>(rest, [<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>]);</code></pre></div><h5 id='method.split_via_unaligned.codegen'>
+    <a class='doc-anchor' href='#method.split_via_unaligned.codegen'>§</a>
+    Code Generation
+</h5>
+<p>See <a href="#method.split_via_immutable.codegen"><code>Split::via_immutable</code></a>.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.via_runtime_check" class="method"><a class="src rightside" href="../src/zerocopy/split_at.rs.html#554-559">Source</a><h4 class="code-header">pub fn <a href="#method.via_runtime_check" class="fn">via_runtime_check</a>(self) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(<a class="primitive" href="https://doc.rust-lang.org/nightly/core/primitive.reference.html">&amp;'a T</a>, &amp;'a [T::<a class="associatedtype" href="trait.SplitAt.html#associatedtype.Elem" title="type zerocopy::SplitAt::Elem">Elem</a>]), Self&gt;</h4></section></summary><div class="docblock"><p>Produces the split parts of <code>self</code>, using a dynamic check to ensure that
+it is sound to have concurrent references to both parts. You should
+prefer using <a href="struct.Split.html#method.via_immutable" title="method zerocopy::Split::via_immutable"><code>Self::via_immutable</code></a>, <a href="struct.Split.html#method.via_into_bytes" title="method zerocopy::Split::via_into_bytes"><code>Self::via_into_bytes</code></a>, or
+<a href="struct.Split.html#method.via_unaligned" title="method zerocopy::Split::via_unaligned"><code>Self::via_unaligned</code></a>, which have no runtime cost.</p>
+<p>Note that this check is overly conservative if <code>T</code> is <a href="trait.Immutable.html" title="trait zerocopy::Immutable"><code>Immutable</code></a>; for
+some types, this check will reject some splits which
+<a href="struct.Split.html#method.via_immutable" title="method zerocopy::Split::via_immutable"><code>Self::via_immutable</code></a> will accept.</p>
+<h5 id="examples-3"><a class="doc-anchor" href="#examples-3">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>zerocopy::{SplitAt, FromBytes, IntoBytes, network_endian::U16};
+
+<span class="attr">#[derive(SplitAt, FromBytes, KnownLayout, Immutable, Debug)]
+#[repr(C, align(<span class="number">2</span>))]
+</span><span class="kw">struct </span>Packet {
+    length: U16,
+    body: [u8],
+}
+
+<span class="comment">// These bytes encode a `Packet`.
+</span><span class="kw">let </span>bytes = [
+    <span class="number">4u16</span>.to_be(),
+    <span class="number">1u16</span>.to_be(),
+    <span class="number">2u16</span>.to_be(),
+    <span class="number">3u16</span>.to_be(),
+    <span class="number">4u16</span>.to_be()
+];
+
+<span class="kw">let </span>packet = Packet::ref_from_bytes(bytes.as_bytes()).unwrap();
+
+<span class="macro">assert_eq!</span>(packet.length, <span class="number">4</span>);
+<span class="macro">assert_eq!</span>(packet.body, [<span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="number">0</span>, <span class="number">4</span>]);
+
+<span class="comment">// Attempt to split `packet` at `length`.
+</span><span class="kw">let </span>split = packet.split_at(packet.length.into()).unwrap();
+
+<span class="comment">// Use a dynamic check to prove that it's okay to return concurrent
+// references to `packet` and `rest`.
+</span><span class="kw">let </span>(packet, rest) = split.via_runtime_check().unwrap();
+
+<span class="macro">assert_eq!</span>(packet.length, <span class="number">4</span>);
+<span class="macro">assert_eq!</span>(packet.body, [<span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">2</span>]);
+<span class="macro">assert_eq!</span>(rest, [<span class="number">0</span>, <span class="number">3</span>, <span class="number">0</span>, <span class="number">4</span>]);
+
+<span class="comment">// Attempt to split `packet` at `length - 1`.
+</span><span class="kw">let </span>idx = packet.length.get() - <span class="number">1</span>;
+<span class="kw">let </span>split = packet.split_at(idx <span class="kw">as </span>usize).unwrap();
+
+<span class="comment">// Attempt (and fail) to use a dynamic check to prove that it's okay
+// to return concurrent references to `packet` and `rest`. Note that
+// this is a case of `via_runtime_check` being overly conservative.
+// Although the left and right parts indeed overlap, the `Immutable`
+// bound ensures that concurrently referencing these overlapping
+// parts is sound.
+</span><span class="macro">assert!</span>(split.via_runtime_check().is_err());</code></pre></div><h5 id='method.split_via_runtime_check.codegen'>
+    <a class='doc-anchor' href='#method.split_via_runtime_check.codegen'>§</a>
+    Code Generation
+</h5>
+<p>This abstraction is safe and cheap, but does not necessarily
+have zero runtime cost. The codegen you experience in practice
+will depend on optimization level, the layout of the destination
+type, and what the compiler can prove about the source.</p>
+<p>The below examples illustrate typical codegen for
+increasingly complex types:</p>
+<div class='codegen-tabs' style='--arity: 2'>
+    <details name='tab-split_via_runtime_check' style='--n: 1'open>
+        <summary><h6>Unsized</h6></summary>
+        <div>
+<div class='codegen-tabs' style='--arity: 4'>
+    <details name='tab-split_via_runtime_check_dynamic_size' style='--n: 1'>
+        <summary><h6>Format</h6></summary>
+        <div>
+
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>zerocopy_derive::<span class="kw-2">*</span>;
+
+<span class="comment">// The only valid value of this type are the bytes `0xC0C0`.
+</span><span class="attr">#[derive(TryFromBytes, KnownLayout, Immutable, IntoBytes)]
+#[repr(u16)]
+</span><span class="kw">pub enum </span>C0C0 {
+   _XC0C0 = <span class="number">0xC0C0</span>,
+}
+
+<span class="macro">macro_rules!</span> define_packet {
+   (<span class="macro-nonterminal">$name</span>: ident, <span class="macro-nonterminal">$trait</span>: ident, <span class="macro-nonterminal">$leading_field</span>: ty) =&gt; {
+       <span class="attr">#[derive(<span class="macro-nonterminal">$trait</span>, KnownLayout, Immutable, IntoBytes, SplitAt)]
+       #[repr(C, align(<span class="number">2</span>))]
+       </span><span class="kw">pub struct </span><span class="macro-nonterminal">$name </span>{
+           magic_number: <span class="macro-nonterminal">$leading_field</span>,
+           mug_size: u8,
+           temperature: u8,
+           marshmallows: [[u8; <span class="number">2</span>]],
+       }
+   };
+}
+
+<span class="doccomment">/// Packet begins with bytes 0xC0C0.
+</span><span class="macro">define_packet!</span>(CocoPacket, TryFromBytes, C0C0);
+
+<span class="doccomment">/// Packet begins with any two bytes.
+</span><span class="macro">define_packet!</span>(LocoPacket, FromBytes, [u8; <span class="number">2</span>]);
+</code></pre></div></div>
+    </details>
+    <details name='tab-split_via_runtime_check_dynamic_size' style='--n: 2'>
+        <summary><h6>Benchmark</h6></summary>
+        <div>
+
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>zerocopy::<span class="kw-2">*</span>;
+
+<span class="attr">#[path = <span class="string">"formats/coco_dynamic_size.rs"</span>]
+</span><span class="kw">mod </span>format;
+
+<span class="attr">#[<span class="kw">unsafe</span>(no_mangle)]
+</span><span class="kw">fn </span>bench_split_via_runtime_check_dynamic_size(
+   split: Split&lt;<span class="kw-2">&amp;</span>format::CocoPacket&gt;,
+) -&gt; <span class="prelude-ty">Option</span>&lt;(<span class="kw-2">&amp;</span>format::CocoPacket, <span class="kw-2">&amp;</span>[[u8; <span class="number">2</span>]])&gt; {
+   split.via_runtime_check().ok()
+}
+</code></pre></div></div>
+    </details>
+    <details name='tab-split_via_runtime_check_dynamic_size' style='--n: 3'open>
+        <summary><h6>Assembly</h6></summary>
+        <div>
+<div class="example-wrap"><pre class="language-plain"><code>bench_split_via_runtime_check_dynamic_size:
+   mov rax, rdi
+   mov rcx, qword ptr [rsi]
+   mov rdx, qword ptr [rsi + 8]
+   mov rsi, qword ptr [rsi + 16]
+   lea rdi, [rcx + 2*rsi]
+   add rdi, 4
+   sub rdx, rsi
+   mov qword ptr [rax], rcx
+   mov qword ptr [rax + 8], rsi
+   mov qword ptr [rax + 16], rdi
+   mov qword ptr [rax + 24], rdx
+   ret
+</code></pre></div></div>
+    </details>
+    <details name='tab-split_via_runtime_check_dynamic_size' style='--n: 4'>
+        <summary><h6>Machine Code Analysis</h6></summary>
+        <div>
+<div class="example-wrap"><pre class="language-plain"><code>Iterations:        100
+Instructions:      1200
+Total Cycles:      509
+Total uOps:        1200
+
+Dispatch Width:    4
+uOps Per Cycle:    2.36
+IPC:               2.36
+Block RThroughput: 4.0
+
+
+Instruction Info:
+[1]: #uOps
+[2]: Latency
+[3]: RThroughput
+[4]: MayLoad
+[5]: MayStore
+[6]: HasSideEffects (U)
+
+[1]    [2]    [3]    [4]    [5]    [6]    Instructions:
+1      1     0.33                        mov	rax, rdi
+1      5     0.50    *                   mov	rcx, qword ptr [rsi]
+1      5     0.50    *                   mov	rdx, qword ptr [rsi + 8]
+1      5     0.50    *                   mov	rsi, qword ptr [rsi + 16]
+1      1     0.50                        lea	rdi, [rcx + 2*rsi]
+1      1     0.33                        add	rdi, 4
+1      1     0.33                        sub	rdx, rsi
+1      1     1.00           *            mov	qword ptr [rax], rcx
+1      1     1.00           *            mov	qword ptr [rax + 8], rsi
+1      1     1.00           *            mov	qword ptr [rax + 16], rdi
+1      1     1.00           *            mov	qword ptr [rax + 24], rdx
+1      1     1.00                  U     ret
+
+
+Resources:
+[0]   - SBDivider
+[1]   - SBFPDivider
+[2]   - SBPort0
+[3]   - SBPort1
+[4]   - SBPort4
+[5]   - SBPort5
+[6.0] - SBPort23
+[6.1] - SBPort23
+
+
+Resource pressure per iteration:
+[0]    [1]    [2]    [3]    [4]    [5]    [6.0]  [6.1]  
+-      -     1.66   1.66   4.00   1.68   3.50   3.50   
+
+Resource pressure by instruction:
+[0]    [1]    [2]    [3]    [4]    [5]    [6.0]  [6.1]  Instructions:
+-      -     0.34   0.33    -     0.33    -      -     mov	rax, rdi
+-      -      -      -      -      -     0.49   0.51   mov	rcx, qword ptr [rsi]
+-      -      -      -      -      -     0.51   0.49   mov	rdx, qword ptr [rsi + 8]
+-      -      -      -      -      -     0.01   0.99   mov	rsi, qword ptr [rsi + 16]
+-      -     0.33   0.67    -      -      -      -     lea	rdi, [rcx + 2*rsi]
+-      -     0.63   0.34    -     0.03    -      -     add	rdi, 4
+-      -     0.36   0.32    -     0.32    -      -     sub	rdx, rsi
+-      -      -      -     1.00    -     0.50   0.50   mov	qword ptr [rax], rcx
+-      -      -      -     1.00    -     0.50   0.50   mov	qword ptr [rax + 8], rsi
+-      -      -      -     1.00    -     0.98   0.02   mov	qword ptr [rax + 16], rdi
+-      -      -      -     1.00    -     0.51   0.49   mov	qword ptr [rax + 24], rdx
+-      -      -      -      -     1.00    -      -     ret
+</code></pre></div></div>
+    </details></div>
+</div>
+    </details>
+    <details name='tab-split_via_runtime_check' style='--n: 2'>
+        <summary><h6>Dynamically Padded</h6></summary>
+        <div>
+<div class='codegen-tabs' style='--arity: 4'>
+    <details name='tab-split_via_runtime_check_dynamic_padding' style='--n: 1'>
+        <summary><h6>Format</h6></summary>
+        <div>
+
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>zerocopy_derive::<span class="kw-2">*</span>;
+
+<span class="comment">// The only valid value of this type are the bytes `0xC0C0`.
+</span><span class="attr">#[derive(TryFromBytes, KnownLayout, Immutable)]
+#[repr(u16)]
+</span><span class="kw">pub enum </span>C0C0 {
+   _XC0C0 = <span class="number">0xC0C0</span>,
+}
+
+<span class="attr">#[derive(FromBytes, KnownLayout, Immutable, SplitAt)]
+#[repr(C, align(<span class="number">4</span>))]
+</span><span class="kw">pub struct </span>Packet&lt;Magic&gt; {
+   magic_number: Magic,
+   milk: u8,
+   mug_size: u8,
+   temperature: [u8; <span class="number">5</span>],
+   marshmallows: [[u8; <span class="number">3</span>]],
+}
+
+<span class="doccomment">/// A packet begining with the magic number `0xC0C0`.
+</span><span class="kw">pub type </span>CocoPacket = Packet&lt;C0C0&gt;;
+
+<span class="doccomment">/// A packet beginning with any two initialized bytes.
+</span><span class="kw">pub type </span>LocoPacket = Packet&lt;[u8; <span class="number">2</span>]&gt;;
+</code></pre></div></div>
+    </details>
+    <details name='tab-split_via_runtime_check_dynamic_padding' style='--n: 2'>
+        <summary><h6>Benchmark</h6></summary>
+        <div>
+
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>zerocopy::<span class="kw-2">*</span>;
+
+<span class="attr">#[path = <span class="string">"formats/coco_dynamic_padding.rs"</span>]
+</span><span class="kw">mod </span>format;
+
+<span class="attr">#[<span class="kw">unsafe</span>(no_mangle)]
+</span><span class="kw">fn </span>bench_split_via_runtime_check_dynamic_padding(
+   split: Split&lt;<span class="kw-2">&amp;</span>format::CocoPacket&gt;,
+) -&gt; <span class="prelude-ty">Option</span>&lt;(<span class="kw-2">&amp;</span>format::CocoPacket, <span class="kw-2">&amp;</span>[[u8; <span class="number">3</span>]])&gt; {
+   split.via_runtime_check().ok()
+}
+</code></pre></div></div>
+    </details>
+    <details name='tab-split_via_runtime_check_dynamic_padding' style='--n: 3'open>
+        <summary><h6>Assembly</h6></summary>
+        <div>
+<div class="example-wrap"><pre class="language-plain"><code>bench_split_via_runtime_check_dynamic_padding:
+   mov rax, rdi
+   mov rdx, qword ptr [rsi + 16]
+   mov ecx, edx
+   and ecx, 3
+   cmp ecx, 1
+   jne .LBB5_1
+   mov rcx, qword ptr [rsi]
+   mov rsi, qword ptr [rsi + 8]
+   lea rdi, [rdx + 2*rdx]
+   add rdi, rcx
+   add rdi, 9
+   sub rsi, rdx
+   mov qword ptr [rax + 8], rdx
+   mov qword ptr [rax + 16], rdi
+   mov qword ptr [rax + 24], rsi
+   mov qword ptr [rax], rcx
+   ret
+.LBB5_1:
+   xor ecx, ecx
+   mov qword ptr [rax], rcx
+   ret
+</code></pre></div></div>
+    </details>
+    <details name='tab-split_via_runtime_check_dynamic_padding' style='--n: 4'>
+        <summary><h6>Machine Code Analysis</h6></summary>
+        <div>
+<div class="example-wrap"><pre class="language-plain"><code>Iterations:        100
+Instructions:      2000
+Total Cycles:      708
+Total uOps:        2000
+
+Dispatch Width:    4
+uOps Per Cycle:    2.82
+IPC:               2.82
+Block RThroughput: 5.0
+
+
+Instruction Info:
+[1]: #uOps
+[2]: Latency
+[3]: RThroughput
+[4]: MayLoad
+[5]: MayStore
+[6]: HasSideEffects (U)
+
+[1]    [2]    [3]    [4]    [5]    [6]    Instructions:
+1      1     0.33                        mov	rax, rdi
+1      5     0.50    *                   mov	rdx, qword ptr [rsi + 16]
+1      1     0.33                        mov	ecx, edx
+1      1     0.33                        and	ecx, 3
+1      1     0.33                        cmp	ecx, 1
+1      1     1.00                        jne	.LBB5_1
+1      5     0.50    *                   mov	rcx, qword ptr [rsi]
+1      5     0.50    *                   mov	rsi, qword ptr [rsi + 8]
+1      1     0.50                        lea	rdi, [rdx + 2*rdx]
+1      1     0.33                        add	rdi, rcx
+1      1     0.33                        add	rdi, 9
+1      1     0.33                        sub	rsi, rdx
+1      1     1.00           *            mov	qword ptr [rax + 8], rdx
+1      1     1.00           *            mov	qword ptr [rax + 16], rdi
+1      1     1.00           *            mov	qword ptr [rax + 24], rsi
+1      1     1.00           *            mov	qword ptr [rax], rcx
+1      1     1.00                  U     ret
+1      0     0.25                        xor	ecx, ecx
+1      1     1.00           *            mov	qword ptr [rax], rcx
+1      1     1.00                  U     ret
+
+
+Resources:
+[0]   - SBDivider
+[1]   - SBFPDivider
+[2]   - SBPort0
+[3]   - SBPort1
+[4]   - SBPort4
+[5]   - SBPort5
+[6.0] - SBPort23
+[6.1] - SBPort23
+
+
+Resource pressure per iteration:
+[0]    [1]    [2]    [3]    [4]    [5]    [6.0]  [6.1]  
+-      -     3.00   3.02   5.00   4.98   4.00   4.00   
+
+Resource pressure by instruction:
+[0]    [1]    [2]    [3]    [4]    [5]    [6.0]  [6.1]  Instructions:
+-      -      -     0.99    -     0.01    -      -     mov	rax, rdi
+-      -      -      -      -      -      -     1.00   mov	rdx, qword ptr [rsi + 16]
+-      -     0.99   0.01    -      -      -      -     mov	ecx, edx
+-      -     0.99   0.01    -      -      -      -     and	ecx, 3
+-      -     0.97   0.03    -      -      -      -     cmp	ecx, 1
+-      -      -      -      -     1.00    -      -     jne	.LBB5_1
+-      -      -      -      -      -     1.00    -     mov	rcx, qword ptr [rsi]
+-      -      -      -      -      -     0.99   0.01   mov	rsi, qword ptr [rsi + 8]
+-      -     0.01   0.99    -      -      -      -     lea	rdi, [rdx + 2*rdx]
+-      -      -     0.96    -     0.04    -      -     add	rdi, rcx
+-      -     0.03    -      -     0.97    -      -     add	rdi, 9
+-      -     0.01   0.03    -     0.96    -      -     sub	rsi, rdx
+-      -      -      -     1.00    -     1.00    -     mov	qword ptr [rax + 8], rdx
+-      -      -      -     1.00    -      -     1.00   mov	qword ptr [rax + 16], rdi
+-      -      -      -     1.00    -     0.01   0.99   mov	qword ptr [rax + 24], rsi
+-      -      -      -     1.00    -     0.99   0.01   mov	qword ptr [rax], rcx
+-      -      -      -      -     1.00    -      -     ret
+-      -      -      -      -      -      -      -     xor	ecx, ecx
+-      -      -      -     1.00    -     0.01   0.99   mov	qword ptr [rax], rcx
+-      -      -      -      -     1.00    -      -     ret
+</code></pre></div></div>
+    </details></div>
+</div>
+    </details></div></div></details><details class="toggle method-toggle" open><summary><section id="method.via_unchecked" class="method"><a class="src rightside" href="../src/zerocopy/split_at.rs.html#591-597">Source</a><h4 class="code-header">pub unsafe fn <a href="#method.via_unchecked" class="fn">via_unchecked</a>(self) -&gt; (<a class="primitive" href="https://doc.rust-lang.org/nightly/core/primitive.reference.html">&amp;'a T</a>, &amp;'a [T::<a class="associatedtype" href="trait.SplitAt.html#associatedtype.Elem" title="type zerocopy::SplitAt::Elem">Elem</a>])</h4></section></summary><div class="docblock"><p>Unsafely produces the split parts of <code>self</code>.</p>
+<h5 id="safety"><a class="doc-anchor" href="#safety">§</a>Safety</h5>
+<p>If <code>T</code> permits interior mutation, the trailing padding bytes of the left
+portion must not overlap the right portion. For some dynamically sized
+types, the padding that appears after the trailing slice field <a href="trait.KnownLayout.html#slice-dst-layout" title="trait zerocopy::KnownLayout">is a
+dynamic function of the trailing slice
+length</a>. Thus, for some types, this
+condition is dependent on the length of the left portion.</p>
+<h5 id='method.split_via_unchecked.codegen'>
+    <a class='doc-anchor' href='#method.split_via_unchecked.codegen'>§</a>
+    Code Generation
+</h5>
+<p>This abstraction is safe and cheap, but does not necessarily
+have zero runtime cost. The codegen you experience in practice
+will depend on optimization level, the layout of the destination
+type, and what the compiler can prove about the source.</p>
+<p>The below examples illustrate typical codegen for
+increasingly complex types:</p>
+<div class='codegen-tabs' style='--arity: 2'>
+    <details name='tab-split_via_unchecked' style='--n: 1'open>
+        <summary><h6>Unsized</h6></summary>
+        <div>
+<div class='codegen-tabs' style='--arity: 4'>
+    <details name='tab-split_via_unchecked_dynamic_size' style='--n: 1'>
+        <summary><h6>Format</h6></summary>
+        <div>
+
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>zerocopy_derive::<span class="kw-2">*</span>;
+
+<span class="comment">// The only valid value of this type are the bytes `0xC0C0`.
+</span><span class="attr">#[derive(TryFromBytes, KnownLayout, Immutable, IntoBytes)]
+#[repr(u16)]
+</span><span class="kw">pub enum </span>C0C0 {
+   _XC0C0 = <span class="number">0xC0C0</span>,
+}
+
+<span class="macro">macro_rules!</span> define_packet {
+   (<span class="macro-nonterminal">$name</span>: ident, <span class="macro-nonterminal">$trait</span>: ident, <span class="macro-nonterminal">$leading_field</span>: ty) =&gt; {
+       <span class="attr">#[derive(<span class="macro-nonterminal">$trait</span>, KnownLayout, Immutable, IntoBytes, SplitAt)]
+       #[repr(C, align(<span class="number">2</span>))]
+       </span><span class="kw">pub struct </span><span class="macro-nonterminal">$name </span>{
+           magic_number: <span class="macro-nonterminal">$leading_field</span>,
+           mug_size: u8,
+           temperature: u8,
+           marshmallows: [[u8; <span class="number">2</span>]],
+       }
+   };
+}
+
+<span class="doccomment">/// Packet begins with bytes 0xC0C0.
+</span><span class="macro">define_packet!</span>(CocoPacket, TryFromBytes, C0C0);
+
+<span class="doccomment">/// Packet begins with any two bytes.
+</span><span class="macro">define_packet!</span>(LocoPacket, FromBytes, [u8; <span class="number">2</span>]);
+</code></pre></div></div>
+    </details>
+    <details name='tab-split_via_unchecked_dynamic_size' style='--n: 2'>
+        <summary><h6>Benchmark</h6></summary>
+        <div>
+
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>zerocopy::<span class="kw-2">*</span>;
+
+<span class="attr">#[path = <span class="string">"formats/coco_dynamic_size.rs"</span>]
+</span><span class="kw">mod </span>format;
+
+<span class="attr">#[<span class="kw">unsafe</span>(no_mangle)]
+</span><span class="kw">unsafe fn </span>bench_split_via_unchecked_dynamic_size(
+   split: Split&lt;<span class="kw-2">&amp;</span>format::CocoPacket&gt;,
+) -&gt; (<span class="kw-2">&amp;</span>format::CocoPacket, <span class="kw-2">&amp;</span>[[u8; <span class="number">2</span>]]) {
+   <span class="kw">unsafe </span>{ split.via_unchecked() }
+}
+</code></pre></div></div>
+    </details>
+    <details name='tab-split_via_unchecked_dynamic_size' style='--n: 3'open>
+        <summary><h6>Assembly</h6></summary>
+        <div>
+<div class="example-wrap"><pre class="language-plain"><code>bench_split_via_unchecked_dynamic_size:
+   mov rax, rdi
+   mov rcx, qword ptr [rsi]
+   mov rdx, qword ptr [rsi + 8]
+   mov rsi, qword ptr [rsi + 16]
+   lea rdi, [rcx + 2*rsi]
+   add rdi, 4
+   sub rdx, rsi
+   mov qword ptr [rax], rcx
+   mov qword ptr [rax + 8], rsi
+   mov qword ptr [rax + 16], rdi
+   mov qword ptr [rax + 24], rdx
+   ret
+</code></pre></div></div>
+    </details>
+    <details name='tab-split_via_unchecked_dynamic_size' style='--n: 4'>
+        <summary><h6>Machine Code Analysis</h6></summary>
+        <div>
+<div class="example-wrap"><pre class="language-plain"><code>Iterations:        100
+Instructions:      1200
+Total Cycles:      509
+Total uOps:        1200
+
+Dispatch Width:    4
+uOps Per Cycle:    2.36
+IPC:               2.36
+Block RThroughput: 4.0
+
+
+Instruction Info:
+[1]: #uOps
+[2]: Latency
+[3]: RThroughput
+[4]: MayLoad
+[5]: MayStore
+[6]: HasSideEffects (U)
+
+[1]    [2]    [3]    [4]    [5]    [6]    Instructions:
+1      1     0.33                        mov	rax, rdi
+1      5     0.50    *                   mov	rcx, qword ptr [rsi]
+1      5     0.50    *                   mov	rdx, qword ptr [rsi + 8]
+1      5     0.50    *                   mov	rsi, qword ptr [rsi + 16]
+1      1     0.50                        lea	rdi, [rcx + 2*rsi]
+1      1     0.33                        add	rdi, 4
+1      1     0.33                        sub	rdx, rsi
+1      1     1.00           *            mov	qword ptr [rax], rcx
+1      1     1.00           *            mov	qword ptr [rax + 8], rsi
+1      1     1.00           *            mov	qword ptr [rax + 16], rdi
+1      1     1.00           *            mov	qword ptr [rax + 24], rdx
+1      1     1.00                  U     ret
+
+
+Resources:
+[0]   - SBDivider
+[1]   - SBFPDivider
+[2]   - SBPort0
+[3]   - SBPort1
+[4]   - SBPort4
+[5]   - SBPort5
+[6.0] - SBPort23
+[6.1] - SBPort23
+
+
+Resource pressure per iteration:
+[0]    [1]    [2]    [3]    [4]    [5]    [6.0]  [6.1]  
+-      -     1.66   1.66   4.00   1.68   3.50   3.50   
+
+Resource pressure by instruction:
+[0]    [1]    [2]    [3]    [4]    [5]    [6.0]  [6.1]  Instructions:
+-      -     0.34   0.33    -     0.33    -      -     mov	rax, rdi
+-      -      -      -      -      -     0.49   0.51   mov	rcx, qword ptr [rsi]
+-      -      -      -      -      -     0.51   0.49   mov	rdx, qword ptr [rsi + 8]
+-      -      -      -      -      -     0.01   0.99   mov	rsi, qword ptr [rsi + 16]
+-      -     0.33   0.67    -      -      -      -     lea	rdi, [rcx + 2*rsi]
+-      -     0.63   0.34    -     0.03    -      -     add	rdi, 4
+-      -     0.36   0.32    -     0.32    -      -     sub	rdx, rsi
+-      -      -      -     1.00    -     0.50   0.50   mov	qword ptr [rax], rcx
+-      -      -      -     1.00    -     0.50   0.50   mov	qword ptr [rax + 8], rsi
+-      -      -      -     1.00    -     0.98   0.02   mov	qword ptr [rax + 16], rdi
+-      -      -      -     1.00    -     0.51   0.49   mov	qword ptr [rax + 24], rdx
+-      -      -      -      -     1.00    -      -     ret
+</code></pre></div></div>
+    </details></div>
+</div>
+    </details>
+    <details name='tab-split_via_unchecked' style='--n: 2'>
+        <summary><h6>Dynamically Padded</h6></summary>
+        <div>
+<div class='codegen-tabs' style='--arity: 4'>
+    <details name='tab-split_via_unchecked_dynamic_padding' style='--n: 1'>
+        <summary><h6>Format</h6></summary>
+        <div>
+
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>zerocopy_derive::<span class="kw-2">*</span>;
+
+<span class="comment">// The only valid value of this type are the bytes `0xC0C0`.
+</span><span class="attr">#[derive(TryFromBytes, KnownLayout, Immutable)]
+#[repr(u16)]
+</span><span class="kw">pub enum </span>C0C0 {
+   _XC0C0 = <span class="number">0xC0C0</span>,
+}
+
+<span class="attr">#[derive(FromBytes, KnownLayout, Immutable, SplitAt)]
+#[repr(C, align(<span class="number">4</span>))]
+</span><span class="kw">pub struct </span>Packet&lt;Magic&gt; {
+   magic_number: Magic,
+   milk: u8,
+   mug_size: u8,
+   temperature: [u8; <span class="number">5</span>],
+   marshmallows: [[u8; <span class="number">3</span>]],
+}
+
+<span class="doccomment">/// A packet begining with the magic number `0xC0C0`.
+</span><span class="kw">pub type </span>CocoPacket = Packet&lt;C0C0&gt;;
+
+<span class="doccomment">/// A packet beginning with any two initialized bytes.
+</span><span class="kw">pub type </span>LocoPacket = Packet&lt;[u8; <span class="number">2</span>]&gt;;
+</code></pre></div></div>
+    </details>
+    <details name='tab-split_via_unchecked_dynamic_padding' style='--n: 2'>
+        <summary><h6>Benchmark</h6></summary>
+        <div>
+
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="kw">use </span>zerocopy::<span class="kw-2">*</span>;
+
+<span class="attr">#[path = <span class="string">"formats/coco_dynamic_padding.rs"</span>]
+</span><span class="kw">mod </span>format;
+
+<span class="attr">#[<span class="kw">unsafe</span>(no_mangle)]
+</span><span class="kw">unsafe fn </span>bench_split_via_unchecked_dynamic_padding(
+   split: Split&lt;<span class="kw-2">&amp;</span>format::CocoPacket&gt;,
+) -&gt; (<span class="kw-2">&amp;</span>format::CocoPacket, <span class="kw-2">&amp;</span>[[u8; <span class="number">3</span>]]) {
+   <span class="kw">unsafe </span>{ split.via_unchecked() }
+}
+</code></pre></div></div>
+    </details>
+    <details name='tab-split_via_unchecked_dynamic_padding' style='--n: 3'open>
+        <summary><h6>Assembly</h6></summary>
+        <div>
+<div class="example-wrap"><pre class="language-plain"><code>bench_split_via_unchecked_dynamic_padding:
+   mov rax, rdi
+   mov rcx, qword ptr [rsi]
+   mov rdx, qword ptr [rsi + 8]
+   mov rsi, qword ptr [rsi + 16]
+   lea rdi, [rsi + 2*rsi]
+   add rdi, rcx
+   add rdi, 9
+   sub rdx, rsi
+   mov qword ptr [rax], rcx
+   mov qword ptr [rax + 8], rsi
+   mov qword ptr [rax + 16], rdi
+   mov qword ptr [rax + 24], rdx
+   ret
+</code></pre></div></div>
+    </details>
+    <details name='tab-split_via_unchecked_dynamic_padding' style='--n: 4'>
+        <summary><h6>Machine Code Analysis</h6></summary>
+        <div>
+<div class="example-wrap"><pre class="language-plain"><code>Iterations:        100
+Instructions:      1300
+Total Cycles:      510
+Total uOps:        1300
+
+Dispatch Width:    4
+uOps Per Cycle:    2.55
+IPC:               2.55
+Block RThroughput: 4.0
+
+
+Instruction Info:
+[1]: #uOps
+[2]: Latency
+[3]: RThroughput
+[4]: MayLoad
+[5]: MayStore
+[6]: HasSideEffects (U)
+
+[1]    [2]    [3]    [4]    [5]    [6]    Instructions:
+1      1     0.33                        mov	rax, rdi
+1      5     0.50    *                   mov	rcx, qword ptr [rsi]
+1      5     0.50    *                   mov	rdx, qword ptr [rsi + 8]
+1      5     0.50    *                   mov	rsi, qword ptr [rsi + 16]
+1      1     0.50                        lea	rdi, [rsi + 2*rsi]
+1      1     0.33                        add	rdi, rcx
+1      1     0.33                        add	rdi, 9
+1      1     0.33                        sub	rdx, rsi
+1      1     1.00           *            mov	qword ptr [rax], rcx
+1      1     1.00           *            mov	qword ptr [rax + 8], rsi
+1      1     1.00           *            mov	qword ptr [rax + 16], rdi
+1      1     1.00           *            mov	qword ptr [rax + 24], rdx
+1      1     1.00                  U     ret
+
+
+Resources:
+[0]   - SBDivider
+[1]   - SBFPDivider
+[2]   - SBPort0
+[3]   - SBPort1
+[4]   - SBPort4
+[5]   - SBPort5
+[6.0] - SBPort23
+[6.1] - SBPort23
+
+
+Resource pressure per iteration:
+[0]    [1]    [2]    [3]    [4]    [5]    [6.0]  [6.1]  
+-      -     2.00   2.00   4.00   2.00   3.50   3.50   
+
+Resource pressure by instruction:
+[0]    [1]    [2]    [3]    [4]    [5]    [6.0]  [6.1]  Instructions:
+-      -     0.03   0.93    -     0.04    -      -     mov	rax, rdi
+-      -      -      -      -      -     0.49   0.51   mov	rcx, qword ptr [rsi]
+-      -      -      -      -      -     1.00    -     mov	rdx, qword ptr [rsi + 8]
+-      -      -      -      -      -     0.01   0.99   mov	rsi, qword ptr [rsi + 16]
+-      -     0.93   0.07    -      -      -      -     lea	rdi, [rsi + 2*rsi]
+-      -     0.05   0.02    -     0.93    -      -     add	rdi, rcx
+-      -     0.49   0.49    -     0.02    -      -     add	rdi, 9
+-      -     0.50   0.49    -     0.01    -      -     sub	rdx, rsi
+-      -      -      -     1.00    -     0.50   0.50   mov	qword ptr [rax], rcx
+-      -      -      -     1.00    -     0.50   0.50   mov	qword ptr [rax + 8], rsi
+-      -      -      -     1.00    -     0.49   0.51   mov	qword ptr [rax + 16], rdi
+-      -      -      -     1.00    -     0.51   0.49   mov	qword ptr [rax + 24], rdx
+-      -      -      -      -     1.00    -      -     ret
+</code></pre></div></div>
+    </details></div>
+</div>
+    </details></div></div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-Split%3C%26mut+T%3E" class="impl"><a class="src rightside" href="../src/zerocopy/split_at.rs.html#600-803">Source</a><a href="#impl-Split%3C%26mut+T%3E" class="anchor">§</a><h3 class="code-header">impl&lt;'a, T&gt; <a class="struct" href="struct.Split.html" title="struct zerocopy::Split">Split</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/core/primitive.reference.html">&amp;'a mut T</a>&gt;<div class="where">where
+    T: ?<a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a> + <a class="trait" href="trait.SplitAt.html" title="trait zerocopy::SplitAt">SplitAt</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.via_into_bytes-1" class="method"><a class="src rightside" href="../src/zerocopy/split_at.rs.html#660-666">Source</a><h4 class="code-header">pub fn <a href="#method.via_into_bytes-1" class="fn">via_into_bytes</a>(self) -&gt; (<a class="primitive" href="https://doc.rust-lang.org/nightly/core/primitive.reference.html">&amp;'a mut T</a>, &amp;'a mut [T::<a class="associatedtype" href="trait.SplitAt.html#associatedtype.Elem" title="type zerocopy::SplitAt::Elem">Elem</a>])<div class="where">where
+    T: <a class="trait" href="trait.IntoBytes.html" title="trait zerocopy::IntoBytes">IntoBytes</a>,</div></h4></section></summary><div class="docblock"><p>Produces the split parts of <code>self</code>, using <a href="trait.IntoBytes.html" title="trait zerocopy::IntoBytes"><code>IntoBytes</code></a> to ensure that
+it is sound to have concurrent references to both parts.</p>
+<h5 id="examples-4"><a class="doc-anchor" href="#examples-4">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>zerocopy::{SplitAt, FromBytes};
+
+<span class="attr">#[derive(SplitAt, FromBytes, KnownLayout, IntoBytes)]
+#[repr(C)]
+</span><span class="kw">struct </span>Packet&lt;B: <span class="question-mark">?</span>Sized&gt; {
+    length: u8,
+    body: B,
+}
+
+<span class="comment">// These bytes encode a `Packet`.
+</span><span class="kw">let </span><span class="kw-2">mut </span>bytes = <span class="kw-2">&amp;mut </span>[<span class="number">4</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>][..];
+
+<span class="kw">let </span>packet = Packet::&lt;[u8]&gt;::mut_from_bytes(bytes).unwrap();
+
+<span class="macro">assert_eq!</span>(packet.length, <span class="number">4</span>);
+<span class="macro">assert_eq!</span>(packet.body, [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>]);
+
+{
+    <span class="comment">// Attempt to split `packet` at `length`.
+    </span><span class="kw">let </span>split = packet.split_at_mut(packet.length <span class="kw">as </span>usize).unwrap();
+
+    <span class="comment">// Use the `IntoBytes` bound on `Packet` to prove that it's okay to
+    // return concurrent references to `packet` and `rest`.
+    </span><span class="kw">let </span>(packet, rest) = split.via_into_bytes();
+
+    <span class="macro">assert_eq!</span>(packet.length, <span class="number">4</span>);
+    <span class="macro">assert_eq!</span>(packet.body, [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>]);
+    <span class="macro">assert_eq!</span>(rest, [<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>]);
+
+    rest.fill(<span class="number">0</span>);
+}
+
+<span class="macro">assert_eq!</span>(packet.length, <span class="number">4</span>);
+<span class="macro">assert_eq!</span>(packet.body, [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>]);</code></pre></div><h5 id="code-generation"><a class="doc-anchor" href="#code-generation">§</a>Code Generation</h5>
+<p>See <a href="#method.split_via_immutable.codegen"><code>Split::via_immutable</code></a>.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.via_unaligned-1" class="method"><a class="src rightside" href="../src/zerocopy/split_at.rs.html#716-722">Source</a><h4 class="code-header">pub fn <a href="#method.via_unaligned-1" class="fn">via_unaligned</a>(self) -&gt; (<a class="primitive" href="https://doc.rust-lang.org/nightly/core/primitive.reference.html">&amp;'a mut T</a>, &amp;'a mut [T::<a class="associatedtype" href="trait.SplitAt.html#associatedtype.Elem" title="type zerocopy::SplitAt::Elem">Elem</a>])<div class="where">where
+    T: <a class="trait" href="trait.Unaligned.html" title="trait zerocopy::Unaligned">Unaligned</a>,</div></h4></section></summary><div class="docblock"><p>Produces the split parts of <code>self</code>, using <a href="trait.Unaligned.html" title="trait zerocopy::Unaligned"><code>Unaligned</code></a> to ensure that
+it is sound to have concurrent references to both parts.</p>
+<h5 id="examples-5"><a class="doc-anchor" href="#examples-5">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>zerocopy::{SplitAt, FromBytes};
+
+<span class="attr">#[derive(SplitAt, FromBytes, KnownLayout, IntoBytes, Unaligned)]
+#[repr(C)]
+</span><span class="kw">struct </span>Packet&lt;B: <span class="question-mark">?</span>Sized&gt; {
+    length: u8,
+    body: B,
+}
+
+<span class="comment">// These bytes encode a `Packet`.
+</span><span class="kw">let </span><span class="kw-2">mut </span>bytes = <span class="kw-2">&amp;mut </span>[<span class="number">4</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>][..];
+
+<span class="kw">let </span>packet = Packet::&lt;[u8]&gt;::mut_from_bytes(bytes).unwrap();
+
+<span class="macro">assert_eq!</span>(packet.length, <span class="number">4</span>);
+<span class="macro">assert_eq!</span>(packet.body, [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>]);
+
+{
+    <span class="comment">// Attempt to split `packet` at `length`.
+    </span><span class="kw">let </span>split = packet.split_at_mut(packet.length <span class="kw">as </span>usize).unwrap();
+
+    <span class="comment">// Use the `Unaligned` bound on `Packet` to prove that it's okay to
+    // return concurrent references to `packet` and `rest`.
+    </span><span class="kw">let </span>(packet, rest) = split.via_unaligned();
+
+    <span class="macro">assert_eq!</span>(packet.length, <span class="number">4</span>);
+    <span class="macro">assert_eq!</span>(packet.body, [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>]);
+    <span class="macro">assert_eq!</span>(rest, [<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>]);
+
+    rest.fill(<span class="number">0</span>);
+}
+
+<span class="macro">assert_eq!</span>(packet.length, <span class="number">4</span>);
+<span class="macro">assert_eq!</span>(packet.body, [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>]);</code></pre></div><h5 id="code-generation-1"><a class="doc-anchor" href="#code-generation-1">§</a>Code Generation</h5>
+<p>See <a href="#method.split_via_immutable.codegen"><code>Split::via_immutable</code></a>.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.via_runtime_check-1" class="method"><a class="src rightside" href="../src/zerocopy/split_at.rs.html#774-779">Source</a><h4 class="code-header">pub fn <a href="#method.via_runtime_check-1" class="fn">via_runtime_check</a>(self) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;(<a class="primitive" href="https://doc.rust-lang.org/nightly/core/primitive.reference.html">&amp;'a mut T</a>, &amp;'a mut [T::<a class="associatedtype" href="trait.SplitAt.html#associatedtype.Elem" title="type zerocopy::SplitAt::Elem">Elem</a>]), Self&gt;</h4></section></summary><div class="docblock"><p>Produces the split parts of <code>self</code>, using a dynamic check to ensure that
+it is sound to have concurrent references to both parts. You should
+prefer using <a href="struct.Split.html#method.via_into_bytes" title="method zerocopy::Split::via_into_bytes"><code>Self::via_into_bytes</code></a> or <a href="struct.Split.html#method.via_unaligned" title="method zerocopy::Split::via_unaligned"><code>Self::via_unaligned</code></a>, which
+have no runtime cost.</p>
+<h5 id="examples-6"><a class="doc-anchor" href="#examples-6">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>zerocopy::{SplitAt, FromBytes};
+
+<span class="attr">#[derive(SplitAt, FromBytes, KnownLayout, IntoBytes, Debug)]
+#[repr(C)]
+</span><span class="kw">struct </span>Packet&lt;B: <span class="question-mark">?</span>Sized&gt; {
+    length: u8,
+    body: B,
+}
+
+<span class="comment">// These bytes encode a `Packet`.
+</span><span class="kw">let </span><span class="kw-2">mut </span>bytes = <span class="kw-2">&amp;mut </span>[<span class="number">4</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>][..];
+
+<span class="kw">let </span>packet = Packet::&lt;[u8]&gt;::mut_from_bytes(bytes).unwrap();
+
+<span class="macro">assert_eq!</span>(packet.length, <span class="number">4</span>);
+<span class="macro">assert_eq!</span>(packet.body, [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>]);
+
+{
+    <span class="comment">// Attempt to split `packet` at `length`.
+    </span><span class="kw">let </span>split = packet.split_at_mut(packet.length <span class="kw">as </span>usize).unwrap();
+
+    <span class="comment">// Use a dynamic check to prove that it's okay to return concurrent
+    // references to `packet` and `rest`.
+    </span><span class="kw">let </span>(packet, rest) = split.via_runtime_check().unwrap();
+
+    <span class="macro">assert_eq!</span>(packet.length, <span class="number">4</span>);
+    <span class="macro">assert_eq!</span>(packet.body, [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>]);
+    <span class="macro">assert_eq!</span>(rest, [<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>]);
+
+    rest.fill(<span class="number">0</span>);
+}
+
+<span class="macro">assert_eq!</span>(packet.length, <span class="number">4</span>);
+<span class="macro">assert_eq!</span>(packet.body, [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>]);</code></pre></div><h5 id="code-generation-2"><a class="doc-anchor" href="#code-generation-2">§</a>Code Generation</h5>
+<p>See <a href="#method.split_via_runtime_check.codegen"><code>Split::via_runtime_check</code></a>.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.via_unchecked-1" class="method"><a class="src rightside" href="../src/zerocopy/split_at.rs.html#796-802">Source</a><h4 class="code-header">pub unsafe fn <a href="#method.via_unchecked-1" class="fn">via_unchecked</a>(self) -&gt; (<a class="primitive" href="https://doc.rust-lang.org/nightly/core/primitive.reference.html">&amp;'a mut T</a>, &amp;'a mut [T::<a class="associatedtype" href="trait.SplitAt.html#associatedtype.Elem" title="type zerocopy::SplitAt::Elem">Elem</a>])</h4></section></summary><div class="docblock"><p>Unsafely produces the split parts of <code>self</code>.</p>
+<h5 id="safety-1"><a class="doc-anchor" href="#safety-1">§</a>Safety</h5>
+<p>The trailing padding bytes of the left portion must not overlap the
+right portion. For some dynamically sized types, the padding that
+appears after the trailing slice field <a href="trait.KnownLayout.html#slice-dst-layout" title="trait zerocopy::KnownLayout">is a dynamic function of the
+trailing slice length</a>. Thus, for some
+types, this condition is dependent on the length of the left portion.</p>
+<h5 id="code-generation-3"><a class="doc-anchor" href="#code-generation-3">§</a>Code Generation</h5>
+<p>See <a href="#method.split_via_unchecked.codegen"><code>Split::via_unchecked</code></a>.</p>
+</div></details></div></details></div><h2 id="trait-implementations" class="section-header">Trait Implementations<a href="#trait-implementations" class="anchor">§</a></h2><div id="trait-implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-Debug-for-Split%3CT%3E" class="impl"><a class="src rightside" href="../src/zerocopy/split_at.rs.html#277">Source</a><a href="#impl-Debug-for-Split%3CT%3E" class="anchor">§</a><h3 class="code-header">impl&lt;T: <a class="trait" href="https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html" title="trait core::fmt::Debug">Debug</a>&gt; <a class="trait" href="https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html" title="trait core::fmt::Debug">Debug</a> for <a class="struct" href="struct.Split.html" title="struct zerocopy::Split">Split</a>&lt;T&gt;</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.fmt" class="method trait-impl"><a class="src rightside" href="../src/zerocopy/split_at.rs.html#277">Source</a><a href="#method.fmt" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#tymethod.fmt" class="fn">fmt</a>(&amp;self, f: &amp;mut <a class="struct" href="https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html" title="struct core::fmt::Formatter">Formatter</a>&lt;'_&gt;) -&gt; <a class="type" href="https://doc.rust-lang.org/nightly/core/fmt/type.Result.html" title="type core::fmt::Result">Result</a></h4></section></summary><div class='docblock'>Formats the value using the given formatter. <a href="https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#tymethod.fmt">Read more</a></div></details></div></details></div><h2 id="synthetic-implementations" class="section-header">Auto Trait Implementations<a href="#synthetic-implementations" class="anchor">§</a></h2><div id="synthetic-implementations-list"><section id="impl-Freeze-for-Split%3CT%3E" class="impl"><a href="#impl-Freeze-for-Split%3CT%3E" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Freeze.html" title="trait core::marker::Freeze">Freeze</a> for <a class="struct" href="struct.Split.html" title="struct zerocopy::Split">Split</a>&lt;T&gt;<div class="where">where
+    T: <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Freeze.html" title="trait core::marker::Freeze">Freeze</a>,</div></h3></section><section id="impl-RefUnwindSafe-for-Split%3CT%3E" class="impl"><a href="#impl-RefUnwindSafe-for-Split%3CT%3E" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/nightly/core/panic/unwind_safe/trait.RefUnwindSafe.html" title="trait core::panic::unwind_safe::RefUnwindSafe">RefUnwindSafe</a> for <a class="struct" href="struct.Split.html" title="struct zerocopy::Split">Split</a>&lt;T&gt;<div class="where">where
+    T: <a class="trait" href="https://doc.rust-lang.org/nightly/core/panic/unwind_safe/trait.RefUnwindSafe.html" title="trait core::panic::unwind_safe::RefUnwindSafe">RefUnwindSafe</a>,</div></h3></section><section id="impl-Send-for-Split%3CT%3E" class="impl"><a href="#impl-Send-for-Split%3CT%3E" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> for <a class="struct" href="struct.Split.html" title="struct zerocopy::Split">Split</a>&lt;T&gt;<div class="where">where
+    T: <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a>,</div></h3></section><section id="impl-Sync-for-Split%3CT%3E" class="impl"><a href="#impl-Sync-for-Split%3CT%3E" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sync.html" title="trait core::marker::Sync">Sync</a> for <a class="struct" href="struct.Split.html" title="struct zerocopy::Split">Split</a>&lt;T&gt;<div class="where">where
+    T: <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sync.html" title="trait core::marker::Sync">Sync</a>,</div></h3></section><section id="impl-Unpin-for-Split%3CT%3E" class="impl"><a href="#impl-Unpin-for-Split%3CT%3E" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Unpin.html" title="trait core::marker::Unpin">Unpin</a> for <a class="struct" href="struct.Split.html" title="struct zerocopy::Split">Split</a>&lt;T&gt;<div class="where">where
+    T: <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Unpin.html" title="trait core::marker::Unpin">Unpin</a>,</div></h3></section><section id="impl-UnsafeUnpin-for-Split%3CT%3E" class="impl"><a href="#impl-UnsafeUnpin-for-Split%3CT%3E" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.UnsafeUnpin.html" title="trait core::marker::UnsafeUnpin">UnsafeUnpin</a> for <a class="struct" href="struct.Split.html" title="struct zerocopy::Split">Split</a>&lt;T&gt;<div class="where">where
+    T: <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.UnsafeUnpin.html" title="trait core::marker::UnsafeUnpin">UnsafeUnpin</a>,</div></h3></section><section id="impl-UnwindSafe-for-Split%3CT%3E" class="impl"><a href="#impl-UnwindSafe-for-Split%3CT%3E" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/nightly/core/panic/unwind_safe/trait.UnwindSafe.html" title="trait core::panic::unwind_safe::UnwindSafe">UnwindSafe</a> for <a class="struct" href="struct.Split.html" title="struct zerocopy::Split">Split</a>&lt;T&gt;<div class="where">where
+    T: <a class="trait" href="https://doc.rust-lang.org/nightly/core/panic/unwind_safe/trait.UnwindSafe.html" title="trait core::panic::unwind_safe::UnwindSafe">UnwindSafe</a>,</div></h3></section></div><h2 id="blanket-implementations" class="section-header">Blanket Implementations<a href="#blanket-implementations" class="anchor">§</a></h2><div id="blanket-implementations-list"><details class="toggle implementors-toggle"><summary><section id="impl-Any-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/nightly/src/core/any.rs.html#141">Source</a><a href="#impl-Any-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/nightly/core/any/trait.Any.html" title="trait core::any::Any">Any</a> for T<div class="where">where
+    T: 'static + ?<a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.type_id" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/nightly/src/core/any.rs.html#142">Source</a><a href="#method.type_id" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/nightly/core/any/trait.Any.html#tymethod.type_id" class="fn">type_id</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/nightly/core/any/struct.TypeId.html" title="struct core::any::TypeId">TypeId</a></h4></section></summary><div class='docblock'>Gets the <code>TypeId</code> of <code>self</code>. <a href="https://doc.rust-lang.org/nightly/core/any/trait.Any.html#tymethod.type_id">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-Borrow%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/nightly/src/core/borrow.rs.html#212">Source</a><a href="#impl-Borrow%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/nightly/core/borrow/trait.Borrow.html" title="trait core::borrow::Borrow">Borrow</a>&lt;T&gt; for T<div class="where">where
+    T: ?<a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.borrow" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/nightly/src/core/borrow.rs.html#214">Source</a><a href="#method.borrow" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/nightly/core/borrow/trait.Borrow.html#tymethod.borrow" class="fn">borrow</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/core/primitive.reference.html">&amp;T</a></h4></section></summary><div class='docblock'>Immutably borrows from an owned value. <a href="https://doc.rust-lang.org/nightly/core/borrow/trait.Borrow.html#tymethod.borrow">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-BorrowMut%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/nightly/src/core/borrow.rs.html#221">Source</a><a href="#impl-BorrowMut%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/nightly/core/borrow/trait.BorrowMut.html" title="trait core::borrow::BorrowMut">BorrowMut</a>&lt;T&gt; for T<div class="where">where
+    T: ?<a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.borrow_mut" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/nightly/src/core/borrow.rs.html#222">Source</a><a href="#method.borrow_mut" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/nightly/core/borrow/trait.BorrowMut.html#tymethod.borrow_mut" class="fn">borrow_mut</a>(&amp;mut self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/core/primitive.reference.html">&amp;mut T</a></h4></section></summary><div class='docblock'>Mutably borrows from an owned value. <a href="https://doc.rust-lang.org/nightly/core/borrow/trait.BorrowMut.html#tymethod.borrow_mut">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-From%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/nightly/src/core/convert/mod.rs.html#787">Source</a><a href="#impl-From%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt; for T</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.from" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/nightly/src/core/convert/mod.rs.html#790">Source</a><a href="#method.from" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/nightly/core/convert/trait.From.html#tymethod.from" class="fn">from</a>(t: T) -&gt; T</h4></section></summary><div class="docblock"><p>Returns the argument unchanged.</p>
+</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-Into%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/nightly/src/core/convert/mod.rs.html#769-771">Source</a><a href="#impl-Into%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.into" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/nightly/src/core/convert/mod.rs.html#779">Source</a><a href="#method.into" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/nightly/core/convert/trait.Into.html#tymethod.into" class="fn">into</a>(self) -&gt; U</h4></section></summary><div class="docblock"><p>Calls <code>U::from(self)</code>.</p>
+<p>That is, this conversion is whatever the implementation of
+<code><a href="https://doc.rust-lang.org/nightly/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt; for U</code> chooses to do.</p>
+</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-TryFrom%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/nightly/src/core/convert/mod.rs.html#814-816">Source</a><a href="#impl-TryFrom%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Error" class="associatedtype trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/nightly/src/core/convert/mod.rs.html#818">Source</a><a href="#associatedtype.Error" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/nightly/core/convert/trait.TryFrom.html#associatedtype.Error" class="associatedtype">Error</a> = <a class="primitive" href="https://doc.rust-lang.org/nightly/core/primitive.never.html">!</a></h4></section></summary><div class='docblock'>The type returned in the event of a conversion error.</div></details><details class="toggle method-toggle" open><summary><section id="method.try_from" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/nightly/src/core/convert/mod.rs.html#821">Source</a><a href="#method.try_from" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/nightly/core/convert/trait.TryFrom.html#tymethod.try_from" class="fn">try_from</a>(value: U) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;T, <a class="primitive" href="https://doc.rust-lang.org/nightly/core/primitive.never.html">!</a>&gt;</h4></section></summary><div class='docblock'>Performs the conversion.</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-TryInto%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/nightly/src/core/convert/mod.rs.html#798-800">Source</a><a href="#impl-TryInto%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.TryInto.html" title="trait core::convert::TryInto">TryInto</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Error-1" class="associatedtype trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/nightly/src/core/convert/mod.rs.html#802">Source</a><a href="#associatedtype.Error-1" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/nightly/core/convert/trait.TryInto.html#associatedtype.Error" class="associatedtype">Error</a> = &lt;U as <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/nightly/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a></h4></section></summary><div class='docblock'>The type returned in the event of a conversion error.</div></details><details class="toggle method-toggle" open><summary><section id="method.try_into" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/nightly/src/core/convert/mod.rs.html#805">Source</a><a href="#method.try_into" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/nightly/core/convert/trait.TryInto.html#tymethod.try_into" class="fn">try_into</a>(self) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;U, &lt;U as <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/nightly/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a>&gt;</h4></section></summary><div class='docblock'>Performs the conversion.</div></details></div></details></div></section></div></main></body></html>

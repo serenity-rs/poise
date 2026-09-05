@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["FormattedHelloWorld","HelloWorldFormatter","HelloWorldProvider","HelloWorldV1","HelloWorldV1Marker"]};
+window.SIDEBAR_ITEMS = {"struct":["FormattedHelloWorld","HelloWorld","HelloWorldFormatter","HelloWorldFormatterPreferences","HelloWorldProvider","HelloWorldV1"]};

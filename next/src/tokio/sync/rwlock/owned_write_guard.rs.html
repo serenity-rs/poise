@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.41.1/src/sync/rwlock/owned_write_guard.rs`."><title>owned_write_guard.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-203241e4.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.100.0-nightly (0ed41eb41 2026-09-04)" data-channel="nightly" data-search-js="search-b167f383.js" data-stringdex-js="stringdex-b5109af9.js" data-settings-js="settings-170eb4bf.js" ><script src="../../../../static.files/storage-41dd4d93.js"></script><script defer src="../../../../static.files/src-script-813739b1.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-1814ead3.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-9f56287d.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><h1><div class="sub-heading">tokio/sync/rwlock/</div>owned_write_guard.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-3"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="kw">use </span><span class="kw">crate</span>::sync::rwlock::owned_read_guard::OwnedRwLockReadGuard;
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.53.1/src/sync/rwlock/owned_write_guard.rs`."><title>owned_write_guard.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-203241e4.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="tokio" data-themes="" data-resource-suffix="" data-rustdoc-version="1.100.0-nightly (0ed41eb41 2026-09-04)" data-channel="nightly" data-search-js="search-b167f383.js" data-stringdex-js="stringdex-b5109af9.js" data-settings-js="settings-170eb4bf.js" ><script src="../../../../static.files/storage-41dd4d93.js"></script><script defer src="../../../../static.files/src-script-813739b1.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-1814ead3.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-9f56287d.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><h1><div class="sub-heading">tokio/sync/rwlock/</div>owned_write_guard.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-3"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="kw">use </span><span class="kw">crate</span>::sync::rwlock::owned_read_guard::OwnedRwLockReadGuard;
 <a href=#2 id=2 data-nosnippet>2</a><span class="kw">use </span><span class="kw">crate</span>::sync::rwlock::owned_write_guard_mapped::OwnedRwLockMappedWriteGuard;
 <a href=#3 id=3 data-nosnippet>3</a><span class="kw">use </span><span class="kw">crate</span>::sync::rwlock::RwLock;
 <a href=#4 id=4 data-nosnippet>4</a><span class="kw">use </span>std::marker::PhantomData;
@@ -69,7 +69,7 @@
 <a href=#69 id=69 data-nosnippet>69</a>    /// #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 <a href=#70 id=70 data-nosnippet>70</a>    /// struct Foo(u32);
 <a href=#71 id=71 data-nosnippet>71</a>    ///
-<a href=#72 id=72 data-nosnippet>72</a>    /// # #[tokio::main]
+<a href=#72 id=72 data-nosnippet>72</a>    /// # #[tokio::main(flavor = "current_thread")]
 <a href=#73 id=73 data-nosnippet>73</a>    /// # async fn main() {
 <a href=#74 id=74 data-nosnippet>74</a>    /// let lock = Arc::new(RwLock::new(Foo(1)));
 <a href=#75 id=75 data-nosnippet>75</a>    ///
@@ -121,7 +121,7 @@
 <a href=#121 id=121 data-nosnippet>121</a>    /// #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 <a href=#122 id=122 data-nosnippet>122</a>    /// struct Foo(u32);
 <a href=#123 id=123 data-nosnippet>123</a>    ///
-<a href=#124 id=124 data-nosnippet>124</a>    /// # #[tokio::main]
+<a href=#124 id=124 data-nosnippet>124</a>    /// # #[tokio::main(flavor = "current_thread")]
 <a href=#125 id=125 data-nosnippet>125</a>    /// # async fn main() {
 <a href=#126 id=126 data-nosnippet>126</a>    /// let lock = Arc::new(RwLock::new(Foo(1)));
 <a href=#127 id=127 data-nosnippet>127</a>    ///
@@ -193,7 +193,7 @@
 <a href=#193 id=193 data-nosnippet>193</a>    /// #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 <a href=#194 id=194 data-nosnippet>194</a>    /// struct Foo(u32);
 <a href=#195 id=195 data-nosnippet>195</a>    ///
-<a href=#196 id=196 data-nosnippet>196</a>    /// # #[tokio::main]
+<a href=#196 id=196 data-nosnippet>196</a>    /// # #[tokio::main(flavor = "current_thread")]
 <a href=#197 id=197 data-nosnippet>197</a>    /// # async fn main() {
 <a href=#198 id=198 data-nosnippet>198</a>    /// let lock = Arc::new(RwLock::new(Foo(1)));
 <a href=#199 id=199 data-nosnippet>199</a>    ///
@@ -255,7 +255,7 @@
 <a href=#255 id=255 data-nosnippet>255</a>    /// #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 <a href=#256 id=256 data-nosnippet>256</a>    /// struct Foo(u32);
 <a href=#257 id=257 data-nosnippet>257</a>    ///
-<a href=#258 id=258 data-nosnippet>258</a>    /// # #[tokio::main]
+<a href=#258 id=258 data-nosnippet>258</a>    /// # #[tokio::main(flavor = "current_thread")]
 <a href=#259 id=259 data-nosnippet>259</a>    /// # async fn main() {
 <a href=#260 id=260 data-nosnippet>260</a>    /// let lock = Arc::new(RwLock::new(Foo(1)));
 <a href=#261 id=261 data-nosnippet>261</a>    ///
@@ -337,7 +337,7 @@
 <a href=#337 id=337 data-nosnippet>337</a>    /// # use tokio::sync::RwLock;
 <a href=#338 id=338 data-nosnippet>338</a>    /// # use std::sync::Arc;
 <a href=#339 id=339 data-nosnippet>339</a>    /// #
-<a href=#340 id=340 data-nosnippet>340</a>    /// # #[tokio::main]
+<a href=#340 id=340 data-nosnippet>340</a>    /// # #[tokio::main(flavor = "current_thread")]
 <a href=#341 id=341 data-nosnippet>341</a>    /// # async fn main() {
 <a href=#342 id=342 data-nosnippet>342</a>    /// let lock = Arc::new(RwLock::new(1));
 <a href=#343 id=343 data-nosnippet>343</a>    ///
@@ -399,7 +399,7 @@
 <a href=#399 id=399 data-nosnippet>399</a>    /// use std::sync::Arc;
 <a href=#400 id=400 data-nosnippet>400</a>    /// use tokio::sync::{RwLock, OwnedRwLockWriteGuard};
 <a href=#401 id=401 data-nosnippet>401</a>    ///
-<a href=#402 id=402 data-nosnippet>402</a>    /// # #[tokio::main]
+<a href=#402 id=402 data-nosnippet>402</a>    /// # #[tokio::main(flavor = "current_thread")]
 <a href=#403 id=403 data-nosnippet>403</a>    /// # async fn main() {
 <a href=#404 id=404 data-nosnippet>404</a>    /// let lock = Arc::new(RwLock::new(1));
 <a href=#405 id=405 data-nosnippet>405</a>    ///

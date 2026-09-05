@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"macro":[["test_file",1]],"mod":["aead","agreement","constant_time","digest","error","hkdf","hmac","io","pbkdf2","pkcs8","rand","rsa","signature","test"]};
+window.SIDEBAR_ITEMS = {"macro":[["test_file",1]],"mod":["aead","agreement","digest","error","hkdf","hmac","io","pbkdf2","pkcs8","rand","rsa","signature"]};

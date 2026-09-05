@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/http-1.1.0/src/uri/scheme.rs`."><title>scheme.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../static.files/rustdoc-203241e4.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="http" data-themes="" data-resource-suffix="" data-rustdoc-version="1.100.0-nightly (0ed41eb41 2026-09-04)" data-channel="nightly" data-search-js="search-b167f383.js" data-stringdex-js="stringdex-b5109af9.js" data-settings-js="settings-170eb4bf.js" ><script src="../../../static.files/storage-41dd4d93.js"></script><script defer src="../../../static.files/src-script-813739b1.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-1814ead3.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-9f56287d.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><h1><div class="sub-heading">http/uri/</div>scheme.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-3"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="kw">use </span>std::convert::TryFrom;
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/http-1.5.0/src/uri/scheme.rs`."><title>scheme.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../static.files/rustdoc-203241e4.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="http" data-themes="" data-resource-suffix="" data-rustdoc-version="1.100.0-nightly (0ed41eb41 2026-09-04)" data-channel="nightly" data-search-js="search-b167f383.js" data-stringdex-js="stringdex-b5109af9.js" data-settings-js="settings-170eb4bf.js" ><script src="../../../static.files/storage-41dd4d93.js"></script><script defer src="../../../static.files/src-script-813739b1.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-1814ead3.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-9f56287d.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><h1><div class="sub-heading">http/uri/</div>scheme.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-3"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="kw">use </span>std::convert::TryFrom;
 <a href=#2 id=2 data-nosnippet>2</a><span class="kw">use </span>std::fmt;
 <a href=#3 id=3 data-nosnippet>3</a><span class="kw">use </span>std::hash::{Hash, Hasher};
 <a href=#4 id=4 data-nosnippet>4</a><span class="kw">use </span>std::str::FromStr;
@@ -67,10 +67,10 @@
 <a href=#67 id=67 data-nosnippet>67</a>    }
 <a href=#68 id=68 data-nosnippet>68</a>}
 <a href=#69 id=69 data-nosnippet>69</a>
-<a href=#70 id=70 data-nosnippet>70</a><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt; <span class="kw">for </span>Scheme {
+<a href=#70 id=70 data-nosnippet>70</a><span class="kw">impl </span>TryFrom&lt;<span class="kw-2">&amp;</span>[u8]&gt; <span class="kw">for </span>Scheme {
 <a href=#71 id=71 data-nosnippet>71</a>    <span class="kw">type </span>Error = InvalidUri;
 <a href=#72 id=72 data-nosnippet>72</a>    <span class="attr">#[inline]
-<a href=#73 id=73 data-nosnippet>73</a>    </span><span class="kw">fn </span>try_from(s: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
+<a href=#73 id=73 data-nosnippet>73</a>    </span><span class="kw">fn </span>try_from(s: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
 <a href=#74 id=74 data-nosnippet>74</a>        <span class="kw">use </span><span class="self">self</span>::Scheme2::<span class="kw-2">*</span>;
 <a href=#75 id=75 data-nosnippet>75</a>
 <a href=#76 id=76 data-nosnippet>76</a>        <span class="kw">match </span>Scheme2::parse_exact(s)<span class="question-mark">? </span>{
@@ -89,10 +89,10 @@
 <a href=#89 id=89 data-nosnippet>89</a>    }
 <a href=#90 id=90 data-nosnippet>90</a>}
 <a href=#91 id=91 data-nosnippet>91</a>
-<a href=#92 id=92 data-nosnippet>92</a><span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>str&gt; <span class="kw">for </span>Scheme {
+<a href=#92 id=92 data-nosnippet>92</a><span class="kw">impl </span>TryFrom&lt;<span class="kw-2">&amp;</span>str&gt; <span class="kw">for </span>Scheme {
 <a href=#93 id=93 data-nosnippet>93</a>    <span class="kw">type </span>Error = InvalidUri;
 <a href=#94 id=94 data-nosnippet>94</a>    <span class="attr">#[inline]
-<a href=#95 id=95 data-nosnippet>95</a>    </span><span class="kw">fn </span>try_from(s: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
+<a href=#95 id=95 data-nosnippet>95</a>    </span><span class="kw">fn </span>try_from(s: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Error&gt; {
 <a href=#96 id=96 data-nosnippet>96</a>        TryFrom::try_from(s.as_bytes())
 <a href=#97 id=97 data-nosnippet>97</a>    }
 <a href=#98 id=98 data-nosnippet>98</a>}
@@ -302,7 +302,7 @@
 <a href=#302 id=302 data-nosnippet>302</a>                        <span class="comment">// Return scheme
 <a href=#303 id=303 data-nosnippet>303</a>                        </span><span class="kw">return </span><span class="prelude-val">Ok</span>(Scheme2::Other(i));
 <a href=#304 id=304 data-nosnippet>304</a>                    }
-<a href=#305 id=305 data-nosnippet>305</a>                    <span class="comment">// Invald scheme character, abort
+<a href=#305 id=305 data-nosnippet>305</a>                    <span class="comment">// Invalid scheme character, abort
 <a href=#306 id=306 data-nosnippet>306</a>                    </span><span class="number">0 </span>=&gt; <span class="kw">break</span>,
 <a href=#307 id=307 data-nosnippet>307</a>                    <span class="kw">_ </span>=&gt; {}
 <a href=#308 id=308 data-nosnippet>308</a>                }
@@ -349,10 +349,10 @@
 <a href=#349 id=349 data-nosnippet>349</a>
 <a href=#350 id=350 data-nosnippet>350</a>    <span class="attr">#[test]
 <a href=#351 id=351 data-nosnippet>351</a>    </span><span class="kw">fn </span>invalid_scheme_is_error() {
-<a href=#352 id=352 data-nosnippet>352</a>        Scheme::try_from(<span class="string">"my_funky_scheme"</span>).expect_err(<span class="string">"Unexpectly valid Scheme"</span>);
+<a href=#352 id=352 data-nosnippet>352</a>        Scheme::try_from(<span class="string">"my_funky_scheme"</span>).expect_err(<span class="string">"Unexpectedly valid Scheme"</span>);
 <a href=#353 id=353 data-nosnippet>353</a>
 <a href=#354 id=354 data-nosnippet>354</a>        <span class="comment">// Invalid UTF-8
-<a href=#355 id=355 data-nosnippet>355</a>        </span>Scheme::try_from([<span class="number">0xC0</span>].as_ref()).expect_err(<span class="string">"Unexpectly valid Scheme"</span>);
+<a href=#355 id=355 data-nosnippet>355</a>        </span>Scheme::try_from([<span class="number">0xC0</span>].as_ref()).expect_err(<span class="string">"Unexpectedly valid Scheme"</span>);
 <a href=#356 id=356 data-nosnippet>356</a>    }
 <a href=#357 id=357 data-nosnippet>357</a>
 <a href=#358 id=358 data-nosnippet>358</a>    <span class="kw">fn </span>scheme(s: <span class="kw-2">&amp;</span>str) -&gt; Scheme {

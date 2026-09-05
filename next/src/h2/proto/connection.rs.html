@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/h2-0.3.26/src/proto/connection.rs`."><title>connection.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../static.files/rustdoc-203241e4.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="h2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.100.0-nightly (0ed41eb41 2026-09-04)" data-channel="nightly" data-search-js="search-b167f383.js" data-stringdex-js="stringdex-b5109af9.js" data-settings-js="settings-170eb4bf.js" ><script src="../../../static.files/storage-41dd4d93.js"></script><script defer src="../../../static.files/src-script-813739b1.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-1814ead3.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-9f56287d.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><h1><div class="sub-heading">h2/proto/</div>connection.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-3"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="kw">use </span><span class="kw">crate</span>::codec::UserError;
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/h2-0.3.27/src/proto/connection.rs`."><title>connection.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../static.files/rustdoc-203241e4.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="h2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.100.0-nightly (0ed41eb41 2026-09-04)" data-channel="nightly" data-search-js="search-b167f383.js" data-stringdex-js="stringdex-b5109af9.js" data-settings-js="settings-170eb4bf.js" ><script src="../../../static.files/storage-41dd4d93.js"></script><script defer src="../../../static.files/src-script-813739b1.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-1814ead3.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-9f56287d.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><h1><div class="sub-heading">h2/proto/</div>connection.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-3"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="kw">use </span><span class="kw">crate</span>::codec::UserError;
 <a href=#2 id=2 data-nosnippet>2</a><span class="kw">use </span><span class="kw">crate</span>::frame::{Reason, StreamId};
 <a href=#3 id=3 data-nosnippet>3</a><span class="kw">use crate</span>::{client, server};
 <a href=#4 id=4 data-nosnippet>4</a>
@@ -428,174 +428,183 @@
 <a href=#428 id=428 data-nosnippet>428</a>            // error. This is handled by setting a GOAWAY frame followed by
 <a href=#429 id=429 data-nosnippet>429</a>            // terminating the connection.
 <a href=#430 id=430 data-nosnippet>430</a>            </span><span class="prelude-val">Err</span>(Error::GoAway(debug_data, reason, initiator)) =&gt; {
-<a href=#431 id=431 data-nosnippet>431</a>                <span class="kw">let </span>e = Error::GoAway(debug_data.clone(), reason, initiator);
-<a href=#432 id=432 data-nosnippet>432</a>                <span class="macro">tracing::debug!</span>(error = <span class="question-mark">?</span>e, <span class="string">"Connection::poll; connection error"</span>);
-<a href=#433 id=433 data-nosnippet>433</a>
-<a href=#434 id=434 data-nosnippet>434</a>                <span class="comment">// We may have already sent a GOAWAY for this error,
-<a href=#435 id=435 data-nosnippet>435</a>                // if so, don't send another, just flush and close up.
-<a href=#436 id=436 data-nosnippet>436</a>                </span><span class="kw">if </span><span class="self">self
-<a href=#437 id=437 data-nosnippet>437</a>                    </span>.go_away
-<a href=#438 id=438 data-nosnippet>438</a>                    .going_away()
-<a href=#439 id=439 data-nosnippet>439</a>                    .map_or(<span class="bool-val">false</span>, |frame| frame.reason() == reason)
-<a href=#440 id=440 data-nosnippet>440</a>                {
-<a href=#441 id=441 data-nosnippet>441</a>                    <span class="macro">tracing::trace!</span>(<span class="string">"    -&gt; already going away"</span>);
-<a href=#442 id=442 data-nosnippet>442</a>                    <span class="kw-2">*</span><span class="self">self</span>.state = State::Closing(reason, initiator);
-<a href=#443 id=443 data-nosnippet>443</a>                    <span class="kw">return </span><span class="prelude-val">Ok</span>(());
-<a href=#444 id=444 data-nosnippet>444</a>                }
-<a href=#445 id=445 data-nosnippet>445</a>
-<a href=#446 id=446 data-nosnippet>446</a>                <span class="comment">// Reset all active streams
-<a href=#447 id=447 data-nosnippet>447</a>                </span><span class="self">self</span>.streams.handle_error(e);
-<a href=#448 id=448 data-nosnippet>448</a>                <span class="self">self</span>.go_away_now_data(reason, debug_data);
-<a href=#449 id=449 data-nosnippet>449</a>                <span class="prelude-val">Ok</span>(())
-<a href=#450 id=450 data-nosnippet>450</a>            }
-<a href=#451 id=451 data-nosnippet>451</a>            <span class="comment">// Attempting to read a frame resulted in a stream level error.
-<a href=#452 id=452 data-nosnippet>452</a>            // This is handled by resetting the frame then trying to read
-<a href=#453 id=453 data-nosnippet>453</a>            // another frame.
-<a href=#454 id=454 data-nosnippet>454</a>            </span><span class="prelude-val">Err</span>(Error::Reset(id, reason, initiator)) =&gt; {
-<a href=#455 id=455 data-nosnippet>455</a>                <span class="macro">debug_assert_eq!</span>(initiator, Initiator::Library);
-<a href=#456 id=456 data-nosnippet>456</a>                <span class="macro">tracing::trace!</span>(<span class="question-mark">?</span>id, <span class="question-mark">?</span>reason, <span class="string">"stream error"</span>);
-<a href=#457 id=457 data-nosnippet>457</a>                <span class="self">self</span>.streams.send_reset(id, reason);
-<a href=#458 id=458 data-nosnippet>458</a>                <span class="prelude-val">Ok</span>(())
-<a href=#459 id=459 data-nosnippet>459</a>            }
-<a href=#460 id=460 data-nosnippet>460</a>            <span class="comment">// Attempting to read a frame resulted in an I/O error. All
-<a href=#461 id=461 data-nosnippet>461</a>            // active streams must be reset.
-<a href=#462 id=462 data-nosnippet>462</a>            //
-<a href=#463 id=463 data-nosnippet>463</a>            // TODO: Are I/O errors recoverable?
-<a href=#464 id=464 data-nosnippet>464</a>            </span><span class="prelude-val">Err</span>(Error::Io(e, inner)) =&gt; {
-<a href=#465 id=465 data-nosnippet>465</a>                <span class="macro">tracing::debug!</span>(error = <span class="question-mark">?</span>e, <span class="string">"Connection::poll; IO error"</span>);
-<a href=#466 id=466 data-nosnippet>466</a>                <span class="kw">let </span>e = Error::Io(e, inner);
-<a href=#467 id=467 data-nosnippet>467</a>
-<a href=#468 id=468 data-nosnippet>468</a>                <span class="comment">// Reset all active streams
-<a href=#469 id=469 data-nosnippet>469</a>                </span><span class="self">self</span>.streams.handle_error(e.clone());
-<a href=#470 id=470 data-nosnippet>470</a>
-<a href=#471 id=471 data-nosnippet>471</a>                <span class="comment">// Return the error
-<a href=#472 id=472 data-nosnippet>472</a>                </span><span class="prelude-val">Err</span>(e)
-<a href=#473 id=473 data-nosnippet>473</a>            }
-<a href=#474 id=474 data-nosnippet>474</a>        }
-<a href=#475 id=475 data-nosnippet>475</a>    }
-<a href=#476 id=476 data-nosnippet>476</a>
-<a href=#477 id=477 data-nosnippet>477</a>    <span class="kw">fn </span>recv_frame(<span class="kw-2">&amp;mut </span><span class="self">self</span>, frame: <span class="prelude-ty">Option</span>&lt;Frame&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;ReceivedFrame, Error&gt; {
-<a href=#478 id=478 data-nosnippet>478</a>        <span class="kw">use </span><span class="kw">crate</span>::frame::Frame::<span class="kw-2">*</span>;
-<a href=#479 id=479 data-nosnippet>479</a>        <span class="kw">match </span>frame {
-<a href=#480 id=480 data-nosnippet>480</a>            <span class="prelude-val">Some</span>(Headers(frame)) =&gt; {
-<a href=#481 id=481 data-nosnippet>481</a>                <span class="macro">tracing::trace!</span>(<span class="question-mark">?</span>frame, <span class="string">"recv HEADERS"</span>);
-<a href=#482 id=482 data-nosnippet>482</a>                <span class="self">self</span>.streams.recv_headers(frame)<span class="question-mark">?</span>;
-<a href=#483 id=483 data-nosnippet>483</a>            }
-<a href=#484 id=484 data-nosnippet>484</a>            <span class="prelude-val">Some</span>(Data(frame)) =&gt; {
-<a href=#485 id=485 data-nosnippet>485</a>                <span class="macro">tracing::trace!</span>(<span class="question-mark">?</span>frame, <span class="string">"recv DATA"</span>);
-<a href=#486 id=486 data-nosnippet>486</a>                <span class="self">self</span>.streams.recv_data(frame)<span class="question-mark">?</span>;
-<a href=#487 id=487 data-nosnippet>487</a>            }
-<a href=#488 id=488 data-nosnippet>488</a>            <span class="prelude-val">Some</span>(Reset(frame)) =&gt; {
-<a href=#489 id=489 data-nosnippet>489</a>                <span class="macro">tracing::trace!</span>(<span class="question-mark">?</span>frame, <span class="string">"recv RST_STREAM"</span>);
-<a href=#490 id=490 data-nosnippet>490</a>                <span class="self">self</span>.streams.recv_reset(frame)<span class="question-mark">?</span>;
-<a href=#491 id=491 data-nosnippet>491</a>            }
-<a href=#492 id=492 data-nosnippet>492</a>            <span class="prelude-val">Some</span>(PushPromise(frame)) =&gt; {
-<a href=#493 id=493 data-nosnippet>493</a>                <span class="macro">tracing::trace!</span>(<span class="question-mark">?</span>frame, <span class="string">"recv PUSH_PROMISE"</span>);
-<a href=#494 id=494 data-nosnippet>494</a>                <span class="self">self</span>.streams.recv_push_promise(frame)<span class="question-mark">?</span>;
-<a href=#495 id=495 data-nosnippet>495</a>            }
-<a href=#496 id=496 data-nosnippet>496</a>            <span class="prelude-val">Some</span>(Settings(frame)) =&gt; {
-<a href=#497 id=497 data-nosnippet>497</a>                <span class="macro">tracing::trace!</span>(<span class="question-mark">?</span>frame, <span class="string">"recv SETTINGS"</span>);
-<a href=#498 id=498 data-nosnippet>498</a>                <span class="kw">return </span><span class="prelude-val">Ok</span>(ReceivedFrame::Settings(frame));
-<a href=#499 id=499 data-nosnippet>499</a>            }
-<a href=#500 id=500 data-nosnippet>500</a>            <span class="prelude-val">Some</span>(GoAway(frame)) =&gt; {
-<a href=#501 id=501 data-nosnippet>501</a>                <span class="macro">tracing::trace!</span>(<span class="question-mark">?</span>frame, <span class="string">"recv GOAWAY"</span>);
-<a href=#502 id=502 data-nosnippet>502</a>                <span class="comment">// This should prevent starting new streams,
-<a href=#503 id=503 data-nosnippet>503</a>                // but should allow continuing to process current streams
-<a href=#504 id=504 data-nosnippet>504</a>                // until they are all EOS. Once they are, State should
-<a href=#505 id=505 data-nosnippet>505</a>                // transition to GoAway.
-<a href=#506 id=506 data-nosnippet>506</a>                </span><span class="self">self</span>.streams.recv_go_away(<span class="kw-2">&amp;</span>frame)<span class="question-mark">?</span>;
-<a href=#507 id=507 data-nosnippet>507</a>                <span class="kw-2">*</span><span class="self">self</span>.error = <span class="prelude-val">Some</span>(frame);
+<a href=#431 id=431 data-nosnippet>431</a>                <span class="self">self</span>.handle_go_away(reason, debug_data, initiator);
+<a href=#432 id=432 data-nosnippet>432</a>                <span class="prelude-val">Ok</span>(())
+<a href=#433 id=433 data-nosnippet>433</a>            }
+<a href=#434 id=434 data-nosnippet>434</a>            <span class="comment">// Attempting to read a frame resulted in a stream level error.
+<a href=#435 id=435 data-nosnippet>435</a>            // This is handled by resetting the frame then trying to read
+<a href=#436 id=436 data-nosnippet>436</a>            // another frame.
+<a href=#437 id=437 data-nosnippet>437</a>            </span><span class="prelude-val">Err</span>(Error::Reset(id, reason, initiator)) =&gt; {
+<a href=#438 id=438 data-nosnippet>438</a>                <span class="macro">debug_assert_eq!</span>(initiator, Initiator::Library);
+<a href=#439 id=439 data-nosnippet>439</a>                <span class="macro">tracing::trace!</span>(<span class="question-mark">?</span>id, <span class="question-mark">?</span>reason, <span class="string">"stream error"</span>);
+<a href=#440 id=440 data-nosnippet>440</a>                <span class="kw">match </span><span class="self">self</span>.streams.send_reset(id, reason) {
+<a href=#441 id=441 data-nosnippet>441</a>                    <span class="prelude-val">Ok</span>(()) =&gt; (),
+<a href=#442 id=442 data-nosnippet>442</a>                    <span class="prelude-val">Err</span>(<span class="kw">crate</span>::proto::error::GoAway { debug_data, reason }) =&gt; {
+<a href=#443 id=443 data-nosnippet>443</a>                        <span class="self">self</span>.handle_go_away(reason, debug_data, Initiator::Library);
+<a href=#444 id=444 data-nosnippet>444</a>                    }
+<a href=#445 id=445 data-nosnippet>445</a>                }
+<a href=#446 id=446 data-nosnippet>446</a>                <span class="prelude-val">Ok</span>(())
+<a href=#447 id=447 data-nosnippet>447</a>            }
+<a href=#448 id=448 data-nosnippet>448</a>            <span class="comment">// Attempting to read a frame resulted in an I/O error. All
+<a href=#449 id=449 data-nosnippet>449</a>            // active streams must be reset.
+<a href=#450 id=450 data-nosnippet>450</a>            //
+<a href=#451 id=451 data-nosnippet>451</a>            // TODO: Are I/O errors recoverable?
+<a href=#452 id=452 data-nosnippet>452</a>            </span><span class="prelude-val">Err</span>(Error::Io(e, inner)) =&gt; {
+<a href=#453 id=453 data-nosnippet>453</a>                <span class="macro">tracing::debug!</span>(error = <span class="question-mark">?</span>e, <span class="string">"Connection::poll; IO error"</span>);
+<a href=#454 id=454 data-nosnippet>454</a>                <span class="kw">let </span>e = Error::Io(e, inner);
+<a href=#455 id=455 data-nosnippet>455</a>
+<a href=#456 id=456 data-nosnippet>456</a>                <span class="comment">// Reset all active streams
+<a href=#457 id=457 data-nosnippet>457</a>                </span><span class="self">self</span>.streams.handle_error(e.clone());
+<a href=#458 id=458 data-nosnippet>458</a>
+<a href=#459 id=459 data-nosnippet>459</a>                <span class="comment">// Return the error
+<a href=#460 id=460 data-nosnippet>460</a>                </span><span class="prelude-val">Err</span>(e)
+<a href=#461 id=461 data-nosnippet>461</a>            }
+<a href=#462 id=462 data-nosnippet>462</a>        }
+<a href=#463 id=463 data-nosnippet>463</a>    }
+<a href=#464 id=464 data-nosnippet>464</a>
+<a href=#465 id=465 data-nosnippet>465</a>    <span class="kw">fn </span>handle_go_away(<span class="kw-2">&amp;mut </span><span class="self">self</span>, reason: Reason, debug_data: Bytes, initiator: Initiator) {
+<a href=#466 id=466 data-nosnippet>466</a>        <span class="kw">let </span>e = Error::GoAway(debug_data.clone(), reason, initiator);
+<a href=#467 id=467 data-nosnippet>467</a>        <span class="macro">tracing::debug!</span>(error = <span class="question-mark">?</span>e, <span class="string">"Connection::poll; connection error"</span>);
+<a href=#468 id=468 data-nosnippet>468</a>
+<a href=#469 id=469 data-nosnippet>469</a>        <span class="comment">// We may have already sent a GOAWAY for this error,
+<a href=#470 id=470 data-nosnippet>470</a>        // if so, don't send another, just flush and close up.
+<a href=#471 id=471 data-nosnippet>471</a>        </span><span class="kw">if </span><span class="self">self
+<a href=#472 id=472 data-nosnippet>472</a>            </span>.go_away
+<a href=#473 id=473 data-nosnippet>473</a>            .going_away()
+<a href=#474 id=474 data-nosnippet>474</a>            .map_or(<span class="bool-val">false</span>, |frame| frame.reason() == reason)
+<a href=#475 id=475 data-nosnippet>475</a>        {
+<a href=#476 id=476 data-nosnippet>476</a>            <span class="macro">tracing::trace!</span>(<span class="string">"    -&gt; already going away"</span>);
+<a href=#477 id=477 data-nosnippet>477</a>            <span class="kw-2">*</span><span class="self">self</span>.state = State::Closing(reason, initiator);
+<a href=#478 id=478 data-nosnippet>478</a>            <span class="kw">return</span>;
+<a href=#479 id=479 data-nosnippet>479</a>        }
+<a href=#480 id=480 data-nosnippet>480</a>
+<a href=#481 id=481 data-nosnippet>481</a>        <span class="comment">// Reset all active streams
+<a href=#482 id=482 data-nosnippet>482</a>        </span><span class="self">self</span>.streams.handle_error(e);
+<a href=#483 id=483 data-nosnippet>483</a>        <span class="self">self</span>.go_away_now_data(reason, debug_data);
+<a href=#484 id=484 data-nosnippet>484</a>    }
+<a href=#485 id=485 data-nosnippet>485</a>
+<a href=#486 id=486 data-nosnippet>486</a>    <span class="kw">fn </span>recv_frame(<span class="kw-2">&amp;mut </span><span class="self">self</span>, frame: <span class="prelude-ty">Option</span>&lt;Frame&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;ReceivedFrame, Error&gt; {
+<a href=#487 id=487 data-nosnippet>487</a>        <span class="kw">use </span><span class="kw">crate</span>::frame::Frame::<span class="kw-2">*</span>;
+<a href=#488 id=488 data-nosnippet>488</a>        <span class="kw">match </span>frame {
+<a href=#489 id=489 data-nosnippet>489</a>            <span class="prelude-val">Some</span>(Headers(frame)) =&gt; {
+<a href=#490 id=490 data-nosnippet>490</a>                <span class="macro">tracing::trace!</span>(<span class="question-mark">?</span>frame, <span class="string">"recv HEADERS"</span>);
+<a href=#491 id=491 data-nosnippet>491</a>                <span class="self">self</span>.streams.recv_headers(frame)<span class="question-mark">?</span>;
+<a href=#492 id=492 data-nosnippet>492</a>            }
+<a href=#493 id=493 data-nosnippet>493</a>            <span class="prelude-val">Some</span>(Data(frame)) =&gt; {
+<a href=#494 id=494 data-nosnippet>494</a>                <span class="macro">tracing::trace!</span>(<span class="question-mark">?</span>frame, <span class="string">"recv DATA"</span>);
+<a href=#495 id=495 data-nosnippet>495</a>                <span class="self">self</span>.streams.recv_data(frame)<span class="question-mark">?</span>;
+<a href=#496 id=496 data-nosnippet>496</a>            }
+<a href=#497 id=497 data-nosnippet>497</a>            <span class="prelude-val">Some</span>(Reset(frame)) =&gt; {
+<a href=#498 id=498 data-nosnippet>498</a>                <span class="macro">tracing::trace!</span>(<span class="question-mark">?</span>frame, <span class="string">"recv RST_STREAM"</span>);
+<a href=#499 id=499 data-nosnippet>499</a>                <span class="self">self</span>.streams.recv_reset(frame)<span class="question-mark">?</span>;
+<a href=#500 id=500 data-nosnippet>500</a>            }
+<a href=#501 id=501 data-nosnippet>501</a>            <span class="prelude-val">Some</span>(PushPromise(frame)) =&gt; {
+<a href=#502 id=502 data-nosnippet>502</a>                <span class="macro">tracing::trace!</span>(<span class="question-mark">?</span>frame, <span class="string">"recv PUSH_PROMISE"</span>);
+<a href=#503 id=503 data-nosnippet>503</a>                <span class="self">self</span>.streams.recv_push_promise(frame)<span class="question-mark">?</span>;
+<a href=#504 id=504 data-nosnippet>504</a>            }
+<a href=#505 id=505 data-nosnippet>505</a>            <span class="prelude-val">Some</span>(Settings(frame)) =&gt; {
+<a href=#506 id=506 data-nosnippet>506</a>                <span class="macro">tracing::trace!</span>(<span class="question-mark">?</span>frame, <span class="string">"recv SETTINGS"</span>);
+<a href=#507 id=507 data-nosnippet>507</a>                <span class="kw">return </span><span class="prelude-val">Ok</span>(ReceivedFrame::Settings(frame));
 <a href=#508 id=508 data-nosnippet>508</a>            }
-<a href=#509 id=509 data-nosnippet>509</a>            <span class="prelude-val">Some</span>(Ping(frame)) =&gt; {
-<a href=#510 id=510 data-nosnippet>510</a>                <span class="macro">tracing::trace!</span>(<span class="question-mark">?</span>frame, <span class="string">"recv PING"</span>);
-<a href=#511 id=511 data-nosnippet>511</a>                <span class="kw">let </span>status = <span class="self">self</span>.ping_pong.recv_ping(frame);
-<a href=#512 id=512 data-nosnippet>512</a>                <span class="kw">if </span>status.is_shutdown() {
-<a href=#513 id=513 data-nosnippet>513</a>                    <span class="macro">assert!</span>(
-<a href=#514 id=514 data-nosnippet>514</a>                        <span class="self">self</span>.go_away.is_going_away(),
-<a href=#515 id=515 data-nosnippet>515</a>                        <span class="string">"received unexpected shutdown ping"
-<a href=#516 id=516 data-nosnippet>516</a>                    </span>);
-<a href=#517 id=517 data-nosnippet>517</a>
-<a href=#518 id=518 data-nosnippet>518</a>                    <span class="kw">let </span>last_processed_id = <span class="self">self</span>.streams.last_processed_id();
-<a href=#519 id=519 data-nosnippet>519</a>                    <span class="self">self</span>.go_away(last_processed_id, Reason::NO_ERROR);
-<a href=#520 id=520 data-nosnippet>520</a>                }
-<a href=#521 id=521 data-nosnippet>521</a>            }
-<a href=#522 id=522 data-nosnippet>522</a>            <span class="prelude-val">Some</span>(WindowUpdate(frame)) =&gt; {
-<a href=#523 id=523 data-nosnippet>523</a>                <span class="macro">tracing::trace!</span>(<span class="question-mark">?</span>frame, <span class="string">"recv WINDOW_UPDATE"</span>);
-<a href=#524 id=524 data-nosnippet>524</a>                <span class="self">self</span>.streams.recv_window_update(frame)<span class="question-mark">?</span>;
-<a href=#525 id=525 data-nosnippet>525</a>            }
-<a href=#526 id=526 data-nosnippet>526</a>            <span class="prelude-val">Some</span>(Priority(frame)) =&gt; {
-<a href=#527 id=527 data-nosnippet>527</a>                <span class="macro">tracing::trace!</span>(<span class="question-mark">?</span>frame, <span class="string">"recv PRIORITY"</span>);
-<a href=#528 id=528 data-nosnippet>528</a>                <span class="comment">// TODO: handle
-<a href=#529 id=529 data-nosnippet>529</a>            </span>}
-<a href=#530 id=530 data-nosnippet>530</a>            <span class="prelude-val">None </span>=&gt; {
-<a href=#531 id=531 data-nosnippet>531</a>                <span class="macro">tracing::trace!</span>(<span class="string">"codec closed"</span>);
-<a href=#532 id=532 data-nosnippet>532</a>                <span class="self">self</span>.streams.recv_eof(<span class="bool-val">false</span>).expect(<span class="string">"mutex poisoned"</span>);
-<a href=#533 id=533 data-nosnippet>533</a>                <span class="kw">return </span><span class="prelude-val">Ok</span>(ReceivedFrame::Done);
+<a href=#509 id=509 data-nosnippet>509</a>            <span class="prelude-val">Some</span>(GoAway(frame)) =&gt; {
+<a href=#510 id=510 data-nosnippet>510</a>                <span class="macro">tracing::trace!</span>(<span class="question-mark">?</span>frame, <span class="string">"recv GOAWAY"</span>);
+<a href=#511 id=511 data-nosnippet>511</a>                <span class="comment">// This should prevent starting new streams,
+<a href=#512 id=512 data-nosnippet>512</a>                // but should allow continuing to process current streams
+<a href=#513 id=513 data-nosnippet>513</a>                // until they are all EOS. Once they are, State should
+<a href=#514 id=514 data-nosnippet>514</a>                // transition to GoAway.
+<a href=#515 id=515 data-nosnippet>515</a>                </span><span class="self">self</span>.streams.recv_go_away(<span class="kw-2">&amp;</span>frame)<span class="question-mark">?</span>;
+<a href=#516 id=516 data-nosnippet>516</a>                <span class="kw-2">*</span><span class="self">self</span>.error = <span class="prelude-val">Some</span>(frame);
+<a href=#517 id=517 data-nosnippet>517</a>            }
+<a href=#518 id=518 data-nosnippet>518</a>            <span class="prelude-val">Some</span>(Ping(frame)) =&gt; {
+<a href=#519 id=519 data-nosnippet>519</a>                <span class="macro">tracing::trace!</span>(<span class="question-mark">?</span>frame, <span class="string">"recv PING"</span>);
+<a href=#520 id=520 data-nosnippet>520</a>                <span class="kw">let </span>status = <span class="self">self</span>.ping_pong.recv_ping(frame);
+<a href=#521 id=521 data-nosnippet>521</a>                <span class="kw">if </span>status.is_shutdown() {
+<a href=#522 id=522 data-nosnippet>522</a>                    <span class="macro">assert!</span>(
+<a href=#523 id=523 data-nosnippet>523</a>                        <span class="self">self</span>.go_away.is_going_away(),
+<a href=#524 id=524 data-nosnippet>524</a>                        <span class="string">"received unexpected shutdown ping"
+<a href=#525 id=525 data-nosnippet>525</a>                    </span>);
+<a href=#526 id=526 data-nosnippet>526</a>
+<a href=#527 id=527 data-nosnippet>527</a>                    <span class="kw">let </span>last_processed_id = <span class="self">self</span>.streams.last_processed_id();
+<a href=#528 id=528 data-nosnippet>528</a>                    <span class="self">self</span>.go_away(last_processed_id, Reason::NO_ERROR);
+<a href=#529 id=529 data-nosnippet>529</a>                }
+<a href=#530 id=530 data-nosnippet>530</a>            }
+<a href=#531 id=531 data-nosnippet>531</a>            <span class="prelude-val">Some</span>(WindowUpdate(frame)) =&gt; {
+<a href=#532 id=532 data-nosnippet>532</a>                <span class="macro">tracing::trace!</span>(<span class="question-mark">?</span>frame, <span class="string">"recv WINDOW_UPDATE"</span>);
+<a href=#533 id=533 data-nosnippet>533</a>                <span class="self">self</span>.streams.recv_window_update(frame)<span class="question-mark">?</span>;
 <a href=#534 id=534 data-nosnippet>534</a>            }
-<a href=#535 id=535 data-nosnippet>535</a>        }
-<a href=#536 id=536 data-nosnippet>536</a>        <span class="prelude-val">Ok</span>(ReceivedFrame::Continue)
-<a href=#537 id=537 data-nosnippet>537</a>    }
-<a href=#538 id=538 data-nosnippet>538</a>}
-<a href=#539 id=539 data-nosnippet>539</a>
-<a href=#540 id=540 data-nosnippet>540</a><span class="kw">enum </span>ReceivedFrame {
-<a href=#541 id=541 data-nosnippet>541</a>    Settings(frame::Settings),
-<a href=#542 id=542 data-nosnippet>542</a>    Continue,
-<a href=#543 id=543 data-nosnippet>543</a>    Done,
-<a href=#544 id=544 data-nosnippet>544</a>}
-<a href=#545 id=545 data-nosnippet>545</a>
-<a href=#546 id=546 data-nosnippet>546</a><span class="kw">impl</span>&lt;T, B&gt; Connection&lt;T, client::Peer, B&gt;
-<a href=#547 id=547 data-nosnippet>547</a><span class="kw">where
-<a href=#548 id=548 data-nosnippet>548</a>    </span>T: AsyncRead + AsyncWrite,
-<a href=#549 id=549 data-nosnippet>549</a>    B: Buf,
-<a href=#550 id=550 data-nosnippet>550</a>{
-<a href=#551 id=551 data-nosnippet>551</a>    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>streams(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Streams&lt;B, client::Peer&gt; {
-<a href=#552 id=552 data-nosnippet>552</a>        <span class="kw-2">&amp;</span><span class="self">self</span>.inner.streams
-<a href=#553 id=553 data-nosnippet>553</a>    }
-<a href=#554 id=554 data-nosnippet>554</a>}
-<a href=#555 id=555 data-nosnippet>555</a>
-<a href=#556 id=556 data-nosnippet>556</a><span class="kw">impl</span>&lt;T, B&gt; Connection&lt;T, server::Peer, B&gt;
-<a href=#557 id=557 data-nosnippet>557</a><span class="kw">where
-<a href=#558 id=558 data-nosnippet>558</a>    </span>T: AsyncRead + AsyncWrite + Unpin,
-<a href=#559 id=559 data-nosnippet>559</a>    B: Buf,
-<a href=#560 id=560 data-nosnippet>560</a>{
-<a href=#561 id=561 data-nosnippet>561</a>    <span class="kw">pub fn </span>next_incoming(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;StreamRef&lt;B&gt;&gt; {
-<a href=#562 id=562 data-nosnippet>562</a>        <span class="self">self</span>.inner.streams.next_incoming()
-<a href=#563 id=563 data-nosnippet>563</a>    }
+<a href=#535 id=535 data-nosnippet>535</a>            <span class="prelude-val">Some</span>(Priority(frame)) =&gt; {
+<a href=#536 id=536 data-nosnippet>536</a>                <span class="macro">tracing::trace!</span>(<span class="question-mark">?</span>frame, <span class="string">"recv PRIORITY"</span>);
+<a href=#537 id=537 data-nosnippet>537</a>                <span class="comment">// TODO: handle
+<a href=#538 id=538 data-nosnippet>538</a>            </span>}
+<a href=#539 id=539 data-nosnippet>539</a>            <span class="prelude-val">None </span>=&gt; {
+<a href=#540 id=540 data-nosnippet>540</a>                <span class="macro">tracing::trace!</span>(<span class="string">"codec closed"</span>);
+<a href=#541 id=541 data-nosnippet>541</a>                <span class="self">self</span>.streams.recv_eof(<span class="bool-val">false</span>).expect(<span class="string">"mutex poisoned"</span>);
+<a href=#542 id=542 data-nosnippet>542</a>                <span class="kw">return </span><span class="prelude-val">Ok</span>(ReceivedFrame::Done);
+<a href=#543 id=543 data-nosnippet>543</a>            }
+<a href=#544 id=544 data-nosnippet>544</a>        }
+<a href=#545 id=545 data-nosnippet>545</a>        <span class="prelude-val">Ok</span>(ReceivedFrame::Continue)
+<a href=#546 id=546 data-nosnippet>546</a>    }
+<a href=#547 id=547 data-nosnippet>547</a>}
+<a href=#548 id=548 data-nosnippet>548</a>
+<a href=#549 id=549 data-nosnippet>549</a><span class="kw">enum </span>ReceivedFrame {
+<a href=#550 id=550 data-nosnippet>550</a>    Settings(frame::Settings),
+<a href=#551 id=551 data-nosnippet>551</a>    Continue,
+<a href=#552 id=552 data-nosnippet>552</a>    Done,
+<a href=#553 id=553 data-nosnippet>553</a>}
+<a href=#554 id=554 data-nosnippet>554</a>
+<a href=#555 id=555 data-nosnippet>555</a><span class="kw">impl</span>&lt;T, B&gt; Connection&lt;T, client::Peer, B&gt;
+<a href=#556 id=556 data-nosnippet>556</a><span class="kw">where
+<a href=#557 id=557 data-nosnippet>557</a>    </span>T: AsyncRead + AsyncWrite,
+<a href=#558 id=558 data-nosnippet>558</a>    B: Buf,
+<a href=#559 id=559 data-nosnippet>559</a>{
+<a href=#560 id=560 data-nosnippet>560</a>    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>streams(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Streams&lt;B, client::Peer&gt; {
+<a href=#561 id=561 data-nosnippet>561</a>        <span class="kw-2">&amp;</span><span class="self">self</span>.inner.streams
+<a href=#562 id=562 data-nosnippet>562</a>    }
+<a href=#563 id=563 data-nosnippet>563</a>}
 <a href=#564 id=564 data-nosnippet>564</a>
-<a href=#565 id=565 data-nosnippet>565</a>    <span class="comment">// Graceful shutdown only makes sense for server peers.
-<a href=#566 id=566 data-nosnippet>566</a>    </span><span class="kw">pub fn </span>go_away_gracefully(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-<a href=#567 id=567 data-nosnippet>567</a>        <span class="kw">if </span><span class="self">self</span>.inner.go_away.is_going_away() {
-<a href=#568 id=568 data-nosnippet>568</a>            <span class="comment">// No reason to start a new one.
-<a href=#569 id=569 data-nosnippet>569</a>            </span><span class="kw">return</span>;
-<a href=#570 id=570 data-nosnippet>570</a>        }
-<a href=#571 id=571 data-nosnippet>571</a>
-<a href=#572 id=572 data-nosnippet>572</a>        <span class="comment">// According to http://httpwg.org/specs/rfc7540.html#GOAWAY:
-<a href=#573 id=573 data-nosnippet>573</a>        //
-<a href=#574 id=574 data-nosnippet>574</a>        // &gt; A server that is attempting to gracefully shut down a connection
-<a href=#575 id=575 data-nosnippet>575</a>        // &gt; SHOULD send an initial GOAWAY frame with the last stream
-<a href=#576 id=576 data-nosnippet>576</a>        // &gt; identifier set to 2^31-1 and a NO_ERROR code. This signals to the
-<a href=#577 id=577 data-nosnippet>577</a>        // &gt; client that a shutdown is imminent and that initiating further
-<a href=#578 id=578 data-nosnippet>578</a>        // &gt; requests is prohibited. After allowing time for any in-flight
-<a href=#579 id=579 data-nosnippet>579</a>        // &gt; stream creation (at least one round-trip time), the server can
-<a href=#580 id=580 data-nosnippet>580</a>        // &gt; send another GOAWAY frame with an updated last stream identifier.
-<a href=#581 id=581 data-nosnippet>581</a>        // &gt; This ensures that a connection can be cleanly shut down without
-<a href=#582 id=582 data-nosnippet>582</a>        // &gt; losing requests.
-<a href=#583 id=583 data-nosnippet>583</a>        </span><span class="self">self</span>.inner.as_dyn().go_away(StreamId::MAX, Reason::NO_ERROR);
-<a href=#584 id=584 data-nosnippet>584</a>
-<a href=#585 id=585 data-nosnippet>585</a>        <span class="comment">// We take the advice of waiting 1 RTT literally, and wait
-<a href=#586 id=586 data-nosnippet>586</a>        // for a pong before proceeding.
-<a href=#587 id=587 data-nosnippet>587</a>        </span><span class="self">self</span>.inner.ping_pong.ping_shutdown();
-<a href=#588 id=588 data-nosnippet>588</a>    }
-<a href=#589 id=589 data-nosnippet>589</a>}
-<a href=#590 id=590 data-nosnippet>590</a>
-<a href=#591 id=591 data-nosnippet>591</a><span class="kw">impl</span>&lt;T, P, B&gt; Drop <span class="kw">for </span>Connection&lt;T, P, B&gt;
-<a href=#592 id=592 data-nosnippet>592</a><span class="kw">where
-<a href=#593 id=593 data-nosnippet>593</a>    </span>P: Peer,
-<a href=#594 id=594 data-nosnippet>594</a>    B: Buf,
-<a href=#595 id=595 data-nosnippet>595</a>{
-<a href=#596 id=596 data-nosnippet>596</a>    <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-<a href=#597 id=597 data-nosnippet>597</a>        <span class="comment">// Ignore errors as this indicates that the mutex is poisoned.
-<a href=#598 id=598 data-nosnippet>598</a>        </span><span class="kw">let _ </span>= <span class="self">self</span>.inner.streams.recv_eof(<span class="bool-val">true</span>);
-<a href=#599 id=599 data-nosnippet>599</a>    }
-<a href=#600 id=600 data-nosnippet>600</a>}
+<a href=#565 id=565 data-nosnippet>565</a><span class="kw">impl</span>&lt;T, B&gt; Connection&lt;T, server::Peer, B&gt;
+<a href=#566 id=566 data-nosnippet>566</a><span class="kw">where
+<a href=#567 id=567 data-nosnippet>567</a>    </span>T: AsyncRead + AsyncWrite + Unpin,
+<a href=#568 id=568 data-nosnippet>568</a>    B: Buf,
+<a href=#569 id=569 data-nosnippet>569</a>{
+<a href=#570 id=570 data-nosnippet>570</a>    <span class="kw">pub fn </span>next_incoming(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;StreamRef&lt;B&gt;&gt; {
+<a href=#571 id=571 data-nosnippet>571</a>        <span class="self">self</span>.inner.streams.next_incoming()
+<a href=#572 id=572 data-nosnippet>572</a>    }
+<a href=#573 id=573 data-nosnippet>573</a>
+<a href=#574 id=574 data-nosnippet>574</a>    <span class="comment">// Graceful shutdown only makes sense for server peers.
+<a href=#575 id=575 data-nosnippet>575</a>    </span><span class="kw">pub fn </span>go_away_gracefully(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+<a href=#576 id=576 data-nosnippet>576</a>        <span class="kw">if </span><span class="self">self</span>.inner.go_away.is_going_away() {
+<a href=#577 id=577 data-nosnippet>577</a>            <span class="comment">// No reason to start a new one.
+<a href=#578 id=578 data-nosnippet>578</a>            </span><span class="kw">return</span>;
+<a href=#579 id=579 data-nosnippet>579</a>        }
+<a href=#580 id=580 data-nosnippet>580</a>
+<a href=#581 id=581 data-nosnippet>581</a>        <span class="comment">// According to http://httpwg.org/specs/rfc7540.html#GOAWAY:
+<a href=#582 id=582 data-nosnippet>582</a>        //
+<a href=#583 id=583 data-nosnippet>583</a>        // &gt; A server that is attempting to gracefully shut down a connection
+<a href=#584 id=584 data-nosnippet>584</a>        // &gt; SHOULD send an initial GOAWAY frame with the last stream
+<a href=#585 id=585 data-nosnippet>585</a>        // &gt; identifier set to 2^31-1 and a NO_ERROR code. This signals to the
+<a href=#586 id=586 data-nosnippet>586</a>        // &gt; client that a shutdown is imminent and that initiating further
+<a href=#587 id=587 data-nosnippet>587</a>        // &gt; requests is prohibited. After allowing time for any in-flight
+<a href=#588 id=588 data-nosnippet>588</a>        // &gt; stream creation (at least one round-trip time), the server can
+<a href=#589 id=589 data-nosnippet>589</a>        // &gt; send another GOAWAY frame with an updated last stream identifier.
+<a href=#590 id=590 data-nosnippet>590</a>        // &gt; This ensures that a connection can be cleanly shut down without
+<a href=#591 id=591 data-nosnippet>591</a>        // &gt; losing requests.
+<a href=#592 id=592 data-nosnippet>592</a>        </span><span class="self">self</span>.inner.as_dyn().go_away(StreamId::MAX, Reason::NO_ERROR);
+<a href=#593 id=593 data-nosnippet>593</a>
+<a href=#594 id=594 data-nosnippet>594</a>        <span class="comment">// We take the advice of waiting 1 RTT literally, and wait
+<a href=#595 id=595 data-nosnippet>595</a>        // for a pong before proceeding.
+<a href=#596 id=596 data-nosnippet>596</a>        </span><span class="self">self</span>.inner.ping_pong.ping_shutdown();
+<a href=#597 id=597 data-nosnippet>597</a>    }
+<a href=#598 id=598 data-nosnippet>598</a>}
+<a href=#599 id=599 data-nosnippet>599</a>
+<a href=#600 id=600 data-nosnippet>600</a><span class="kw">impl</span>&lt;T, P, B&gt; Drop <span class="kw">for </span>Connection&lt;T, P, B&gt;
+<a href=#601 id=601 data-nosnippet>601</a><span class="kw">where
+<a href=#602 id=602 data-nosnippet>602</a>    </span>P: Peer,
+<a href=#603 id=603 data-nosnippet>603</a>    B: Buf,
+<a href=#604 id=604 data-nosnippet>604</a>{
+<a href=#605 id=605 data-nosnippet>605</a>    <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+<a href=#606 id=606 data-nosnippet>606</a>        <span class="comment">// Ignore errors as this indicates that the mutex is poisoned.
+<a href=#607 id=607 data-nosnippet>607</a>        </span><span class="kw">let _ </span>= <span class="self">self</span>.inner.streams.recv_eof(<span class="bool-val">true</span>);
+<a href=#608 id=608 data-nosnippet>608</a>    }
+<a href=#609 id=609 data-nosnippet>609</a>}
 </code></pre></div></section></main></body></html>

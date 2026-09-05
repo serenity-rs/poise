@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["load_script_with_extensions_unstable","load_script_with_extensions_with_any_provider","script_with_extensions"],"struct":["ScriptExtensionsSet","ScriptWithExtensions","ScriptWithExtensionsBorrowed"]};
+window.SIDEBAR_ITEMS = {"struct":["ScriptExtensionsSet","ScriptWithExtensions","ScriptWithExtensionsBorrowed"]};

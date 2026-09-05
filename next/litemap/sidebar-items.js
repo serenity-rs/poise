@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["store"],"struct":["LiteMap"]};
+window.SIDEBAR_ITEMS = {"enum":["Entry"],"mod":["store"],"struct":["LiteMap","OccupiedEntry","VacantEntry"]};

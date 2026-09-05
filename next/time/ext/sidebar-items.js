@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"trait":["InstantExt","NumericalDuration","NumericalStdDuration"]};
+window.SIDEBAR_ITEMS = {"trait":["InstantExt","NumericalDuration","NumericalStdDuration","SystemTimeExt"]};

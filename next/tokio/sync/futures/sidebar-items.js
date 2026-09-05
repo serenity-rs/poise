@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["Notified"]};
+window.SIDEBAR_ITEMS = {"struct":["Notified","OwnedNotified"]};

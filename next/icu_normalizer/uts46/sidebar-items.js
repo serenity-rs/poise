@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["Uts46Mapper"]};
+window.SIDEBAR_ITEMS = {"struct":["Uts46Mapper","Uts46MapperBorrowed"]};

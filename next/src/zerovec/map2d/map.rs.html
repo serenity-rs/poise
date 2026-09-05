@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zerovec-0.10.4/src/map2d/map.rs`."><title>map.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../static.files/rustdoc-203241e4.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="zerovec" data-themes="" data-resource-suffix="" data-rustdoc-version="1.100.0-nightly (0ed41eb41 2026-09-04)" data-channel="nightly" data-search-js="search-b167f383.js" data-stringdex-js="stringdex-b5109af9.js" data-settings-js="settings-170eb4bf.js" ><script src="../../../static.files/storage-41dd4d93.js"></script><script defer src="../../../static.files/src-script-813739b1.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-1814ead3.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-9f56287d.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><h1><div class="sub-heading">zerovec/map2d/</div>map.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-3"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="comment">// This file is part of ICU4X. For terms of use, please see the file
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/zerovec-0.11.5/src/map2d/map.rs`."><title>map.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../static.files/rustdoc-203241e4.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="zerovec" data-themes="" data-resource-suffix="" data-rustdoc-version="1.100.0-nightly (0ed41eb41 2026-09-04)" data-channel="nightly" data-search-js="search-b167f383.js" data-stringdex-js="stringdex-b5109af9.js" data-settings-js="settings-170eb4bf.js" ><script src="../../../static.files/storage-41dd4d93.js"></script><script defer src="../../../static.files/src-script-813739b1.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-1814ead3.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-9f56287d.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><h1><div class="sub-heading">zerovec/map2d/</div>map.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-3"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="comment">// This file is part of ICU4X. For terms of use, please see the file
 <a href=#2 id=2 data-nosnippet>2</a>// called LICENSE at the top level of the ICU4X source tree
 <a href=#3 id=3 data-nosnippet>3</a>// (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).
 <a href=#4 id=4 data-nosnippet>4</a>
@@ -34,10 +34,10 @@
 <a href=#34 id=34 data-nosnippet>34</a>/// use zerovec::ZeroMap2d;
 <a href=#35 id=35 data-nosnippet>35</a>///
 <a href=#36 id=36 data-nosnippet>36</a>/// // Example byte buffer representing the map { 1: {2: "three" } }
-<a href=#37 id=37 data-nosnippet>37</a>/// let BINCODE_BYTES: &amp;[u8; 51] = &amp;[
+<a href=#37 id=37 data-nosnippet>37</a>/// let BINCODE_BYTES: &amp;[u8; 47] = &amp;[
 <a href=#38 id=38 data-nosnippet>38</a>///     2, 0, 0, 0, 0, 0, 0, 0, 1, 0, 4, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 2, 0,
-<a href=#39 id=39 data-nosnippet>39</a>///     0, 0, 0, 0, 0, 0, 2, 0, 11, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 116,
-<a href=#40 id=40 data-nosnippet>40</a>///     104, 114, 101, 101,
+<a href=#39 id=39 data-nosnippet>39</a>///     0, 0, 0, 0, 0, 0, 2, 0, 7, 0, 0, 0, 0, 0, 0, 0, 1, 0, 116, 104, 114,
+<a href=#40 id=40 data-nosnippet>40</a>///     101, 101,
 <a href=#41 id=41 data-nosnippet>41</a>/// ];
 <a href=#42 id=42 data-nosnippet>42</a>///
 <a href=#43 id=43 data-nosnippet>43</a>/// // Deserializing to ZeroMap requires no heap allocations.
@@ -242,7 +242,7 @@
 <a href=#242 id=242 data-nosnippet>242</a>
 <a href=#243 id=243 data-nosnippet>243</a>    <span class="doccomment">/// Shifts all joiner ranges from key0_index onward one index up
 <a href=#244 id=244 data-nosnippet>244</a>    </span><span class="kw">fn </span>joiner_expand(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key0_index: usize) {
-<a href=#245 id=245 data-nosnippet>245</a>        <span class="attr">#[allow(clippy::expect_used)] </span><span class="comment">// slice overflow
+<a href=#245 id=245 data-nosnippet>245</a>        <span class="attr">#[expect(clippy::expect_used)] </span><span class="comment">// slice overflow
 <a href=#246 id=246 data-nosnippet>246</a>        </span><span class="self">self</span>.joiner
 <a href=#247 id=247 data-nosnippet>247</a>            .to_mut_slice()
 <a href=#248 id=248 data-nosnippet>248</a>            .iter_mut()
@@ -306,7 +306,7 @@
 <a href=#306 id=306 data-nosnippet>306</a>    /// assert_eq!(map.insert(&amp;0, "zero", "foo"), None,);
 <a href=#307 id=307 data-nosnippet>307</a>    /// assert_eq!(map.insert(&amp;1, "one", "bar"), None,);
 <a href=#308 id=308 data-nosnippet>308</a>    /// assert_eq!(map.insert(&amp;1, "one", "baz").as_deref(), Some("bar"),);
-<a href=#309 id=309 data-nosnippet>309</a>    /// assert_eq!(map.get_2d(&amp;1, "one").as_deref(), Some("baz"));
+<a href=#309 id=309 data-nosnippet>309</a>    /// assert_eq!(map.get_2d(&amp;1, "one"), Some("baz"));
 <a href=#310 id=310 data-nosnippet>310</a>    /// assert_eq!(map.len(), 2);
 <a href=#311 id=311 data-nosnippet>311</a>    /// ```
 <a href=#312 id=312 data-nosnippet>312</a>    </span><span class="kw">pub fn </span>insert(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key0: <span class="kw-2">&amp;</span>K0, key1: <span class="kw-2">&amp;</span>K1, value: <span class="kw-2">&amp;</span>V) -&gt; <span class="prelude-ty">Option</span>&lt;V::OwnedType&gt; {
@@ -314,7 +314,7 @@
 <a href=#314 id=314 data-nosnippet>314</a>        <span class="macro">debug_assert!</span>(range.start &lt;= range.end); <span class="comment">// '&lt;=' because we may have inserted a new key0
 <a href=#315 id=315 data-nosnippet>315</a>        </span><span class="macro">debug_assert!</span>(range.end &lt;= <span class="self">self</span>.keys1.zvl_len());
 <a href=#316 id=316 data-nosnippet>316</a>        <span class="kw">let </span>range_start = range.start;
-<a href=#317 id=317 data-nosnippet>317</a>        <span class="attr">#[allow(clippy::unwrap_used)] </span><span class="comment">// by debug_assert! invariants
+<a href=#317 id=317 data-nosnippet>317</a>        <span class="attr">#[expect(clippy::unwrap_used)] </span><span class="comment">// by debug_assert! invariants
 <a href=#318 id=318 data-nosnippet>318</a>        </span><span class="kw">let </span>index = range_start
 <a href=#319 id=319 data-nosnippet>319</a>            + <span class="kw">match </span><span class="self">self</span>.keys1.zvl_binary_search_in_range(key1, range).unwrap() {
 <a href=#320 id=320 data-nosnippet>320</a>                <span class="prelude-val">Ok</span>(index) =&gt; <span class="kw">return </span><span class="prelude-val">Some</span>(<span class="self">self</span>.values.zvl_replace(range_start + index, value)),
@@ -349,7 +349,7 @@
 <a href=#349 id=349 data-nosnippet>349</a>        <span class="macro">debug_assert!</span>(range.start &lt; range.end); <span class="comment">// '&lt;' because every key0 should have a key1
 <a href=#350 id=350 data-nosnippet>350</a>        </span><span class="macro">debug_assert!</span>(range.end &lt;= <span class="self">self</span>.keys1.zvl_len());
 <a href=#351 id=351 data-nosnippet>351</a>        <span class="kw">let </span>is_singleton_range = range.start + <span class="number">1 </span>== range.end;
-<a href=#352 id=352 data-nosnippet>352</a>        <span class="attr">#[allow(clippy::unwrap_used)] </span><span class="comment">// by debug_assert invariants
+<a href=#352 id=352 data-nosnippet>352</a>        <span class="attr">#[expect(clippy::unwrap_used)] </span><span class="comment">// by debug_assert invariants
 <a href=#353 id=353 data-nosnippet>353</a>        </span><span class="kw">let </span>index = range.start
 <a href=#354 id=354 data-nosnippet>354</a>            + <span class="self">self
 <a href=#355 id=355 data-nosnippet>355</a>                </span>.keys1
@@ -408,10 +408,10 @@
 <a href=#408 id=408 data-nosnippet>408</a>        }
 <a href=#409 id=409 data-nosnippet>409</a>
 <a href=#410 id=410 data-nosnippet>410</a>        <span class="comment">// The unwraps are protected by the fact that we are not empty
-<a href=#411 id=411 data-nosnippet>411</a>        </span><span class="attr">#[allow(clippy::unwrap_used)]
+<a href=#411 id=411 data-nosnippet>411</a>        </span><span class="attr">#[expect(clippy::unwrap_used)]
 <a href=#412 id=412 data-nosnippet>412</a>        </span><span class="kw">let </span>last_key0 = <span class="self">self</span>.keys0.zvl_get(<span class="self">self</span>.keys0.zvl_len() - <span class="number">1</span>).unwrap();
 <a href=#413 id=413 data-nosnippet>413</a>        <span class="kw">let </span>key0_cmp = K0::Container::t_cmp_get(key0, last_key0);
-<a href=#414 id=414 data-nosnippet>414</a>        <span class="attr">#[allow(clippy::unwrap_used)]
+<a href=#414 id=414 data-nosnippet>414</a>        <span class="attr">#[expect(clippy::unwrap_used)]
 <a href=#415 id=415 data-nosnippet>415</a>        </span><span class="kw">let </span>last_key1 = <span class="self">self</span>.keys1.zvl_get(<span class="self">self</span>.keys1.zvl_len() - <span class="number">1</span>).unwrap();
 <a href=#416 id=416 data-nosnippet>416</a>        <span class="kw">let </span>key1_cmp = K1::Container::t_cmp_get(key1, last_key1);
 <a href=#417 id=417 data-nosnippet>417</a>
@@ -433,12 +433,12 @@
 <a href=#433 id=433 data-nosnippet>433</a>            <span class="kw">_ </span>=&gt; {}
 <a href=#434 id=434 data-nosnippet>434</a>        }
 <a href=#435 id=435 data-nosnippet>435</a>
-<a href=#436 id=436 data-nosnippet>436</a>        <span class="attr">#[allow(clippy::expect_used)] </span><span class="comment">// slice overflow
+<a href=#436 id=436 data-nosnippet>436</a>        <span class="attr">#[expect(clippy::expect_used)] </span><span class="comment">// slice overflow
 <a href=#437 id=437 data-nosnippet>437</a>        </span><span class="kw">let </span>joiner_value = u32::try_from(<span class="self">self</span>.keys1.zvl_len() + <span class="number">1</span>)
 <a href=#438 id=438 data-nosnippet>438</a>            .expect(<span class="string">"Attempted to add more than 2^32 elements to a ZeroMap2d"</span>);
 <a href=#439 id=439 data-nosnippet>439</a>
 <a href=#440 id=440 data-nosnippet>440</a>        <span class="comment">// All OK to append
-<a href=#441 id=441 data-nosnippet>441</a>        </span><span class="attr">#[allow(clippy::unwrap_used)]
+<a href=#441 id=441 data-nosnippet>441</a>        </span><span class="attr">#[expect(clippy::unwrap_used)]
 <a href=#442 id=442 data-nosnippet>442</a>        </span><span class="kw">if </span>key0_cmp == Ordering::Greater {
 <a href=#443 id=443 data-nosnippet>443</a>            <span class="self">self</span>.keys0.zvl_push(key0);
 <a href=#444 id=444 data-nosnippet>444</a>            <span class="self">self</span>.joiner
@@ -459,7 +459,7 @@
 <a href=#459 id=459 data-nosnippet>459</a>    <span class="comment">// INTERNAL ROUTINES FOLLOW //
 <a href=#460 id=460 data-nosnippet>460</a>
 <a href=#461 id=461 data-nosnippet>461</a>    </span><span class="attr">#[cfg(debug_assertions)]
-<a href=#462 id=462 data-nosnippet>462</a>    #[allow(clippy::unwrap_used)] </span><span class="comment">// this is an assertion function
+<a href=#462 id=462 data-nosnippet>462</a>    #[expect(clippy::unwrap_used)] </span><span class="comment">// this is an assertion function
 <a href=#463 id=463 data-nosnippet>463</a>    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>check_invariants(<span class="kw-2">&amp;</span><span class="self">self</span>) {
 <a href=#464 id=464 data-nosnippet>464</a>        <span class="macro">debug_assert_eq!</span>(<span class="self">self</span>.keys0.zvl_len(), <span class="self">self</span>.joiner.len());
 <a href=#465 id=465 data-nosnippet>465</a>        <span class="macro">debug_assert_eq!</span>(<span class="self">self</span>.keys1.zvl_len(), <span class="self">self</span>.values.zvl_len());
@@ -524,8 +524,8 @@
 <a href=#524 id=524 data-nosnippet>524</a>    /// let mut map = ZeroMap2d::new();
 <a href=#525 id=525 data-nosnippet>525</a>    /// map.insert(&amp;1, "one", "foo");
 <a href=#526 id=526 data-nosnippet>526</a>    /// map.insert(&amp;2, "two", "bar");
-<a href=#527 id=527 data-nosnippet>527</a>    /// assert!(matches!(map.get0_by(|probe| probe.cmp(&amp;1)), Some(_)));
-<a href=#528 id=528 data-nosnippet>528</a>    /// assert!(matches!(map.get0_by(|probe| probe.cmp(&amp;3)), None));
+<a href=#527 id=527 data-nosnippet>527</a>    /// assert!(map.get0_by(|probe| probe.cmp(&amp;1)).is_some());
+<a href=#528 id=528 data-nosnippet>528</a>    /// assert!(map.get0_by(|probe| probe.cmp(&amp;3)).is_none());
 <a href=#529 id=529 data-nosnippet>529</a>    /// ```
 <a href=#530 id=530 data-nosnippet>530</a>    </span><span class="kw">pub fn </span>get0_by&lt;<span class="lifetime">'l</span>&gt;(
 <a href=#531 id=531 data-nosnippet>531</a>        <span class="kw-2">&amp;</span><span class="lifetime">'l </span><span class="self">self</span>,
@@ -563,7 +563,7 @@
 <a href=#563 id=563 data-nosnippet>563</a>                </span>} <span class="kw">else </span>{
 <a href=#564 id=564 data-nosnippet>564</a>                    <span class="macro">debug_assert!</span>(key0_index &lt;= <span class="self">self</span>.joiner.len());
 <a href=#565 id=565 data-nosnippet>565</a>                    <span class="comment">// The unwrap is protected by the debug_assert above and key0_index != 0
-<a href=#566 id=566 data-nosnippet>566</a>                    </span><span class="attr">#[allow(clippy::unwrap_used)]
+<a href=#566 id=566 data-nosnippet>566</a>                    </span><span class="attr">#[expect(clippy::unwrap_used)]
 <a href=#567 id=567 data-nosnippet>567</a>                    </span><span class="self">self</span>.joiner.get(key0_index - <span class="number">1</span>).unwrap()
 <a href=#568 id=568 data-nosnippet>568</a>                };
 <a href=#569 id=569 data-nosnippet>569</a>                <span class="self">self</span>.keys0.zvl_insert(key0_index, key0);
