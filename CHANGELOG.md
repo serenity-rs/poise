@@ -31,6 +31,63 @@ this find-and-replace regex (VSCode flavor):
 - Replace: [@$1](https://github.com/$1)
 -->
 
+# 0.7.0
+
+New features:
+- Added configurable limits on prefix command edit tracking to prevent unintended command invocation ([6ea8d6d](https://github.com/serenity-rs/poise/commit/6ea8d6dbf74d496a261d212794ab8dc60dc4d77d))
+  - `PrefixFrameworkOptions::check_edits_against_cache` (default: `true`) determines whether edits are checked against the cached message, when available.
+  - `PrefixFrameworkOptions::tracking_initiation_window` (default: 15 min.) defines a window starting from message creation during which edit tracking is active.
+
+API updates:
+- Removed redundant `serenity_context` and user `data` fields from `Context` ([6ea554d](https://github.com/serenity-rs/poise/commit/6ea554dc8fc9acb95240b68309d3075e3d13f2aa))
+  - Serenity context can be accessed via `Context::serenity_context()`/`FrameworkContext::serenity_context`.
+  - User data can be accessed via `Framework::user_data()`/`FrameworkContext::user_data()`/`FrameworkContext::user_data`.
+- `reply::CreateReply` fields are now private ([ead8cb1](https://github.com/serenity-rs/poise/commit/ead8cb1eb186e7aeb1bdb6a753e2b62656414e30))
+- `PrefixFrameworkOptions::prefix` now takes `Cow<'static, str>` instead of `String` ([621bf48](https://github.com/serenity-rs/poise/commit/621bf48c53e8929fb05850e874eea4142798d97c))
+- `modal::execute_modal_on_component_interaction()` now takes `&serenity::Context` instead of `impl AsRef<serenity::Context>` ([8f45e5d](https://github.com/serenity-rs/poise/commit/8f45e5dfb023631ec002514cb0ea88918dc3b050))
+- Removed magic from autocomplete ([cefd69d](https://github.com/serenity-rs/poise/commit/cefd69d0cf7b7f92d25c2a9a525b9b557efe12ca))
+  - Autocomplete functions now must return `serenity::CreateAutocompleteResponse`.
+- Removed `builtins::help()`, `builtins::pretty_help()`, and `help_text_fn` ([cc20f24](https://github.com/serenity-rs/poise/commit/cc20f24e8f982ebecba40f39313c5ca7ffe78d91))
+- Inline choice parameters are now converted to `String` at compile time ([63c89c6](https://github.com/serenity-rs/poise/commit/63c89c61c3b43120415676e9d6e69f9bef11a84d))
+  - This makes inline choices slightly more restrictive, as byte string literals, nul-terminated C-string literals, and byte literals are no longer supported.
+- `builtins::create_application_commands()`, `builtins::register_globally()`, and `builtins::register_in_guild()` now take `impl IntoIterator<Item = &Command<U, E>>` instead of `&[Command<U, E>]` ([d7c5599](https://github.com/serenity-rs/poise/commit/d7c55997b7f558415d36c089f8b21b0bd1f5502f))
+- Removed specialization hacks for `PopArgument` and `SlashArgument` ([2d3816c](https://github.com/serenity-rs/poise/commit/2d3816c64323789e97fa689fb459144c7d3af02a))
+  - Types that do not implement `PopArgument` but implement `FromStr` must now be decorated with a new `#[string]` attribute, or users can implement the `PopArgument` trait manually.
+- Added support for the `#[string]` attribute to slash commands ([fbf89f1](https://github.com/serenity-rs/poise/commit/fbf89f167f9044516d6259240958ce760b45522a))
+  - Types that do not implement `SlashArgument` but implement `FromStr` must now be decorated with a new `#[string]` attribute, or users can implement the `SlashArgument` trait manually.
+- Restored support for `Option<T: FromStr>` arguments to prefix commands using the `#[string]` attribute ([ff6c74b](https://github.com/serenity-rs/poise/commit/ff6c74b99db1c38c023e264b44786a22827ea102))
+- Removed redundant fields from `Context` and `FrameworkError` to reduce their sizes ([83d2040](https://github.com/serenity-rs/poise/commit/83d20405312b480ac1003684eb5afd510ef3aa54))
+  - Removed `Context::command` fields. Use `Context::command()` instead.
+  - Removed `Context::parent_commands` fields. Use `Context::parent_commands()` instead.
+  - New `Context::command_tree`/`Context::command_tree()` now contains the full invoked command tree (parents + invoked command).
+  - Removed `PrefixContext::action` field. Use `Command::prefix_action` instead.
+  - Removed `PrefixContext::prefix` field. Use `Context::prefix()` instead.
+  - Removed `prefix` and `msg_content` from `FrameworkError::UnknownCommand`, which already includes the full `Message` object. A new `content_start` field gives the position in the message that the prefix ends, allowing the user to determine the prefix and message content, if necessary.
+
+Behavior changes:
+- Permission checks have been rewritten ([fd83067](https://github.com/serenity-rs/poise/commit/fd83067615d6a9d5557f2e3f48ac3361c63fd62d))
+  - Previously, when the bot permissions were unknown, the command would run anyway. Now, `FrameworkError::PermissionFetchFailed` is returned.
+- Prefix commands no longer panic when `serenity::Message::author_permissions()` cannot find a channel while calculating permissions ([50c2130](https://github.com/serenity-rs/poise/commit/50c2130ed4a70bd694f0f6253d9bd5c7a8967c59))
+- `builtins::on_error()` now shows the full error source chain ([3c01afc](https://github.com/serenity-rs/poise/commit/3c01afc5d064c39c57aa93a88e1fca0dda6339f3))
+- Permissions calculations now properly handle `SEND_MESSAGES_IN_THREADS` ([fa332af](https://github.com/serenity-rs/poise/commit/fa332af323e45d1f13f9fb6c91f9cd0f0f01da66))
+- Interaction type is now checked in command matching ([6347d12](https://github.com/serenity-rs/poise/commit/6347d124e35db0911e0c44c27a5cb048444deb61))
+  - This fixes a bug that prevented different command types (`USER`/`MESSAGE`/`CHAT_INPUT`) from having the same name.
+- `Modal::execute_with_defaults()` now properly handles a defined default value of `None` ([26dbb0d](https://github.com/serenity-rs/poise/commit/26dbb0dd5f9d4cdfa398f45c36f655e55c2e6fa9))
+  - This fixes a bug that would cause an `Invalid Form Body` error from Discord when a default of `None` was defined for an `Option<String>` parameter.
+
+Miscellaneous:
+- Switched from `String`/`Vec` to `Cow<'static, str>`/`Cow<'static, [T]>` in `structs::Command` and related structs ([a917c4c](https://github.com/serenity-rs/poise/commit/a917c4c23550d9ecd796749d61eef2793990f4b6))
+  - This avoids allocations and simplifies command construction, but does not impact modifying the values at runtime.
+- Removed the `parse_prefix_args!` and `parse_slash_args!` declarative macros ([40e99ec](https://github.com/serenity-rs/poise/commit/40e99ec1ce35cb480527548be60f4011d115e3a0))
+  - Their functionality is now directly incorporated into the `poise::command` proc macro, which makes things more readable and maintainable, and opens the door for added features down the line.
+- Fixed several parsing bugs introduced when specialization hacks were removed ([303023a](https://github.com/serenity-rs/poise/commit/303023a92609872add5c415fddbc1046289d77f4))
+- Fixed exponential code generation for prefix commands with many `Option<T>` parameters ([8d7bb43](https://github.com/serenity-rs/poise/commit/8d7bb43f5bcbd34fcaf0acb331568952489881ae))
+- Switched from the unmaintained `derivative` crate to `derive_where` ([e9ffb58](https://github.com/serenity-rs/poise/commit/e9ffb581a059bec6de40fcd910a45fecc603a87b))
+
+Detailed changelog: https://github.com/serenity-rs/poise/compare/v0.6.2...v0.7.0
+
+Thanks to [@arqunis](https://github.com/arqunis), [@GnomedDev](https://github.com/GnomedDev), [@jamesbt365](https://github.com/jamesbt365), [@zkxs](https://github.com/zkxs), [@mkrasnitski](https://github.com/mkrasnitski), [@inklesspen](https://github.com/inklesspen), [@SabrinaJewson](https://github.com/SabrinaJewson), and [@meditationmind](https://github.com/meditationmind)!
+
 # 0.6.2
 
 New features:

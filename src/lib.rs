@@ -398,7 +398,7 @@ pub mod track_edits;
 pub mod macros {
     //! Procedural macros used in poise, like [`command`]
     #[doc(inline)]
-    pub use serenity_poise_macros::*;
+    pub use poise_macros::*;
 }
 
 #[doc(no_inline)]
