@@ -120,71 +120,89 @@
 <a href=#120 id=120 data-nosnippet>120</a>    /// with the new result.
 <a href=#121 id=121 data-nosnippet>121</a>    </span><span class="kw">pub </span>edit_tracker: <span class="prelude-ty">Option</span>&lt;std::sync::Arc&lt;std::sync::RwLock&lt;<span class="kw">crate</span>::EditTracker&gt;&gt;&gt;,
 <a href=#122 id=122 data-nosnippet>122</a>    <span class="doccomment">/// If the user makes a typo in their message and a subsequent edit creates a valid invocation,
-<a href=#123 id=123 data-nosnippet>123</a>    /// the bot will execute the command if this attribute is set. [`Self::edit_tracker`] does not
-<a href=#124 id=124 data-nosnippet>124</a>    /// need to be set for this.
-<a href=#125 id=125 data-nosnippet>125</a>    ///
-<a href=#126 id=126 data-nosnippet>126</a>    /// That does not mean that any subsequent edits will also trigger execution. For that,
-<a href=#127 id=127 data-nosnippet>127</a>    /// see [`crate::Command::invoke_on_edit`].
-<a href=#128 id=128 data-nosnippet>128</a>    ///
-<a href=#129 id=129 data-nosnippet>129</a>    /// Note: only has an effect if [`Self::edit_tracker`] is set.
-<a href=#130 id=130 data-nosnippet>130</a>    </span><span class="kw">pub </span>execute_untracked_edits: bool,
-<a href=#131 id=131 data-nosnippet>131</a>    <span class="doccomment">/// Whether to ignore message edits on messages that have not yet been responded to.
-<a href=#132 id=132 data-nosnippet>132</a>    ///
-<a href=#133 id=133 data-nosnippet>133</a>    /// This is the case if the message edit happens before a command has sent a response, or if the
-<a href=#134 id=134 data-nosnippet>134</a>    /// command does not send a response at all.
-<a href=#135 id=135 data-nosnippet>135</a>    </span><span class="kw">pub </span>ignore_edits_if_not_yet_responded: bool,
-<a href=#136 id=136 data-nosnippet>136</a>
-<a href=#137 id=137 data-nosnippet>137</a>    <span class="doccomment">/// Whether commands in messages emitted by this bot itself should be executed as well.
-<a href=#138 id=138 data-nosnippet>138</a>    </span><span class="kw">pub </span>execute_self_messages: bool,
-<a href=#139 id=139 data-nosnippet>139</a>    <span class="doccomment">/// Whether to ignore messages from bots for command invoking. Default `true`
-<a href=#140 id=140 data-nosnippet>140</a>    </span><span class="kw">pub </span>ignore_bots: bool,
-<a href=#141 id=141 data-nosnippet>141</a>    <span class="doccomment">/// Whether to ignore commands contained within thread creation messages. Default `true`
-<a href=#142 id=142 data-nosnippet>142</a>    </span><span class="kw">pub </span>ignore_thread_creation: bool,
-<a href=#143 id=143 data-nosnippet>143</a>    <span class="doccomment">/// Whether command names should be compared case-insensitively.
-<a href=#144 id=144 data-nosnippet>144</a>    </span><span class="kw">pub </span>case_insensitive_commands: bool,
-<a href=#145 id=145 data-nosnippet>145</a>    <span class="doccomment">/// Callback for all non-command messages. Useful if you want to run code on any message that
-<a href=#146 id=146 data-nosnippet>146</a>    /// is not a command
-<a href=#147 id=147 data-nosnippet>147</a>    </span><span class="kw">pub </span>non_command_message: <span class="prelude-ty">Option</span>&lt;
-<a href=#148 id=148 data-nosnippet>148</a>        <span class="kw">for</span>&lt;<span class="lifetime">'a</span>&gt; <span class="kw">fn</span>(
-<a href=#149 id=149 data-nosnippet>149</a>            <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw">crate</span>::FrameworkContext&lt;<span class="lifetime">'a</span>, U, E&gt;,
-<a href=#150 id=150 data-nosnippet>150</a>            <span class="kw-2">&amp;</span><span class="lifetime">'a </span>serenity::Message,
-<a href=#151 id=151 data-nosnippet>151</a>        ) -&gt; <span class="kw">crate</span>::BoxFuture&lt;<span class="lifetime">'a</span>, <span class="prelude-ty">Result</span>&lt;(), E&gt;&gt;,
-<a href=#152 id=152 data-nosnippet>152</a>    &gt;,
-<a href=#153 id=153 data-nosnippet>153</a>    <span class="comment">/* // TODO: implement
-<a href=#154 id=154 data-nosnippet>154</a>    /// Whether to invoke help command when someone sends a message with just a bot mention
-<a href=#155 id=155 data-nosnippet>155</a>    pub help_when_mentioned: bool,
-<a href=#156 id=156 data-nosnippet>156</a>    /// The bot's general help command. Currently used for [`Self::help_when_mentioned`].
-<a href=#157 id=157 data-nosnippet>157</a>    pub help_commmand: Option&lt;Command&lt;U, E&gt;&gt;,
-<a href=#158 id=158 data-nosnippet>158</a>    // /// The bot's help command for individial commands. Currently used when a command group without
-<a href=#159 id=159 data-nosnippet>159</a>    // /// any specific subcommand is invoked. This command is expected to take the command name as a
-<a href=#160 id=160 data-nosnippet>160</a>    // /// single parameter
-<a href=#161 id=161 data-nosnippet>161</a>    // pub command_specific_help_commmand: Option&lt;Command&lt;U, E&gt;&gt;, */
-<a href=#162 id=162 data-nosnippet>162</a>    // #[non_exhaustive] forbids struct update syntax for ?? reason
-<a href=#163 id=163 data-nosnippet>163</a>    </span><span class="attr">#[doc(hidden)]
-<a href=#164 id=164 data-nosnippet>164</a>    </span><span class="kw">pub </span>__non_exhaustive: (),
-<a href=#165 id=165 data-nosnippet>165</a>}
-<a href=#166 id=166 data-nosnippet>166</a>
-<a href=#167 id=167 data-nosnippet>167</a><span class="kw">impl</span>&lt;U, E&gt; Default <span class="kw">for </span>PrefixFrameworkOptions&lt;U, E&gt; {
-<a href=#168 id=168 data-nosnippet>168</a>    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
-<a href=#169 id=169 data-nosnippet>169</a>        <span class="self">Self </span>{
-<a href=#170 id=170 data-nosnippet>170</a>            prefix: <span class="prelude-val">None</span>,
-<a href=#171 id=171 data-nosnippet>171</a>            additional_prefixes: Vec::new(),
-<a href=#172 id=172 data-nosnippet>172</a>            dynamic_prefix: <span class="prelude-val">None</span>,
-<a href=#173 id=173 data-nosnippet>173</a>            stripped_dynamic_prefix: <span class="prelude-val">None</span>,
-<a href=#174 id=174 data-nosnippet>174</a>            mention_as_prefix: <span class="bool-val">true</span>,
-<a href=#175 id=175 data-nosnippet>175</a>            edit_tracker: <span class="prelude-val">None</span>,
-<a href=#176 id=176 data-nosnippet>176</a>            execute_untracked_edits: <span class="bool-val">true</span>,
-<a href=#177 id=177 data-nosnippet>177</a>            ignore_edits_if_not_yet_responded: <span class="bool-val">false</span>,
-<a href=#178 id=178 data-nosnippet>178</a>            execute_self_messages: <span class="bool-val">false</span>,
-<a href=#179 id=179 data-nosnippet>179</a>            ignore_bots: <span class="bool-val">true</span>,
-<a href=#180 id=180 data-nosnippet>180</a>            ignore_thread_creation: <span class="bool-val">true</span>,
-<a href=#181 id=181 data-nosnippet>181</a>            case_insensitive_commands: <span class="bool-val">true</span>,
-<a href=#182 id=182 data-nosnippet>182</a>            non_command_message: <span class="prelude-val">None</span>,
-<a href=#183 id=183 data-nosnippet>183</a>            <span class="comment">// help_when_mentioned: true,
-<a href=#184 id=184 data-nosnippet>184</a>            // help_commmand: None,
-<a href=#185 id=185 data-nosnippet>185</a>            // command_specific_help_commmand: None,
-<a href=#186 id=186 data-nosnippet>186</a>            </span>__non_exhaustive: (),
-<a href=#187 id=187 data-nosnippet>187</a>        }
-<a href=#188 id=188 data-nosnippet>188</a>    }
-<a href=#189 id=189 data-nosnippet>189</a>}
+<a href=#123 id=123 data-nosnippet>123</a>    /// the bot will execute the command if this attribute is set.
+<a href=#124 id=124 data-nosnippet>124</a>    ///
+<a href=#125 id=125 data-nosnippet>125</a>    /// That does not mean that any subsequent edits will also trigger execution. For that,
+<a href=#126 id=126 data-nosnippet>126</a>    /// see [`crate::Command::invoke_on_edit`].
+<a href=#127 id=127 data-nosnippet>127</a>    ///
+<a href=#128 id=128 data-nosnippet>128</a>    /// Note: Only has an effect if [`Self::edit_tracker`] is set.
+<a href=#129 id=129 data-nosnippet>129</a>    </span><span class="kw">pub </span>execute_untracked_edits: bool,
+<a href=#130 id=130 data-nosnippet>130</a>    <span class="doccomment">/// Whether to ignore message edits on messages that have not yet been responded to.
+<a href=#131 id=131 data-nosnippet>131</a>    ///
+<a href=#132 id=132 data-nosnippet>132</a>    /// This is the case if the message edit happens before a command has sent a response, or if the
+<a href=#133 id=133 data-nosnippet>133</a>    /// command does not send a response at all.
+<a href=#134 id=134 data-nosnippet>134</a>    </span><span class="kw">pub </span>ignore_edits_if_not_yet_responded: bool,
+<a href=#135 id=135 data-nosnippet>135</a>    <span class="doccomment">/// Whether to ignore message edits when the message was present in the message cache and the
+<a href=#136 id=136 data-nosnippet>136</a>    /// content of the updated message is unchanged. Default is `true`.
+<a href=#137 id=137 data-nosnippet>137</a>    ///
+<a href=#138 id=138 data-nosnippet>138</a>    /// It is recommended to keep this on to prevent unintended command invocation.
+<a href=#139 id=139 data-nosnippet>139</a>    ///
+<a href=#140 id=140 data-nosnippet>140</a>    /// Note: Only has an effect if [`Self::edit_tracker`] is set and message caching is used.
+<a href=#141 id=141 data-nosnippet>141</a>    </span><span class="attr">#[cfg(feature = <span class="string">"cache"</span>)]
+<a href=#142 id=142 data-nosnippet>142</a>    </span><span class="kw">pub </span>check_edits_against_cache: bool,
+<a href=#143 id=143 data-nosnippet>143</a>    <span class="doccomment">/// Optional window of time during which edit tracking may be initiated, beginning at message
+<a href=#144 id=144 data-nosnippet>144</a>    /// creation. Default is 15 minutes.
+<a href=#145 id=145 data-nosnippet>145</a>    ///
+<a href=#146 id=146 data-nosnippet>146</a>    /// Setting a sensible duration is recommended to prevent unintended command invocations for
+<a href=#147 id=147 data-nosnippet>147</a>    /// old messages, which can be triggered by both Discord and user edits.
+<a href=#148 id=148 data-nosnippet>148</a>    ///
+<a href=#149 id=149 data-nosnippet>149</a>    /// Note: Only has an effect if [`Self::edit_tracker`] is set.
+<a href=#150 id=150 data-nosnippet>150</a>    </span><span class="kw">pub </span>tracking_initiation_window: <span class="prelude-ty">Option</span>&lt;std::time::Duration&gt;,
+<a href=#151 id=151 data-nosnippet>151</a>
+<a href=#152 id=152 data-nosnippet>152</a>    <span class="doccomment">/// Whether commands in messages emitted by this bot itself should be executed as well.
+<a href=#153 id=153 data-nosnippet>153</a>    </span><span class="kw">pub </span>execute_self_messages: bool,
+<a href=#154 id=154 data-nosnippet>154</a>    <span class="doccomment">/// Whether to ignore messages from bots for command invoking. Default `true`
+<a href=#155 id=155 data-nosnippet>155</a>    </span><span class="kw">pub </span>ignore_bots: bool,
+<a href=#156 id=156 data-nosnippet>156</a>    <span class="doccomment">/// Whether to ignore commands contained within thread creation messages. Default `true`
+<a href=#157 id=157 data-nosnippet>157</a>    </span><span class="kw">pub </span>ignore_thread_creation: bool,
+<a href=#158 id=158 data-nosnippet>158</a>    <span class="doccomment">/// Whether command names should be compared case-insensitively.
+<a href=#159 id=159 data-nosnippet>159</a>    </span><span class="kw">pub </span>case_insensitive_commands: bool,
+<a href=#160 id=160 data-nosnippet>160</a>    <span class="doccomment">/// Callback for all non-command messages. Useful if you want to run code on any message that
+<a href=#161 id=161 data-nosnippet>161</a>    /// is not a command
+<a href=#162 id=162 data-nosnippet>162</a>    </span><span class="kw">pub </span>non_command_message: <span class="prelude-ty">Option</span>&lt;
+<a href=#163 id=163 data-nosnippet>163</a>        <span class="kw">for</span>&lt;<span class="lifetime">'a</span>&gt; <span class="kw">fn</span>(
+<a href=#164 id=164 data-nosnippet>164</a>            <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw">crate</span>::FrameworkContext&lt;<span class="lifetime">'a</span>, U, E&gt;,
+<a href=#165 id=165 data-nosnippet>165</a>            <span class="kw-2">&amp;</span><span class="lifetime">'a </span>serenity::Message,
+<a href=#166 id=166 data-nosnippet>166</a>        ) -&gt; <span class="kw">crate</span>::BoxFuture&lt;<span class="lifetime">'a</span>, <span class="prelude-ty">Result</span>&lt;(), E&gt;&gt;,
+<a href=#167 id=167 data-nosnippet>167</a>    &gt;,
+<a href=#168 id=168 data-nosnippet>168</a>    <span class="comment">/* // TODO: implement
+<a href=#169 id=169 data-nosnippet>169</a>    /// Whether to invoke help command when someone sends a message with just a bot mention
+<a href=#170 id=170 data-nosnippet>170</a>    pub help_when_mentioned: bool,
+<a href=#171 id=171 data-nosnippet>171</a>    /// The bot's general help command. Currently used for [`Self::help_when_mentioned`].
+<a href=#172 id=172 data-nosnippet>172</a>    pub help_commmand: Option&lt;Command&lt;U, E&gt;&gt;,
+<a href=#173 id=173 data-nosnippet>173</a>    // /// The bot's help command for individial commands. Currently used when a command group without
+<a href=#174 id=174 data-nosnippet>174</a>    // /// any specific subcommand is invoked. This command is expected to take the command name as a
+<a href=#175 id=175 data-nosnippet>175</a>    // /// single parameter
+<a href=#176 id=176 data-nosnippet>176</a>    // pub command_specific_help_commmand: Option&lt;Command&lt;U, E&gt;&gt;, */
+<a href=#177 id=177 data-nosnippet>177</a>    // #[non_exhaustive] forbids struct update syntax for ?? reason
+<a href=#178 id=178 data-nosnippet>178</a>    </span><span class="attr">#[doc(hidden)]
+<a href=#179 id=179 data-nosnippet>179</a>    </span><span class="kw">pub </span>__non_exhaustive: (),
+<a href=#180 id=180 data-nosnippet>180</a>}
+<a href=#181 id=181 data-nosnippet>181</a>
+<a href=#182 id=182 data-nosnippet>182</a><span class="kw">impl</span>&lt;U, E&gt; Default <span class="kw">for </span>PrefixFrameworkOptions&lt;U, E&gt; {
+<a href=#183 id=183 data-nosnippet>183</a>    <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
+<a href=#184 id=184 data-nosnippet>184</a>        <span class="self">Self </span>{
+<a href=#185 id=185 data-nosnippet>185</a>            prefix: <span class="prelude-val">None</span>,
+<a href=#186 id=186 data-nosnippet>186</a>            additional_prefixes: Vec::new(),
+<a href=#187 id=187 data-nosnippet>187</a>            dynamic_prefix: <span class="prelude-val">None</span>,
+<a href=#188 id=188 data-nosnippet>188</a>            stripped_dynamic_prefix: <span class="prelude-val">None</span>,
+<a href=#189 id=189 data-nosnippet>189</a>            mention_as_prefix: <span class="bool-val">true</span>,
+<a href=#190 id=190 data-nosnippet>190</a>            edit_tracker: <span class="prelude-val">None</span>,
+<a href=#191 id=191 data-nosnippet>191</a>            execute_untracked_edits: <span class="bool-val">true</span>,
+<a href=#192 id=192 data-nosnippet>192</a>            ignore_edits_if_not_yet_responded: <span class="bool-val">false</span>,
+<a href=#193 id=193 data-nosnippet>193</a>            <span class="attr">#[cfg(feature = <span class="string">"cache"</span>)]
+<a href=#194 id=194 data-nosnippet>194</a>            </span>check_edits_against_cache: <span class="bool-val">true</span>,
+<a href=#195 id=195 data-nosnippet>195</a>            tracking_initiation_window: <span class="prelude-val">Some</span>(std::time::Duration::from_secs(<span class="number">60 </span>* <span class="number">15</span>)),
+<a href=#196 id=196 data-nosnippet>196</a>            execute_self_messages: <span class="bool-val">false</span>,
+<a href=#197 id=197 data-nosnippet>197</a>            ignore_bots: <span class="bool-val">true</span>,
+<a href=#198 id=198 data-nosnippet>198</a>            ignore_thread_creation: <span class="bool-val">true</span>,
+<a href=#199 id=199 data-nosnippet>199</a>            case_insensitive_commands: <span class="bool-val">true</span>,
+<a href=#200 id=200 data-nosnippet>200</a>            non_command_message: <span class="prelude-val">None</span>,
+<a href=#201 id=201 data-nosnippet>201</a>            <span class="comment">// help_when_mentioned: true,
+<a href=#202 id=202 data-nosnippet>202</a>            // help_commmand: None,
+<a href=#203 id=203 data-nosnippet>203</a>            // command_specific_help_commmand: None,
+<a href=#204 id=204 data-nosnippet>204</a>            </span>__non_exhaustive: (),
+<a href=#205 id=205 data-nosnippet>205</a>        }
+<a href=#206 id=206 data-nosnippet>206</a>    }
+<a href=#207 id=207 data-nosnippet>207</a>}
 </code></pre></div></section></main></body></html>
