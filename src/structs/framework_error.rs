@@ -6,8 +6,7 @@ use crate::serenity_prelude as serenity;
 /// have an `error` field with your error type `E` in it), or originating from within the framework.
 ///
 /// These errors are handled with the [`crate::FrameworkOptions::on_error`] callback
-#[derive(derivative::Derivative)]
-#[derivative(Debug)]
+#[derive_where::derive_where(Debug; U, E)]
 pub enum FrameworkError<'a, U, E> {
     /// User code threw an error in user data setup
     #[non_exhaustive]
@@ -15,12 +14,12 @@ pub enum FrameworkError<'a, U, E> {
         /// Error which was thrown in the setup code
         error: E,
         /// The Framework passed to the event
-        #[derivative(Debug = "ignore")]
+        #[derive_where(skip)]
         framework: &'a crate::Framework<U, E>,
         /// Discord Ready event data present during setup
         data_about_bot: &'a serenity::Ready,
         /// The serenity Context passed to the event
-        #[derivative(Debug = "ignore")]
+        #[derive_where(skip)]
         ctx: &'a serenity::Context,
     },
     /// User code threw an error in generic event event handler
@@ -31,7 +30,7 @@ pub enum FrameworkError<'a, U, E> {
         /// Which event was being processed when the error occurred
         event: &'a serenity::FullEvent,
         /// The Framework passed to the event
-        #[derivative(Debug = "ignore")]
+        #[derive_where(skip)]
         framework: crate::FrameworkContext<'a, U, E>,
     },
     /// Error occurred during command execution
@@ -163,7 +162,7 @@ pub enum FrameworkError<'a, U, E> {
         /// Error which was thrown in the dynamic prefix code
         error: E,
         /// General context
-        #[derivative(Debug = "ignore")]
+        #[derive_where(skip)]
         ctx: crate::PartialContext<'a, U, E>,
         /// Message which the dynamic prefix callback was evaluated upon
         msg: &'a serenity::Message,
@@ -176,10 +175,10 @@ pub enum FrameworkError<'a, U, E> {
         /// The position in the message that the prefix ends.
         content_start: u16,
         /// Framework context
-        #[derivative(Debug = "ignore")]
+        #[derive_where(skip)]
         framework: crate::FrameworkContext<'a, U, E>,
         /// See [`crate::Context::invocation_data`]
-        #[derivative(Debug = "ignore")]
+        #[derive_where(skip)]
         invocation_data: &'a tokio::sync::Mutex<Box<dyn std::any::Any + Send + Sync>>,
         /// Which event triggered the message parsing routine
         trigger: crate::MessageDispatchTrigger,
@@ -188,7 +187,7 @@ pub enum FrameworkError<'a, U, E> {
     #[non_exhaustive]
     UnknownInteraction {
         /// Framework context
-        #[derivative(Debug = "ignore")]
+        #[derive_where(skip)]
         framework: crate::FrameworkContext<'a, U, E>,
         /// The interaction in question
         interaction: &'a serenity::CommandInteraction,
@@ -199,7 +198,7 @@ pub enum FrameworkError<'a, U, E> {
         /// The error thrown by user code
         error: E,
         /// Framework context
-        #[derivative(Debug = "ignore")]
+        #[derive_where(skip)]
         framework: crate::FrameworkContext<'a, U, E>,
         /// The interaction in question
         msg: &'a serenity::Message,
