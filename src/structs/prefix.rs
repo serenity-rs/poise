@@ -120,19 +120,34 @@ pub struct PrefixFrameworkOptions<U, E> {
     /// with the new result.
     pub edit_tracker: Option<std::sync::Arc<std::sync::RwLock<crate::EditTracker>>>,
     /// If the user makes a typo in their message and a subsequent edit creates a valid invocation,
-    /// the bot will execute the command if this attribute is set. [`Self::edit_tracker`] does not
-    /// need to be set for this.
+    /// the bot will execute the command if this attribute is set.
     ///
     /// That does not mean that any subsequent edits will also trigger execution. For that,
     /// see [`crate::Command::invoke_on_edit`].
     ///
-    /// Note: only has an effect if [`Self::edit_tracker`] is set.
+    /// Note: Only has an effect if [`Self::edit_tracker`] is set.
     pub execute_untracked_edits: bool,
     /// Whether to ignore message edits on messages that have not yet been responded to.
     ///
     /// This is the case if the message edit happens before a command has sent a response, or if the
     /// command does not send a response at all.
     pub ignore_edits_if_not_yet_responded: bool,
+    /// Whether to ignore message edits when the message was present in the message cache and the
+    /// content of the updated message is unchanged. Default is `true`.
+    ///
+    /// It is recommended to keep this on to prevent unintended command invocation.
+    ///
+    /// Note: Only has an effect if [`Self::edit_tracker`] is set and message caching is used.
+    #[cfg(feature = "cache")]
+    pub check_edits_against_cache: bool,
+    /// Optional window of time during which edit tracking may be initiated, beginning at message
+    /// creation. Default is 15 minutes.
+    ///
+    /// Setting a sensible duration is recommended to prevent unintended command invocations for
+    /// old messages, which can be triggered by both Discord and user edits.
+    ///
+    /// Note: Only has an effect if [`Self::edit_tracker`] is set.
+    pub tracking_initiation_window: Option<std::time::Duration>,
 
     /// Whether commands in messages emitted by this bot itself should be executed as well.
     pub execute_self_messages: bool,
@@ -175,6 +190,9 @@ impl<U, E> Default for PrefixFrameworkOptions<U, E> {
             edit_tracker: None,
             execute_untracked_edits: true,
             ignore_edits_if_not_yet_responded: false,
+            #[cfg(feature = "cache")]
+            check_edits_against_cache: true,
+            tracking_initiation_window: Some(std::time::Duration::from_secs(60 * 15)),
             execute_self_messages: false,
             ignore_bots: true,
             ignore_thread_creation: true,
