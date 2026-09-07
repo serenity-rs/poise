@@ -87,13 +87,12 @@ impl<T: darling::FromMeta> darling::FromMeta for Tuple2<T> {
     }
 }
 
-pub fn tuple_2_iter_deref<'a, I: 'a, T: 'a, D: ?Sized + 'a>(
-    iter: I,
-) -> impl ExactSizeIterator<Item = Tuple2<&'a D>>
+pub fn tuple_2_iter_deref<'a, I, T, D>(iter: I) -> impl ExactSizeIterator<Item = Tuple2<&'a D>>
 where
-    I: IntoIterator<Item = &'a Tuple2<T>>,
+    I: IntoIterator<Item = &'a Tuple2<T>> + 'a,
     I::IntoIter: ExactSizeIterator,
-    T: std::ops::Deref<Target = D>,
+    T: std::ops::Deref<Target = D> + 'a,
+    D: ?Sized + 'a,
 {
     iter.into_iter()
         .map(|Tuple2(t, v)| Tuple2(t.deref(), v.deref()))

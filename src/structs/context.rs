@@ -538,9 +538,10 @@ context_methods! {
 impl<'a, U, E> Context<'a, U, E> {
     /// Actual implementation of rerun() that returns `FrameworkError` for implementation convenience
     async fn rerun_inner(self) -> Result<(), crate::FrameworkError<'a, U, E>> {
-        // TODO: When merging into `serenity-next`, either set `U: Send + Sync + 'static` in the
-        // impl trait bounds or manually match and retrieve the command from `self.command_tree`.
-        let command = self.command();
+        let command = match self {
+            Self::Prefix(x) => x.command_tree.last().unwrap(),
+            Self::Application(x) => x.command_tree.last().unwrap(),
+        };
         match self {
             Self::Application(ctx) => {
                 // Skip autocomplete interactions

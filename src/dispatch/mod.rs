@@ -85,17 +85,13 @@ pub async fn dispatch_event<U: Send + Sync + 'static, E>(
                 #[cfg(feature = "cache")]
                 if framework.options().prefix_options.check_edits_against_cache {
                     if let Some(old) = old_if_available {
-                        if event
-                            .content
-                            .as_deref()
-                            .is_some_and(|new_content| new_content == old.content)
-                        {
+                        if event.message.content == old.content {
                             return;
                         }
                     }
                 }
 
-                let msg = edit_tracker.write().unwrap().process_message_update(
+                let result = edit_tracker.write().unwrap().process_message_update(
                     event,
                     framework
                         .options()

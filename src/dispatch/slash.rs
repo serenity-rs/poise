@@ -199,7 +199,7 @@ pub async fn dispatch_interaction<'a, U: Send + Sync + 'static, E>(
     crate::catch_unwind_maybe(run_command(ctx))
         .await
         .map_err(|payload| crate::FrameworkError::CommandPanic {
-            payload,
+            payload: payload.map(Box::new),
             ctx: ctx.into(),
         })??;
 
@@ -283,7 +283,7 @@ pub async fn dispatch_autocomplete<'a, U: Send + Sync + 'static, E>(
     crate::catch_unwind_maybe(run_autocomplete(ctx))
         .await
         .map_err(|payload| crate::FrameworkError::CommandPanic {
-            payload,
+            payload: payload.map(Box::new),
             ctx: ctx.into(),
         })??;
 

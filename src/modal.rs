@@ -437,9 +437,6 @@ pub trait Modal: Sized {
     ) -> serenity::CreateInteractionResponse<'static>;
 
     /// Parses a received modal submit interaction into this type.
-    ///
-    /// Returns an error if a field was missing. This should never happen, because Discord will only
-    /// let users submit when all required fields are filled properly.
     fn parse(data: serenity::ModalInteractionData) -> Self;
 
     /// Calls `execute_modal(ctx, None, None)`. See [`execute_modal()`].

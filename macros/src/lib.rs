@@ -323,8 +323,8 @@ pub async fn modal(ctx: ApplicationContext<'_>) -> Result<(), Error> {
 
 - `#[name = ""]`: Sets the modal title. Defaults to struct name if omitted. Max 45 chars.
 - `#[text_display = ""]`: Optional [text display] component, shown below the modal title. Can
-include markdown-formatted text, mentions (users, roles, etc.), and emojis. Note that this counts
-toward the maximum total of five components per modal. Max 4000 chars.
+  include markdown-formatted text, mentions (users, roles, etc.), and emojis. Note that this counts
+  toward the maximum total of five components per modal. Max 4000 chars.
 
 It is possible to create an informational modal with no interactive components by defining an
 empty struct with a text display component.
@@ -378,15 +378,15 @@ attributes (**one per field**):
 
 - `#[file_upload]`: Allows the user to upload files (0-10). Returns [`FixedArray<Attachment>`].
 - `#[string_select("", "")]`: Supports 1-25 **unique** options (up to 100 chars each), defined in
-the attribute. Returns `FixedArray<String>`.
+  the attribute. Returns `FixedArray<String>`.
 - `#[user_select]`: Returns [`FixedArray<User>`].
 - `#[role_select]`: Returns [`FixedArray<Role>`].
 - `#[mentionable_select]`: Returns [`Mentionables`].
 - `#[channel_select]`: Returns [`FixedArray<GenericChannelId>`].
 - `#[radio_group("", "")]`: Supports 2-10 **unique** options (up to 100 chars each), defined in
-the attribute. Returns `FixedString`.
+  the attribute. Returns `FixedString`.
 - `#[checkbox_group("", "")]`: Supports 1-10 **unique** options (up to 100 chars each), defined in
-the attribute. Returns `FixedArray<String>`.
+  the attribute. Returns `FixedArray<String>`.
 - `#[checkbox]`: Returns `true` if checked, `false` if unchecked.
 
 Optionally, emojis and/or descriptions may be added to string select menu options. Radio group
@@ -423,7 +423,7 @@ using the following field attributes:
 
 - `#[min_values = 0]`: 0-10 for files/checkbox groups; 0-25 for select menus. Defaults to 1.
 - `#[max_values = 25]`: 1-10 for files/checkbox groups; 1-25 for select menus. Defaults to 1 for
-files and select menus; defaults to the number of options for checkbox groups.
+  files and select menus; defaults to the number of options for checkbox groups.
 
 ```rust
 #[name = "Role select menu"]
@@ -459,7 +459,7 @@ channels: FixedArray<serenity::GenericChannelId>
 For file uploads, allowed file types may optionally be defined using the following field attribute:
 
 - `#[file_types("", "")]`: Valid types include `image`, `video`, `audio`, and any dot-prefixed
-extension such as `.pdf`. See [File Type Filtering] for details. Maximum of 10 types.
+  extension such as `.pdf`. See [File Type Filtering] for details. Maximum of 10 types.
 
 ```rust
 #[name = "Image or PDF upload"]

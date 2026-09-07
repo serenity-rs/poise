@@ -1,4 +1,7 @@
 //! Implements the #[derive(ChoiceParameter)] derive macro
+// Triggered by darling(multiple) attribute.
+// Issue: https://github.com/TedDriggs/darling/issues/440
+#![allow(clippy::redundant_field_names)]
 
 use proc_macro::TokenStream;
 use syn::spanned::Spanned as _;

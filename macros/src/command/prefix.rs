@@ -1,4 +1,4 @@
-use super::{CommandParameter, Invocation, unwrap_generic};
+use super::{unwrap_generic, CommandParameter, Invocation};
 use quote::format_ident;
 use syn::spanned::Spanned as _;
 
@@ -138,7 +138,7 @@ fn parse_prefix_params(
                     #empty
                 } else {
                     let #token =
-                        <#ty as ::poise::serenity_prelude::ArgumentConvert>::convert(
+                        <#ty as ::poise::ArgumentConvert>::convert(
                             serenity_ctx,
                             msg.guild_id,
                             Some(msg.channel_id),

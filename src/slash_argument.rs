@@ -249,7 +249,7 @@ impl SlashArgError {
             Self::Parse { error, input } => crate::FrameworkError::ArgumentParse {
                 ctx: ctx.into(),
                 error,
-                input: Some(input),
+                input: Some(Box::new(input)),
             },
             Self::Invalid(description) => crate::FrameworkError::ArgumentParse {
                 ctx: ctx.into(),

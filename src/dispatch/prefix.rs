@@ -75,7 +75,7 @@ async fn strip_prefix<'a, U: Send + Sync + 'static, E>(
     }
 
     if let Some(dynamic_prefix) = framework.options.prefix_options.stripped_dynamic_prefix {
-        match dynamic_prefix(framework.serenity_context, msg, framework.user_data).await {
+        match dynamic_prefix(framework.serenity_context, msg, framework.user_data()).await {
             Ok(Some(prefix)) => return Some(prefix_len_to_u16(prefix)),
             Ok(None) => {}
             Err(error) => {
@@ -98,7 +98,8 @@ async fn strip_prefix<'a, U: Send + Sync + 'static, E>(
                 .strip_prefix(&framework.bot_id().to_string())?
                 .strip_prefix('>')
         })() {
-            let mention_prefix = &msg.content[..(msg.content.len() - stripped_content.len())];
+            let mention_prefix =
+                &msg.content[..(msg.content.len() as usize - stripped_content.len())];
             return Some(prefix_len_to_u16(mention_prefix));
         }
     }
@@ -201,7 +202,7 @@ pub async fn dispatch_message<'a, U: Send + Sync + 'static, E>(
         crate::catch_unwind_maybe(run_invocation(ctx))
             .await
             .map_err(|payload| crate::FrameworkError::CommandPanic {
-                payload,
+                payload: payload.map(Box::new),
                 ctx: ctx.into(),
             })??;
     } else if let Some(non_command_message) = framework.options.prefix_options.non_command_message {
@@ -224,7 +225,7 @@ pub async fn dispatch_message<'a, U: Send + Sync + 'static, E>(
 /// fully parsed.
 ///
 /// [`Message`]: serenity::Message
-pub async fn parse_invocation<'a, U: Send + Sync, E>(
+pub async fn parse_invocation<'a, U: Send + Sync + 'static, E>(
     framework: crate::FrameworkContext<'a, U, E>,
     msg: &'a serenity::Message,
     trigger: crate::MessageDispatchTrigger,

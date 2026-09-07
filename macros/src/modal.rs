@@ -302,7 +302,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
         // If field is a checkbox group component, process and continue.
         if let Some(checkbox_group) = field_attrs.checkbox_group {
             let options = checkbox_group.0;
-            if options.len() < 1 {
+            if options.is_empty() {
                 let err = "minimum of 1 checkbox group option required";
                 return Err(err_on_attr(&attrs, err, "checkbox_group"));
             } else if options.len() > 10 {
@@ -392,7 +392,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                 ..
             } => {
                 let strings = string_select.0;
-                if strings.len() < 1 {
+                if strings.is_empty() {
                     let err = "minimum of 1 string select option required";
                     return Err(err_on_attr(&attrs, err, "string_select"));
                 } else if strings.len() > 25 {

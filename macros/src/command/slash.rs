@@ -1,4 +1,4 @@
-use super::{CommandParameter, Invocation, unwrap_generic};
+use super::{unwrap_generic, CommandParameter, Invocation};
 use crate::util::{
     extract_type_parameter, iter_tuple_2_to_vec_map, tuple_2_iter_deref, wrap_option_to_string,
 };

@@ -21,7 +21,6 @@ pub struct EditTracker {
     /// Duration after which cached messages can be purged
     max_duration: std::time::Duration,
     /// Cache, which stores invocation messages, and the corresponding bot response message if any
-    // TODO: change to `OrderedMap<MessageId, (Message, Option<serenity::Message>)>`?
     cache: Vec<CachedInvocation>,
 }
 
@@ -51,7 +50,7 @@ impl EditTracker {
     ) -> Option<bool> {
         let new_message = &user_msg_update.message;
         if let Some(window) = tracking_initiation_window {
-            let created = user_msg_update.id.created_at().unix_timestamp();
+            let created = new_message.id.created_at().unix_timestamp();
             let elapsed = serenity::Timestamp::now().unix_timestamp() - created;
             if elapsed.unsigned_abs() > window.as_secs() {
                 return None;

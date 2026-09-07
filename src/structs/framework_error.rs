@@ -35,8 +35,7 @@ pub enum FrameworkError<'a, U, E> {
         ///
         /// The reason the original [`Box<dyn Any + Send>`] payload isn't provided here is that it
         /// would make [`FrameworkError`] not [`Sync`] anymore.
-        // TODO: Switch to `FixedString` when merged into `serenity-next`.
-        payload: Option<String>,
+        payload: Option<Box<String>>,
         /// Command context
         ctx: crate::Context<'a, U, E>,
     },
@@ -46,8 +45,7 @@ pub enum FrameworkError<'a, U, E> {
         /// Error which was thrown by the parameter type's parsing routine
         error: Box<dyn std::error::Error + Send + Sync>,
         /// If applicable, the input on which parsing failed
-        // TODO: Switch to `FixedString` when merged into `serenity-next`.
-        input: Option<String>,
+        input: Option<Box<String>>,
         /// General context
         ctx: crate::Context<'a, U, E>,
     },
@@ -256,7 +254,11 @@ impl<'a, U, E> FrameworkError<'a, U, E> {
         input: Option<String>,
         error: Box<dyn std::error::Error + Send + Sync>,
     ) -> Self {
-        Self::ArgumentParse { error, input, ctx }
+        Self::ArgumentParse {
+            error,
+            input: input.map(Box::new),
+            ctx,
+        }
     }
 
     pub fn new_command_structure_mismatch(
