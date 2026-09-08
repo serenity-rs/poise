@@ -682,10 +682,10 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
 #[doc(hidden)]
 fn err_on_attr(attrs: &[darling::ast::NestedMeta], err: &str, target: &str) -> darling::Error {
     for attr in attrs.iter() {
-        if let darling::ast::NestedMeta::Meta(meta) = attr {
-            if meta.path().is_ident(target) {
-                return darling::Error::custom(err).with_span(&meta.path());
-            }
+        if let darling::ast::NestedMeta::Meta(meta) = attr
+            && meta.path().is_ident(target)
+        {
+            return darling::Error::custom(err).with_span(&meta.path());
         }
     }
     darling::Error::custom(err)

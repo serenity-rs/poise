@@ -116,15 +116,13 @@ pub struct Invocation {
 fn extract_help_from_doc_comments(attrs: &[syn::Attribute]) -> (Option<String>, Option<String>) {
     let mut doc_lines = String::new();
     for attr in attrs {
-        if let syn::Meta::NameValue(doc_attr) = &attr.meta {
-            if doc_attr.path == quote::format_ident!("doc").into() {
-                if let syn::Expr::Lit(lit_expr) = &doc_attr.value {
-                    if let syn::Lit::Str(literal) = &lit_expr.lit {
-                        doc_lines += literal.value().trim(); // Trim lines like rustdoc does
-                        doc_lines += "\n";
-                    }
-                }
-            }
+        if let syn::Meta::NameValue(doc_attr) = &attr.meta
+            && doc_attr.path == quote::format_ident!("doc").into()
+            && let syn::Expr::Lit(lit_expr) = &doc_attr.value
+            && let syn::Lit::Str(literal) = &lit_expr.lit
+        {
+            doc_lines += literal.value().trim(); // Trim lines like rustdoc does
+            doc_lines += "\n";
         }
     }
 
@@ -432,18 +430,14 @@ fn generate_cooldown_config(args: &CommandArgs) -> proc_macro2::TokenStream {
 }
 
 fn unwrap_generic<'a>(ty: &'a syn::Type, name: &str) -> Option<&'a syn::Type> {
-    if let syn::Type::Path(typepath) = ty {
-        if typepath.qself.is_none() {
-            if let Some(last) = typepath.path.segments.last() {
-                if last.ident == name {
-                    if let syn::PathArguments::AngleBracketed(params) = &last.arguments {
-                        if let Some(syn::GenericArgument::Type(ty)) = params.args.first() {
-                            return Some(ty);
-                        }
-                    }
-                }
-            }
-        }
+    if let syn::Type::Path(typepath) = ty
+        && typepath.qself.is_none()
+        && let Some(last) = typepath.path.segments.last()
+        && last.ident == name
+        && let syn::PathArguments::AngleBracketed(params) = &last.arguments
+        && let Some(syn::GenericArgument::Type(ty)) = params.args.first()
+    {
+        return Some(ty);
     }
     None
 }
