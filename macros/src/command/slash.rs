@@ -1,7 +1,7 @@
 use quote::format_ident;
 use syn::spanned::Spanned as _;
 
-use super::{unwrap_generic, CommandParameter, Invocation};
+use super::{CommandParameter, Invocation, unwrap_generic};
 use crate::util::{
     extract_type_parameter,
     iter_tuple_2_to_vec_map,

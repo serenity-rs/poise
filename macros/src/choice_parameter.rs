@@ -25,7 +25,7 @@ pub fn choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, darling:
                 input.ident.span(),
                 "Only enums can be used for choice parameters",
             )
-            .into())
+            .into());
         },
     };
 

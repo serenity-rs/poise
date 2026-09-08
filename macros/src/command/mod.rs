@@ -257,7 +257,7 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
         _ => {
             return Err(
                 syn::Error::new(inv.function.sig.span(), "expected a Context parameter").into()
-            )
+            );
         },
     };
     // Needed because we're not allowed to have lifetimes in the hacky use case below

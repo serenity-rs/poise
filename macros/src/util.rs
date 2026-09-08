@@ -81,7 +81,7 @@ impl<T: darling::FromMeta> darling::FromMeta for Tuple2<T> {
                     proc_macro2::Span::call_site(),
                     "expected two items `(\"a\", \"b\")`",
                 )
-                .into())
+                .into());
             },
         })
     }

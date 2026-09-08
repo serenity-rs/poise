@@ -50,7 +50,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                 input.ident.span(),
                 "only structs with named fields can be used for derived modals",
             )
-            .into())
+            .into());
         },
     };
 
@@ -248,8 +248,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                 }
             } else {
                 if descriptions.len() < options.len() {
-                    let err =
-                        "number of descriptions must not be less than the number of radio group options";
+                    let err = "number of descriptions must not be less than the number of radio group options";
                     return Err(err_on_attr(&attrs, err, "radio_group_descriptions"));
                 }
                 quote::quote! {
@@ -322,8 +321,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                 }
             } else {
                 if descriptions.len() < options.len() {
-                    let err =
-                        "number of descriptions must not be less than the number of checkbox group options";
+                    let err = "number of descriptions must not be less than the number of checkbox group options";
                     return Err(err_on_attr(&attrs, err, "checkbox_group_descriptions"));
                 }
                 quote::quote! {
@@ -384,22 +382,19 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                     return Err(err_on_attr(&attrs, err, "string_select"));
                 }
                 if field_attrs.max_values.is_some_and(|v| usize::from(v) > strings.len()) {
-                    let err =
-                    "value of `max_values` cannot be greater than the number of options provided";
+                    let err = "value of `max_values` cannot be greater than the number of options provided";
                     return Err(
                         darling::Error::custom(err).with_span(&field_attrs.max_values.span())
                     );
                 }
                 let emojis = field_attrs.string_select_emojis.unwrap_or_default().0;
                 if !emojis.is_empty() && emojis.len() < strings.len() {
-                    let err =
-                        "number of emojis must not be less than the number of string select options";
+                    let err = "number of emojis must not be less than the number of string select options";
                     return Err(err_on_attr(&attrs, err, "string_select_emojis"));
                 }
                 let descriptions = field_attrs.string_select_descriptions.unwrap_or_default().0;
                 if !descriptions.is_empty() && descriptions.len() < strings.len() {
-                    let err =
-                        "number of descriptions must not be less than the number of string select options";
+                    let err = "number of descriptions must not be less than the number of string select options";
                     return Err(err_on_attr(&attrs, err, "string_select_descriptions"));
                 }
                 let create_option = match (emojis.is_empty(), descriptions.is_empty()) {
