@@ -21,7 +21,7 @@ pub struct CreateReply<'a> {
 }
 
 impl<'a> CreateReply<'a> {
-    /// Creates a blank CreateReply. Equivalent to [`Self::default`].
+    /// Creates a blank `CreateReply`. Equivalent to [`Self::default`].
     pub fn new() -> Self {
         Self::default()
     }

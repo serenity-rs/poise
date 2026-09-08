@@ -40,8 +40,8 @@ impl<'a, U, E> From<crate::PrefixContext<'a, U, E>> for Context<'a, U, E> {
         Self::Prefix(x)
     }
 }
-/// Macro to generate Context methods and also PrefixContext and ApplicationContext methods that
-/// delegate to Context
+/// Macro to generate Context methods and also `PrefixContext` and `ApplicationContext` methods
+/// that delegate to Context
 macro_rules! context_methods {
     ( $(
         $( #[$($attrs:tt)*] )*
@@ -549,7 +549,8 @@ context_methods! {
 }
 
 impl<'a, U, E> Context<'a, U, E> {
-    /// Actual implementation of rerun() that returns `FrameworkError` for implementation convenience
+    /// Actual implementation of `rerun()` that returns `FrameworkError` for implementation
+    /// convenience
     async fn rerun_inner(self) -> Result<(), crate::FrameworkError<'a, U, E>> {
         let command = match self {
             Self::Prefix(x) => x.command_tree.last().unwrap(),
@@ -616,8 +617,8 @@ impl<'a, U, E> Context<'a, U, E> {
     }
 }
 
-/// Forwards for serenity::Context's impls. With these, poise's Context types can be passed in as-is
-/// to serenity API functions.
+/// Forwards for `serenity::Context`'s impls. With these, poise's Context types can be passed in as
+/// is to serenity API functions.
 macro_rules! context_trait_impls {
     ($($type:tt)*) => {
         #[cfg(feature = "cache")]

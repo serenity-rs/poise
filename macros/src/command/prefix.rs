@@ -1,6 +1,7 @@
-use super::{unwrap_generic, CommandParameter, Invocation};
 use quote::format_ident;
 use syn::spanned::Spanned as _;
+
+use super::{unwrap_generic, CommandParameter, Invocation};
 
 enum Modifier {
     Lazy,

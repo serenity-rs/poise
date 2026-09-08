@@ -23,7 +23,6 @@
     clippy::wildcard_imports,
     clippy::cast_sign_loss,
     clippy::too_many_lines,
-    clippy::doc_markdown,
     clippy::missing_panics_doc,
     // Currently very noisy for Poise
     clippy::missing_errors_doc,
@@ -47,8 +46,8 @@ Poise is an opinionated Discord bot framework with a few distinctive features:
 To run commands, ping your bot and write the command name and arguments after. Run the register
 command to register slash commands, after which you can use those, too.
 
-See examples/feature_showcase/ in the git repository for a full-featured example bot, showcasing most
-features of poise: `cargo run --example=feature_showcase`
+See `examples/feature_showcase/` in the git repository for a full-featured example bot, showcasing
+most features of poise: `cargo run --example=feature_showcase`
 
 # Introduction to serenity
 
@@ -417,8 +416,18 @@ pub mod macros {
 
 #[doc(no_inline)]
 pub use {
-    argument_convert::*, choice_parameter::*, cooldown::*, dispatch::*, framework::*, macros::*,
-    modal::*, prefix_argument::*, reply::*, slash_argument::*, structs::*, track_edits::*,
+    argument_convert::*,
+    choice_parameter::*,
+    cooldown::*,
+    dispatch::*,
+    framework::*,
+    macros::*,
+    modal::*,
+    prefix_argument::*,
+    reply::*,
+    slash_argument::*,
+    structs::*,
+    track_edits::*,
 };
 
 /// See [`builtins`]
@@ -449,7 +458,7 @@ use serenity_prelude as serenity; // private alias for crate root docs intradoc-
 /// An owned future has the `'static` lifetime.
 pub type BoxFuture<'a, T> = std::pin::Pin<Box<dyn std::future::Future<Output = T> + Send + 'a>>;
 
-/// Internal wrapper function for catch_unwind that respects the `handle_panics` feature flag
+/// Internal wrapper function for `catch_unwind` that respects the `handle_panics` feature flag
 async fn catch_unwind_maybe<T>(
     fut: impl std::future::Future<Output = T>,
 ) -> Result<T, Option<String>> {

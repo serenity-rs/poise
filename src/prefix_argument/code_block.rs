@@ -1,7 +1,8 @@
 //! Parsing code for [`CodeBlock`], a prefix-specific command parameter type
 
-use super::*;
 use trim_in_place::TrimInPlace;
+
+use super::*;
 
 /// Error thrown when parsing a malformed [`CodeBlock`] ([`CodeBlock::pop_from`])
 #[derive(Default, Debug, Clone)]
@@ -139,14 +140,11 @@ fn test_pop_code_block() {
         ),
         ("```c#\nusing System;\n```", "using System;", Some("c#")),
     ] {
-        assert_eq!(
-            pop_from(string).unwrap().1,
-            CodeBlock {
-                code: code.into(),
-                language: language.map(Into::into),
-                __non_exhaustive: (),
-            }
-        );
+        assert_eq!(pop_from(string).unwrap().1, CodeBlock {
+            code: code.into(),
+            language: language.map(Into::into),
+            __non_exhaustive: (),
+        });
     }
 
     assert!(pop_from("").is_err());

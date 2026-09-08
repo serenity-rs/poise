@@ -1,9 +1,13 @@
-use super::{unwrap_generic, CommandParameter, Invocation};
-use crate::util::{
-    extract_type_parameter, iter_tuple_2_to_vec_map, tuple_2_iter_deref, wrap_option_to_string,
-};
 use quote::format_ident;
 use syn::spanned::Spanned as _;
+
+use super::{unwrap_generic, CommandParameter, Invocation};
+use crate::util::{
+    extract_type_parameter,
+    iter_tuple_2_to_vec_map,
+    tuple_2_iter_deref,
+    wrap_option_to_string,
+};
 
 fn lit_to_string(lit: &syn::Lit) -> Result<String, syn::Error> {
     match lit {

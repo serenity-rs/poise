@@ -1,5 +1,6 @@
-use crate::{Context, Error};
 use poise::serenity_prelude as serenity;
+
+use crate::{Context, Error};
 
 // `install_context` determines how the bot has to be installed for a command to be available.
 // `interaction_context` determines where a command can be used.

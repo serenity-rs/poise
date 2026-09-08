@@ -1,12 +1,13 @@
 //! Infrastructure for command cooldowns
 
-use crate::serenity_prelude as serenity;
 // I usually don't really do imports, but these are very convenient
 use std::collections::HashMap;
 use std::time::{Duration, Instant};
 
-/// Subset of [`crate::Context`] so that [`Cooldowns`] can be used without requiring a full [Context](`crate::Context`)
-/// (ie from within an `event_handler`)
+use crate::serenity_prelude as serenity;
+
+/// Subset of [`crate::Context`] so that [`Cooldowns`] can be used without requiring a full
+/// [Context](`crate::Context`) (i.e., from within an `event_handler`)
 #[derive(Default, Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub struct CooldownContext {
     /// The user associated with this request
@@ -54,7 +55,7 @@ pub struct CooldownTracker {
 
 /// Possible types of command cooldowns.
 ///
-/// Currently used for [CooldownTracker::set_last_invocation]
+/// Currently used for [`CooldownTracker::set_last_invocation`]
 #[non_exhaustive]
 #[derive(Debug, Clone, Copy)]
 pub enum CooldownType {

@@ -10,7 +10,8 @@ use crate::{Context, Error};
 // The first parameter of that function is ApplicationContext or Context, and the second parameter
 // is a &str of the partial input which the user has typed so far.
 //
-// As the return value of autocomplete functions, you must return `serenity::CreateAutocompleteResponse`.
+// As the return value of autocomplete functions, you must return
+// `serenity::CreateAutocompleteResponse`.
 
 async fn autocomplete_name<'a>(
     _ctx: Context<'a>,

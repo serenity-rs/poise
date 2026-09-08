@@ -1,8 +1,7 @@
 //! Application command permissions calculation
 use self::serenity::Permissions;
-use crate::serenity_prelude as serenity;
-
 use super::PermissionsInfo;
+use crate::serenity_prelude as serenity;
 
 /// Gets the permissions of the ctx author and the bot.
 pub(super) fn get_author_and_bot_permissions(

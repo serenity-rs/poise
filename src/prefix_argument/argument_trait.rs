@@ -1,9 +1,10 @@
 //! Trait implemented for all types usable as prefix command parameters.
 
+use std::str::FromStr;
+
 use super::{InvalidBool, MissingAttachment, TooFewArguments, pop_string};
 use crate::argument_convert::ArgumentConvert;
 use crate::serenity_prelude as serenity;
-use std::str::FromStr;
 
 /// The result of [`PopArgument::pop_from`].
 ///  - If Ok, this is `(remaining, attachment_index, T)`

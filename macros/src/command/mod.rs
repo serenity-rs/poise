@@ -1,12 +1,16 @@
 mod prefix;
 mod slash;
 
-use crate::util::{
-    iter_tuple_2_to_vec_map, wrap_option, wrap_option_and_map, wrap_option_to_string,
-};
 use proc_macro::TokenStream;
 use quote::format_ident;
 use syn::spanned::Spanned as _;
+
+use crate::util::{
+    iter_tuple_2_to_vec_map,
+    wrap_option,
+    wrap_option_and_map,
+    wrap_option_to_string,
+};
 
 /// Representation of the command attribute arguments (`#[command(...)]`)
 #[derive(Default, Debug, darling::FromMeta)]

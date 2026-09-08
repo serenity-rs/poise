@@ -3,6 +3,8 @@
 //! This file provides sample commands and utility functions like pagination or error handlers to
 //! use as a starting point for the framework.
 
+use std::fmt::{self, Display};
+
 mod register;
 pub use register::*;
 
@@ -11,22 +13,24 @@ mod paginate;
 #[cfg(feature = "chrono")]
 pub use paginate::*;
 
-use crate::{CreateReply, serenity_prelude as serenity, serenity_prelude::CreateAllowedMentions};
-use std::fmt::{self, Display};
+use crate::serenity_prelude::CreateAllowedMentions;
+use crate::{CreateReply, serenity_prelude as serenity};
 
-/// An error handler that logs errors either via the [`tracing`] crate or via a Discord message. Set
-/// up a logger like tracing subscriber
-/// (e.g. `tracing_subscriber::fmt::init()`) to see the logged errors from this method.
+/// An error handler that logs errors via either the [`tracing`] crate or a Discord message. Set
+/// up a logger like tracing subscriber (e.g., `tracing_subscriber::fmt::init()`) to see the logged
+/// errors from this method.
 ///
-/// If the user invoked the command wrong ([`crate::FrameworkError::ArgumentParse`]), the command
-/// help is displayed and the user is directed to the help menu.
+/// If the user invoked the command incorrectly ([`crate::FrameworkError::ArgumentParse`]), the
+/// command help is displayed and the user is directed to the help menu.
+///
+/// # Errors
 ///
 /// Can return an error if sending the Discord error message failed. You can decide for yourself
 /// how to handle this, for example:
 /// ```rust,no_run
 /// # async { let error: poise::FrameworkError<'_, (), &str> = todo!();
 /// if let Err(e) = poise::builtins::on_error(error).await {
-///     tracing::error!("Fatal error while sending error message: {}", e);
+///     tracing::error!("Fatal error while sending error message: {e}");
 /// }
 /// # };
 /// ```

@@ -2,12 +2,11 @@
 
 mod commands;
 
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
+use std::time::Duration;
+
 use poise::serenity_prelude as serenity;
-use std::{
-    collections::HashMap,
-    sync::{Arc, Mutex},
-    time::Duration,
-};
 
 // Types used by all command functions
 type Error = Box<dyn std::error::Error + Send + Sync>;

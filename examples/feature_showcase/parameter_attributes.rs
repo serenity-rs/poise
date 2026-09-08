@@ -1,5 +1,6 @@
-use crate::{Context, Error};
 use poise::serenity_prelude as serenity;
+
+use crate::{Context, Error};
 
 /// Adds multiple numbers
 ///

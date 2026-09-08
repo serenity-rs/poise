@@ -71,7 +71,7 @@ async fn lookup_channel_global(
     }
 }
 
-/// Look up a Channel by a string case-insensitively.
+/// Look up a `Channel` by a string case-insensitively.
 ///
 /// Lookup are done via local guild. If in DMs, the global cache is used instead.
 ///
@@ -136,11 +136,11 @@ impl fmt::Display for GuildChannelParseError {
     }
 }
 
-/// Look up a GuildChannel by a string case-insensitively.
+/// Look up a `GuildChannel` by a string case-insensitively.
 ///
 /// Lookup is done by the global cache, hence the cache feature needs to be enabled.
 ///
-/// For more information, see the ArgumentConvert implementation for [`Channel`]
+/// For more information, see the `ArgumentConvert` implementation for [`Channel`].
 #[async_trait::async_trait]
 impl ArgumentConvert for serenity::GuildChannel {
     type Err = GuildChannelParseError;

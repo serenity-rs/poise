@@ -221,7 +221,8 @@ async fn run_autocomplete<U: Send + Sync + 'static, E>(
         },
     )?;
 
-    // Only continue if this parameter supports autocomplete and Discord has given us a partial value
+    // Only continue if this parameter supports autocomplete and Discord has given us a partial
+    // value
     let Some(autocomplete_callback) = focused_parameter.autocomplete_callback else {
         return Ok(());
     };

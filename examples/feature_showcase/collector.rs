@@ -1,5 +1,6 @@
-use crate::{Context, Error};
 use poise::{CreateReply, serenity_prelude as serenity};
+
+use crate::{Context, Error};
 
 /// Boop the bot!
 #[poise::command(prefix_command, track_edits, slash_command)]

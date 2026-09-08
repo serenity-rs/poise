@@ -1,6 +1,7 @@
-use crate::{Data, Error};
 use poise::serenity_prelude as serenity;
 use poise::serenity_prelude::small_fixed_array::{FixedArray, FixedString};
+
+use crate::{Data, Error};
 
 #[derive(Debug, poise::Modal)]
 #[name = "My Modal"]
@@ -50,16 +51,13 @@ pub async fn modal_with_defaults(
 ) -> Result<(), Error> {
     use poise::Modal as _;
 
-    let data = MyModal::execute_with_defaults(
-        ctx,
-        MyModal {
-            text: FixedString::from_static_trunc("My text"),
-            paragraph: Some(FixedString::from_static_trunc("My long text")),
-            string_select: FixedArray::from_vec_trunc(vec!["Option 1".to_owned()]),
-            radio_group: None,
-            checkbox: true,
-        },
-    )
+    let data = MyModal::execute_with_defaults(ctx, MyModal {
+        text: FixedString::from_static_trunc("My text"),
+        paragraph: Some(FixedString::from_static_trunc("My long text")),
+        string_select: FixedArray::from_vec_trunc(vec!["Option 1".to_owned()]),
+        radio_group: None,
+        checkbox: true,
+    })
     .await?;
     println!("Got data: {data:?}");
 

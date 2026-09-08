@@ -45,7 +45,8 @@ impl serenity::EventHandler for Handler {
                     err.handle(&self.options).await;
                 }
             },
-            // For slash commands or edit tracking to work, forward InteractionCreate and MessageUpdate.
+            // For slash commands or edit tracking to work, forward InteractionCreate and
+            // MessageUpdate.
             _ => {},
         }
     }

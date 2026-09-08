@@ -2,9 +2,8 @@
 
 use std::borrow::Cow;
 
-use crate::{BoxFuture, serenity_prelude as serenity};
-
 use super::{CowStr, CowVec};
+use crate::{BoxFuture, serenity_prelude as serenity};
 
 /// Default name given to commands
 const DEFAULT_NAME: CowStr = Cow::Borrowed("A slash command");
@@ -48,8 +47,8 @@ pub struct Command<U, E> {
     pub qualified_name: CowStr,
     /// A string to identify this particular command within a list of commands.
     ///
-    /// Can be configured via the [`crate::command`] macro (though it's probably not needed for most
-    /// bots). If not explicitly configured, it falls back to the command function name.
+    /// Can be configured via the [`crate::command`] macro (though it's probably not needed for
+    /// most bots). If not explicitly configured, it falls back to the command function name.
     pub identifying_name: CowStr,
     /// The name of the `#[poise::command]`-annotated function
     pub source_code_name: CowStr,
@@ -88,7 +87,8 @@ pub struct Command<U, E> {
     ///
     /// This is checked internally and works for both prefix commands and slash commands.
     ///
-    /// This also handles the case a message is sent in a thread, in which `SEND_MESSAGES` is set to `SEND_MESSAGES_IN_THREADS`.
+    /// This also handles the case a message is sent in a thread, in which `SEND_MESSAGES` is set
+    /// to `SEND_MESSAGES_IN_THREADS`.
     ///
     /// Set to [`serenity::Permissions::empty()`] by default
     pub required_permissions: serenity::Permissions,
@@ -97,7 +97,8 @@ pub struct Command<U, E> {
     /// You can set this to fail early and give a descriptive error message in case the
     /// bot hasn't been assigned the minimum permissions by the guild admin.
     ///
-    /// This also handles the case a message is sent in a thread, in which `SEND_MESSAGES` is set to `SEND_MESSAGES_IN_THREADS`.
+    /// This also handles the case a message is sent in a thread, in which `SEND_MESSAGES` is set
+    /// to `SEND_MESSAGES_IN_THREADS`.
     ///
     /// Set to [`serenity::Permissions::empty()`] by default
     pub required_bot_permissions: serenity::Permissions,
@@ -128,7 +129,8 @@ pub struct Command<U, E> {
     pub aliases: CowVec<CowStr>,
     /// Whether to rerun the command if an existing invocation message is edited (prefix-only)
     pub invoke_on_edit: bool,
-    /// Whether to delete the bot response if an existing invocation message is deleted (prefix-only)
+    /// Whether to delete the bot response if an existing invocation message is deleted
+    /// (prefix-only)
     pub track_deletion: bool,
     /// Whether to broadcast a typing indicator while executing this commmand (prefix-only)
     pub broadcast_typing: bool,

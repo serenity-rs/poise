@@ -7,8 +7,9 @@ Poise supports several pre-command checks (sorted by order of execution):
 - command-specific check function
 - cooldowns
 */
-use crate::{Context, Error};
 use poise::serenity_prelude as serenity;
+
+use crate::{Context, Error};
 
 #[poise::command(prefix_command, owners_only, hide_in_help)]
 pub async fn shutdown(ctx: Context<'_>) -> Result<(), Error> {

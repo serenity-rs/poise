@@ -1,6 +1,7 @@
 //! The central Framework struct that ties everything together.
 
-use std::{borrow::Cow, sync::Arc};
+use std::borrow::Cow;
+use std::sync::Arc;
 
 pub use builder::*;
 
@@ -198,9 +199,9 @@ pub async fn insert_owners_from_http<S: std::hash::BuildHasher>(
 ///
 /// Important to avoid the edit tracker gobbling up unlimited memory
 ///
-/// NOT PUB because it's not useful to outside users because it requires a full blown Framework
-/// Because e.g. taking a `PrefixFrameworkOptions` reference won't work because tokio tasks need to be
-/// 'static
+/// NOT `pub` because it's not useful to outside users since it requires a full-blown `Framework`;
+/// for example, taking a `PrefixFrameworkOptions` reference won't work because tokio tasks need to
+/// be `'static`
 fn spawn_edit_tracker_purge_task(
     edit_tracker: Arc<std::sync::RwLock<crate::EditTracker>>,
 ) -> tokio::task::JoinHandle<()> {

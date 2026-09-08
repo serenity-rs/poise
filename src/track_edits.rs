@@ -76,7 +76,7 @@ impl EditTracker {
 
     /// Removes this command invocation from the cache and returns the associated bot response,
     /// if the command invocation is cached, and it has an associated bot response, and the command
-    /// is marked track_deletion
+    /// is marked `track_deletion`
     pub fn process_message_delete(
         &mut self,
         deleted_message_id: serenity::MessageId,

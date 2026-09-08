@@ -1,10 +1,10 @@
 //! Holds application command definition structs.
 
-use std::{borrow::Cow, collections::HashMap};
-
-use crate::{BoxFuture, serenity_prelude as serenity};
+use std::borrow::Cow;
+use std::collections::HashMap;
 
 use super::{CowStr, CowVec};
+use crate::{BoxFuture, serenity_prelude as serenity};
 
 /// Specifies if the current invokation is from a Command or Autocomplete.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]

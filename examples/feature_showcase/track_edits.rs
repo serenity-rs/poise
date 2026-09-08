@@ -1,5 +1,6 @@
-use crate::{Context, Error};
 use poise::serenity_prelude as serenity;
+
+use crate::{Context, Error};
 
 #[poise::command(slash_command, prefix_command, reuse_response)]
 pub async fn test_reuse_response(ctx: Context<'_>) -> Result<(), Error> {

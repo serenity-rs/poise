@@ -1,6 +1,6 @@
+use poise::{ChoiceParameter, serenity_prelude as serenity};
+
 use crate::{Context, Error};
-use poise::ChoiceParameter;
-use poise::serenity_prelude as serenity;
 
 #[derive(ChoiceParameter)]
 pub enum WelcomeChoice {

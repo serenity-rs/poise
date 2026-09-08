@@ -11,7 +11,7 @@ use crate::serenity_prelude as serenity;
 ///
 /// Note: panics when called in an autocomplete context!
 ///
-/// ```rust,no_run
+/// ```rust,no_run,no_fmt
 /// # use poise::serenity_prelude as serenity;
 /// # #[tokio::main] async fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// # let ctx: poise::Context<'_, (), ()> = todo!();

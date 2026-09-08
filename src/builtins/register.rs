@@ -20,9 +20,9 @@ pub fn create_application_commands<'a, U: 'a, E: 'a>(
     commands: impl IntoIterator<Item = &'a crate::Command<U, E>>,
 ) -> Vec<serenity::CreateCommand<'static>> {
     /// We decided to extract context menu commands recursively, despite the subcommand hierarchy
-    /// not being preserved. Because it's more confusing to just silently discard context menu
+    /// not being preserved, because it's more confusing to just silently discard context menu
     /// commands if they're not top-level commands.
-    /// https://discord.com/channels/381880193251409931/919310428344029265/947970605985189989
+    // https://discord.com/channels/381880193251409931/919310428344029265/947970605985189989
     fn recursively_add_context_menu_commands<U, E>(
         builder: &mut Vec<serenity::CreateCommand<'static>>,
         command: &crate::Command<U, E>,

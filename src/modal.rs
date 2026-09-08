@@ -426,7 +426,8 @@ pub trait Modal: Sized {
 
     /// Calls `execute_modal(ctx, None, None)`. See [`execute_modal()`].
     ///
-    /// For a variant that is triggered on component interactions, see [`execute_modal_on_component_interaction`].
+    /// For a variant that is triggered on component interactions, see
+    /// [`execute_modal_on_component_interaction`].
     // TODO: add execute_with_defaults? Or add a `defaults: Option<Self>` param?
     #[allow(clippy::must_use_candidate)]
     async fn execute<U: Send + Sync + 'static, E>(

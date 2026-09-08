@@ -1,5 +1,7 @@
 //! Infrastructure for replying, i.e. sending a message in a command context
 
+use std::borrow::Cow;
+
 mod builder;
 pub use builder::*;
 
@@ -7,7 +9,6 @@ mod send_reply;
 pub use send_reply::*;
 
 use crate::serenity_prelude as serenity;
-use std::borrow::Cow;
 
 /// Private enum so we can extend, split apart, or merge variants without breaking changes
 #[derive(Clone)]
@@ -63,7 +64,8 @@ impl ReplyHandle<'_> {
     /// Note: to delete or edit, use [`ReplyHandle::delete()`] and [`ReplyHandle::edit()`] directly!
     /// Doing it via the methods from a Message object will fail for ephemeral messages
     ///
-    /// Returns a reference to the known Message object, or fetches the message from the discord API.
+    /// Returns a reference to the known Message object, or fetches the message from the discord
+    /// API.
     ///
     /// To get an owned [`serenity::Message`], use [`Self::into_message()`]
     pub async fn message(&self) -> Result<Cow<'_, serenity::Message>, serenity::Error> {

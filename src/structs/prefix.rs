@@ -85,7 +85,8 @@ pub struct PrefixFrameworkOptions<U, E> {
     pub additional_prefixes: Vec<Prefix>,
     /// Callback invoked on every message to return a prefix.
     ///
-    /// Override this field for a simple dynamic prefix which changes depending on the guild or user.
+    /// Override this field for a simple dynamic prefix which changes depending on the guild or
+    /// user.
     ///
     /// For more advanced dynamic prefixes, see [`Self::stripped_dynamic_prefix`]
     #[derive_where(skip)]
@@ -116,8 +117,8 @@ pub struct PrefixFrameworkOptions<U, E> {
     >,
     /// Treat a bot mention (a ping) like a prefix
     pub mention_as_prefix: bool,
-    /// If Some, the framework will react to message edits by editing the corresponding bot response
-    /// with the new result.
+    /// If Some, the framework will react to message edits by editing the corresponding bot
+    /// response with the new result.
     pub edit_tracker: Option<std::sync::Arc<std::sync::RwLock<crate::EditTracker>>>,
     /// If the user makes a typo in their message and a subsequent edit creates a valid invocation,
     /// the bot will execute the command if this attribute is set.
@@ -129,8 +130,8 @@ pub struct PrefixFrameworkOptions<U, E> {
     pub execute_untracked_edits: bool,
     /// Whether to ignore message edits on messages that have not yet been responded to.
     ///
-    /// This is the case if the message edit happens before a command has sent a response, or if the
-    /// command does not send a response at all.
+    /// This is the case if the message edit happens before a command has sent a response, or if
+    /// the command does not send a response at all.
     pub ignore_edits_if_not_yet_responded: bool,
     /// Whether to ignore message edits when the message was present in the message cache and the
     /// content of the updated message is unchanged. Default is `true`.

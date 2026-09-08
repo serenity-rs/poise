@@ -16,7 +16,8 @@ pub enum FrameworkError<'a, U, E> {
         /// General context
         ctx: crate::Context<'a, U, E>,
     },
-    /// Command was invoked without specifying a subcommand, but the command has `subcommand_required` set
+    /// Command was invoked without specifying a subcommand, but the command has
+    /// `subcommand_required` set
     SubcommandRequired {
         /// General context
         ctx: crate::Context<'a, U, E>,
