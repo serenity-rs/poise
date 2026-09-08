@@ -53,9 +53,7 @@ async fn main() {
         commands: vec![register_commands(), commands::vote(), commands::getvotes()],
         prefix_options: poise::PrefixFrameworkOptions {
             prefix: Some("~".into()),
-            edit_tracker: Some(Arc::new(poise::EditTracker::for_timespan(Duration::from_secs(
-                3600,
-            )))),
+            edit_tracker: Some(Arc::new(poise::EditTracker::for_timespan(Duration::from_hours(1)))),
             additional_prefixes: vec![
                 poise::Prefix::Literal("hey bot,"),
                 poise::Prefix::Literal("hey bot"),

@@ -3,6 +3,7 @@
 //!
 //! Note: this example configures no designated prefix. Mention the bot as a prefix instead. For
 //! that to work, please adjust the bot ID below to your bot, for the mention parsing to work.
+#![allow(clippy::single_match)]
 
 use std::sync::Arc;
 

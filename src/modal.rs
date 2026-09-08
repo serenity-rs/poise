@@ -122,7 +122,7 @@ impl ModalDataResolved {
                     } else {
                         tracing::warn!(
                             "Failed to parse `{value}` into u64 and retrieve resolved data"
-                        )
+                        );
                     }
                 }
                 Self {
@@ -140,7 +140,7 @@ impl ModalDataResolved {
                     } else {
                         tracing::warn!(
                             "Failed to parse `{value}` into u64 and retrieve resolved data"
-                        )
+                        );
                     }
                 }
                 Self {
@@ -165,7 +165,7 @@ impl ModalDataResolved {
                     } else {
                         tracing::warn!(
                             "Failed to parse `{value}` into u64 and retrieve resolved data"
-                        )
+                        );
                     }
                 }
                 Self {
@@ -235,45 +235,39 @@ pub fn find_modal_data(
     data: &mut serenity::ModalInteractionData,
     custom_id: &str,
 ) -> ModalDataResolved {
-    for component in data.components.iter_mut() {
-        match component {
-            serenity::ModalComponent::Label(label) => match &mut label.component {
-                serenity::LabelComponent::InputText(input_text) => {
-                    if input_text.custom_id == custom_id {
-                        return ModalDataResolved::from(input_text);
-                    }
+    for component in &mut data.components {
+        if let serenity::ModalComponent::Label(label) = component {
+            match &mut label.component {
+                serenity::LabelComponent::InputText(input_text)
+                    if input_text.custom_id == custom_id =>
+                {
+                    return ModalDataResolved::from(input_text);
                 },
-                serenity::LabelComponent::FileUpload(file_upload) => {
-                    if file_upload.custom_id == custom_id {
-                        return ModalDataResolved::extract_attachments(
-                            file_upload,
-                            &mut data.resolved,
-                        );
-                    }
+                serenity::LabelComponent::FileUpload(file_upload)
+                    if file_upload.custom_id == custom_id =>
+                {
+                    return ModalDataResolved::extract_attachments(file_upload, &mut data.resolved);
                 },
-                serenity::LabelComponent::SelectMenu(select_menu) => {
-                    if select_menu.custom_id == custom_id {
-                        return ModalDataResolved::extract_selections(select_menu, &data.resolved);
-                    }
+                serenity::LabelComponent::SelectMenu(select_menu)
+                    if select_menu.custom_id == custom_id =>
+                {
+                    return ModalDataResolved::extract_selections(select_menu, &data.resolved);
                 },
-                serenity::LabelComponent::RadioGroup(radio_group) => {
-                    if radio_group.custom_id == custom_id {
-                        return ModalDataResolved::from(radio_group);
-                    }
+                serenity::LabelComponent::RadioGroup(radio_group)
+                    if radio_group.custom_id == custom_id =>
+                {
+                    return ModalDataResolved::from(radio_group);
                 },
-                serenity::LabelComponent::CheckboxGroup(checkbox_group) => {
-                    if checkbox_group.custom_id == custom_id {
-                        return ModalDataResolved::from(checkbox_group);
-                    }
+                serenity::LabelComponent::CheckboxGroup(checkbox_group)
+                    if checkbox_group.custom_id == custom_id =>
+                {
+                    return ModalDataResolved::from(checkbox_group);
                 },
-                serenity::LabelComponent::Checkbox(checkbox) => {
-                    if checkbox.custom_id == custom_id {
-                        return ModalDataResolved::from(checkbox);
-                    }
+                serenity::LabelComponent::Checkbox(checkbox) if checkbox.custom_id == custom_id => {
+                    return ModalDataResolved::from(checkbox);
                 },
-                _ => continue,
-            },
-            _ => continue,
+                _ => {},
+            }
         }
     }
     tracing::warn!("{custom_id} not found in modal response");
@@ -298,12 +292,9 @@ async fn execute_modal_generic<
     // Wait for user to submit
     let response = serenity::collector::ModalInteractionCollector::new(ctx)
         .filter(move |d| d.data.custom_id.as_str() == modal_custom_id)
-        .timeout(timeout.unwrap_or(std::time::Duration::from_secs(3600)))
+        .timeout(timeout.unwrap_or(std::time::Duration::from_hours(1)))
         .await;
-    let response = match response {
-        Some(x) => x,
-        None => return Ok(None),
-    };
+    let Some(response) = response else { return Ok(None) };
 
     // Send acknowledgement so that the pop-up is closed
     response.create_response(&ctx.http, serenity::CreateInteractionResponse::Acknowledge).await?;
@@ -437,6 +428,7 @@ pub trait Modal: Sized {
     ///
     /// For a variant that is triggered on component interactions, see [`execute_modal_on_component_interaction`].
     // TODO: add execute_with_defaults? Or add a `defaults: Option<Self>` param?
+    #[allow(clippy::must_use_candidate)]
     async fn execute<U: Send + Sync + 'static, E>(
         ctx: crate::ApplicationContext<'_, U, E>,
     ) -> Result<Option<Self>, serenity::Error> {

@@ -176,6 +176,7 @@ pub struct CommandParameter<U, E> {
 impl<U, E> CommandParameter<U, E> {
     /// Generates a slash command parameter builder from this [`CommandParameter`] instance. This
     /// can be used to register the command on Discord's servers
+    #[must_use]
     pub fn create_as_slash_command_option(&self) -> Option<serenity::CreateCommandOption<'static>> {
         let description =
             self.description.clone().unwrap_or(Cow::Borrowed("A slash command parameter"));

@@ -1,6 +1,7 @@
 //! Dispatches incoming messages and message edits onto framework commands
 
 use std::convert::TryInto as _;
+use std::sync::Arc;
 
 use crate::serenity_prelude as serenity;
 
@@ -299,7 +300,7 @@ pub async fn run_invocation<U: Send + Sync + 'static, E>(
 
     // Typing is broadcasted as long as this object is alive
     let _typing_broadcaster = if command.broadcast_typing {
-        Some(ctx.msg.channel_id.start_typing(ctx.framework.serenity_context.http.clone()))
+        Some(ctx.msg.channel_id.start_typing(Arc::clone(&ctx.framework.serenity_context.http)))
     } else {
         None
     };

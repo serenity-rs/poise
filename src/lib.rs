@@ -1,13 +1,33 @@
 #![cfg_attr(doc_nightly, feature(doc_cfg))]
 #![doc(test(attr(deny(deprecated))))]
+#![forbid(unsafe_code)]
 // native #[non_exhaustive] is awful because you can't do struct update syntax with it (??)
 #![allow(clippy::manual_non_exhaustive)]
 #![allow(clippy::type_complexity)]
 #![warn(
+    unused,
+    clippy::pedantic,
+    clippy::clone_on_ref_ptr,
+    clippy::fallible_impl_from,
+    clippy::let_underscore_must_use,
+    clippy::format_push_string,
     clippy::missing_docs_in_private_items,
     clippy::unused_async,
     rust_2018_idioms,
     missing_docs
+)]
+#![allow(
+    // Allowed as they are too pedantic
+    clippy::cast_possible_truncation,
+    clippy::cast_possible_wrap,
+    clippy::wildcard_imports,
+    clippy::cast_sign_loss,
+    clippy::too_many_lines,
+    clippy::doc_markdown,
+    clippy::missing_panics_doc,
+    // Currently very noisy for Poise
+    clippy::missing_errors_doc,
+    clippy::struct_excessive_bools
 )]
 /*!
 Poise is an opinionated Discord bot framework with a few distinctive features:
@@ -436,7 +456,7 @@ async fn catch_unwind_maybe<T>(
     #[cfg(feature = "handle_panics")]
     let res = futures_util::FutureExt::catch_unwind(std::panic::AssertUnwindSafe(fut))
         .await
-        .map_err(|e| e.downcast_ref::<&str>().map(|s| s.to_string()));
+        .map_err(|e| e.downcast_ref::<&str>().map(ToString::to_string));
     #[cfg(not(feature = "handle_panics"))]
     let res = Ok(fut.await);
     res
@@ -450,6 +470,7 @@ mod tests {
         U: Send + Sync + 'static + 'static,
         E: Send + Sync + 'static,
     >() {
+        #[expect(clippy::used_underscore_items)]
         _assert_send_sync::<crate::FrameworkError<'_, U, E>>();
     }
 }

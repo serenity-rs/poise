@@ -39,7 +39,7 @@ pub async fn on_error<
     match error {
         crate::FrameworkError::Command { ctx, error } => {
             let error = display_error(error).to_string();
-            eprintln!("An error occured in a command: {}", error);
+            eprintln!("An error occured in a command: {error}");
 
             let mentions =
                 CreateAllowedMentions::new().everyone(false).all_roles(false).all_users(false);
@@ -75,9 +75,9 @@ pub async fn on_error<
                 None => "Please check the help menu for usage information",
             };
             let response = if let Some(input) = input {
-                format!("**Cannot parse `{}` as argument: {}**\n{}", input, error, usage)
+                format!("**Cannot parse `{input}` as argument: {error}**\n{usage}")
             } else {
-                format!("**{}**\n{}", error, usage)
+                format!("**{error}**\n{usage}")
             };
 
             let mentions =
@@ -95,18 +95,21 @@ pub async fn on_error<
                 description,
             );
         },
-        crate::FrameworkError::CommandCheckFailed { ctx, error } => match error {
-            Some(error) => tracing::error!(
-                "A command check failed in command {} for user {}: {}",
-                ctx.command().name,
-                ctx.author().name,
-                display_error(error),
-            ),
-            None => tracing::error!(
-                "A command check failed in command {} for user {}",
-                ctx.command().name,
-                ctx.author().name,
-            ),
+        crate::FrameworkError::CommandCheckFailed { ctx, error } => {
+            if let Some(error) = error {
+                tracing::error!(
+                    "A command check failed in command {} for user {}: {}",
+                    ctx.command().name,
+                    ctx.author().name,
+                    display_error(error),
+                );
+            } else {
+                tracing::error!(
+                    "A command check failed in command {} for user {}",
+                    ctx.command().name,
+                    ctx.author().name,
+                );
+            }
         },
         crate::FrameworkError::CooldownHit { remaining_cooldown, ctx } => {
             let msg = format!(
@@ -117,8 +120,7 @@ pub async fn on_error<
         },
         crate::FrameworkError::MissingBotPermissions { missing_permissions, ctx } => {
             let msg = format!(
-                "Command cannot be executed because the bot is lacking permissions: {}",
-                missing_permissions,
+                "Command cannot be executed because the bot is lacking permissions: {missing_permissions}",
             );
             ctx.send(CreateReply::default().content(msg).ephemeral(true)).await?;
         },
@@ -188,7 +190,7 @@ pub async fn on_error<
 /// An autocomplete function that can be used for the command parameter in your help function.
 ///
 /// See `examples/feature_showcase` for an example
-#[allow(clippy::unused_async)] // Required for the return type
+#[expect(clippy::unused_async)] // Required for the return type
 pub async fn autocomplete_command<'a, U: Send + Sync + 'static, E>(
     ctx: crate::Context<'a, U, E>,
     partial: &'a str,
@@ -234,7 +236,7 @@ pub async fn servers<U: Send + Sync + 'static, E>(
                 if !is_public && !show_private_guilds {
                     hidden_guilds += 1; // private guild whose name and size shouldn't be exposed
                 } else {
-                    shown_guilds.push((guild.name.clone(), guild.member_count.get()))
+                    shown_guilds.push((guild.name.clone(), guild.member_count.get()));
                 }
             },
             None => hidden_guilds += 1, // uncached guild
@@ -250,7 +252,7 @@ pub async fn servers<U: Send + Sync + 'static, E>(
     }
     let mut guilds = shown_guilds.into_iter().peekable();
     while let Some((name, member_count)) = guilds.peek() {
-        let line = format!("- **{}** ({} members)\n", name, member_count);
+        let line = format!("- **{name}** ({member_count} members)\n");
 
         // Make sure we don't exceed a certain number of characters below the 2000 char limit so
         // we have enough space for the remaining servers line
@@ -266,11 +268,11 @@ pub async fn servers<U: Send + Sync + 'static, E>(
         guilds.next(); // advance peekable iterator
     }
     if hidden_guilds > 0 {
-        let _ = writeln!(
+        writeln!(
             response,
-            "- {} remaining servers with {} members total",
-            hidden_guilds, hidden_guilds_members
-        );
+            "- {hidden_guilds} remaining servers with {hidden_guilds_members} members total"
+        )
+        .expect("writing to a string should never fail");
     }
 
     // Final safe guard (shouldn't be hit at the time of writing)

@@ -100,15 +100,12 @@ pub async fn register_application_commands<U: Send + Sync + 'static, E>(
     let num_commands = commands_builder.len();
 
     if global {
-        ctx.say(format!("Registering {num_commands} commands...",)).await?;
+        ctx.say(format!("Registering {num_commands} commands...")).await?;
         serenity::Command::set_global_commands(ctx.http(), &commands_builder).await?;
     } else {
-        let guild_id = match ctx.guild_id() {
-            Some(x) => x,
-            None => {
-                ctx.say("Must be called in guild").await?;
-                return Ok(());
-            },
+        let Some(guild_id) = ctx.guild_id() else {
+            ctx.say("Must be called in guild").await?;
+            return Ok(());
         };
 
         ctx.say(format!("Registering {num_commands} commands...")).await?;
@@ -199,13 +196,11 @@ pub async fn register_application_commands_buttons<U: Send + Sync + 'static, E>(
             crate::CreateReply::default().components(vec![]).content("Processing... Please wait."),
         )
         .await?; // remove buttons after button press and edit message
-    let pressed_button_id = match &interaction {
-        Some(m) => &m.data.custom_id,
-        None => {
-            ctx.say(":warning: You didn't interact in time - please run the command again.")
-                .await?;
-            return Ok(());
-        },
+    let pressed_button_id = if let Some(m) = &interaction {
+        &m.data.custom_id
+    } else {
+        ctx.say(":warning: You didn't interact in time - please run the command again.").await?;
+        return Ok(());
     };
 
     let (register, global) = match &**pressed_button_id {
@@ -223,22 +218,19 @@ pub async fn register_application_commands_buttons<U: Send + Sync + 'static, E>(
 
     if global {
         if register {
-            ctx.say(format!(":gear: Registering {num_commands} global commands...",)).await?;
+            ctx.say(format!(":gear: Registering {num_commands} global commands...")).await?;
             serenity::Command::set_global_commands(ctx.http(), &create_commands).await?;
         } else {
             ctx.say(":gear: Unregistering global commands...").await?;
             serenity::Command::set_global_commands(ctx.http(), &[]).await?;
         }
     } else {
-        let guild_id = match ctx.guild_id() {
-            Some(x) => x,
-            None => {
-                ctx.say(":x: Must be called in guild").await?;
-                return Ok(());
-            },
+        let Some(guild_id) = ctx.guild_id() else {
+            ctx.say(":x: Must be called in guild").await?;
+            return Ok(());
         };
         if register {
-            ctx.say(format!(":gear: Registering {num_commands} guild commands...",)).await?;
+            ctx.say(format!(":gear: Registering {num_commands} guild commands...")).await?;
             guild_id.set_commands(ctx.http(), &create_commands).await?;
         } else {
             ctx.say(":gear: Unregistering guild commands...").await?;

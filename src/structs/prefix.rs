@@ -192,7 +192,7 @@ impl<U, E> Default for PrefixFrameworkOptions<U, E> {
             ignore_edits_if_not_yet_responded: false,
             #[cfg(feature = "cache")]
             check_edits_against_cache: true,
-            tracking_initiation_window: Some(std::time::Duration::from_secs(60 * 15)),
+            tracking_initiation_window: Some(std::time::Duration::from_mins(15)),
             execute_self_messages: false,
             ignore_bots: true,
             ignore_thread_creation: true,

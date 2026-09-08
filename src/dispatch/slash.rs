@@ -204,15 +204,12 @@ async fn run_autocomplete<U: Send + Sync + 'static, E>(
     super::common::check_permissions_and_cooldown(ctx.into()).await?;
 
     // Find which parameter is focused by the user
-    let (focused_option_name, partial_input) = match ctx.args.iter().find_map(|o| match &o.value {
+    let Some((focused_option_name, partial_input)) = ctx.args.iter().find_map(|o| match &o.value {
         serenity::ResolvedValue::Autocomplete { value, .. } => Some((&o.name, value)),
         _ => None,
-    }) {
-        Some(x) => x,
-        None => {
-            tracing::warn!("no option is focused in autocomplete interaction");
-            return Ok(());
-        },
+    }) else {
+        tracing::warn!("no option is focused in autocomplete interaction");
+        return Ok(());
     };
 
     // Find the matching parameter from our Command object
@@ -225,9 +222,8 @@ async fn run_autocomplete<U: Send + Sync + 'static, E>(
     )?;
 
     // Only continue if this parameter supports autocomplete and Discord has given us a partial value
-    let autocomplete_callback = match focused_parameter.autocomplete_callback {
-        Some(a) => a,
-        _ => return Ok(()),
+    let Some(autocomplete_callback) = focused_parameter.autocomplete_callback else {
+        return Ok(());
     };
 
     // Generate an autocomplete response

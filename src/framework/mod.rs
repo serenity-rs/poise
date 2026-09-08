@@ -45,6 +45,7 @@ impl<U, E> Framework<U, E> {
     }
 
     /// Setup a new [`Framework`].
+    #[must_use]
     pub fn new(options: crate::FrameworkOptions<U, E>) -> Self
     where
         U: Send + Sync + 'static + 'static,
@@ -54,6 +55,7 @@ impl<U, E> Framework<U, E> {
     }
 
     /// Return the stored framework options, including commands.
+    #[must_use]
     pub fn options(&self) -> &crate::FrameworkOptions<U, E> {
         &self.options
     }
@@ -62,7 +64,7 @@ impl<U, E> Framework<U, E> {
 impl<U, E> Drop for Framework<U, E> {
     fn drop(&mut self) {
         if let Some(task) = &mut self.edit_tracker_purge_task {
-            task.abort()
+            task.abort();
         }
     }
 }
@@ -90,12 +92,12 @@ impl<U: Send + Sync + 'static, E: Send + Sync> serenity::Framework for Framework
 
         if let Some(edit_tracker) = &self.options.prefix_options.edit_tracker {
             self.edit_tracker_purge_task =
-                Some(spawn_edit_tracker_purge_task(edit_tracker.clone()));
+                Some(spawn_edit_tracker_purge_task(Arc::clone(edit_tracker)));
         }
     }
 
     async fn dispatch(&self, ctx: &serenity::Context, event: &serenity::FullEvent) {
-        raw_dispatch_event(self, ctx, event).await
+        raw_dispatch_event(self, ctx, event).await;
     }
 }
 
@@ -109,6 +111,7 @@ async fn raw_dispatch_event<U, E>(
     U: Send + Sync + 'static,
 {
     if let serenity::FullEvent::Ready { data_about_bot, .. } = event {
+        #[expect(clippy::let_underscore_must_use)]
         let _: Result<_, _> = framework.bot_id.set(data_about_bot.user.id);
     }
 
@@ -155,9 +158,9 @@ fn message_content_intent_sanity_check<U, E>(
 
 /// Runs [`serenity::Http::get_current_application_info`] and inserts owner data into
 /// [`crate::FrameworkOptions::owners`]
-pub async fn insert_owners_from_http(
+pub async fn insert_owners_from_http<S: std::hash::BuildHasher>(
     http: &serenity::Http,
-    owners: &mut std::collections::HashSet<serenity::UserId>,
+    owners: &mut std::collections::HashSet<serenity::UserId, S>,
     initialized_teams: &Option<Vec<serenity::TeamMemberRole>>,
 ) -> Result<(), serenity::Error> {
     let application_info = http.get_current_application_info().await?;

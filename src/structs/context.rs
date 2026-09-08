@@ -50,6 +50,7 @@ macro_rules! context_methods {
         $($await:ident)? ( $fn_name:ident $self:ident $($arg:ident)* )
         ( $($sig:tt)* ) $(where $b1:lifetime : $b2:lifetime)? $body:block
     )* ) => {
+        #[expect(clippy::unused_async_trait_impl)]
         impl<'a, U: Send + Sync + 'static, E> Context<'a, U, E> { $(
             $( #[$($attrs)*] )*
             $($sig)* $(where $b1:$b2)* $body
@@ -116,7 +117,7 @@ context_methods! {
             Self::Prefix(ctx) => Some(
                 ctx.msg
                     .channel_id
-                    .start_typing(ctx.serenity_context().http.clone()),
+                    .start_typing(std::sync::Arc::clone(&ctx.serenity_context().http)),
             ),
         })
     }
@@ -306,7 +307,7 @@ context_methods! {
                     // insert those bits into the ID
                     let timestamp_millis = edited_timestamp.timestamp_millis();
 
-                    id |= ((timestamp_millis - 1420070400000) as u64) << 22;
+                    id |= ((timestamp_millis - 1_420_070_400_000) as u64) << 22;
                 }
                 id
             }
@@ -391,7 +392,7 @@ context_methods! {
             // current command invocation parsed successfully, we can always expect that a command
             // rerun will still parse successfully.
             // Also: can't debug print error because then we need U: Debug + E: Debug bound arghhhhh
-            Err(_other) => panic!("unexpected error before entering command"),
+            _ => panic!("unexpected error before entering command"),
         }
     }
 
@@ -416,25 +417,39 @@ context_methods! {
                     string += arg.name;
                     string += ":";
 
-                    let _ = match arg.value {
+                    match arg.value {
                         // This was verified to match Discord behavior when copy-pasting a not-yet
                         // sent slash command invocation
-                        serenity::ResolvedValue::Attachment(_) => write!(string, ""),
-                        serenity::ResolvedValue::Boolean(x) => write!(string, "{}", x),
-                        serenity::ResolvedValue::Integer(x) => write!(string, "{}", x),
-                        serenity::ResolvedValue::Number(x) => write!(string, "{}", x),
-                        serenity::ResolvedValue::String(x) => write!(string, "{}", x),
+                        serenity::ResolvedValue::Attachment(_) => {
+                            write!(string, "").expect("writing to a string should never fail");
+                        }
+                        serenity::ResolvedValue::Boolean(x) => {
+                            write!(string, "{x}").expect("writing to a string should never fail");
+                        }
+                        serenity::ResolvedValue::Integer(x) => {
+                            write!(string, "{x}").expect("writing to a string should never fail");
+                        }
+                        serenity::ResolvedValue::Number(x) => {
+                            write!(string, "{x}").expect("writing to a string should never fail");
+                        }
+                        serenity::ResolvedValue::String(x) => {
+                            write!(string, "{x}").expect("writing to a string should never fail");
+                        }
                         serenity::ResolvedValue::Channel(x) => {
                             write!(string, "#{}", x.base().name.as_deref().unwrap_or(""))
+                                .expect("writing to a string should never fail");
                         }
-                        serenity::ResolvedValue::Role(x) => write!(string, "@{}", x.name),
+                        serenity::ResolvedValue::Role(x) => {
+                            write!(string, "@{}", x.name)
+                                .expect("writing to a string should never fail");
+                        }
                         serenity::ResolvedValue::User(x, _) => {
                             string.push('@');
                             string.push_str(&x.name);
                             if let Some(discrim) = x.discriminator {
-                                let _ = write!(string, "#{discrim:04}");
+                                write!(string, "#{discrim:04}")
+                                    .expect("writing to a string should never fail");
                             }
-                            Ok(())
                         }
 
                         serenity::ResolvedValue::Unresolved(_)
@@ -442,14 +457,12 @@ context_methods! {
                         | serenity::ResolvedValue::SubCommandGroup(_)
                         | serenity::ResolvedValue::Autocomplete { .. } => {
                             tracing::warn!("unexpected interaction option type");
-                            Ok(())
                         }
                         // We need this because ResolvedValue is #[non_exhaustive]
                         _ => {
                             tracing::warn!("newly-added unknown interaction option type");
-                            Ok(())
                         }
-                    };
+                    }
                 }
                 string
             }

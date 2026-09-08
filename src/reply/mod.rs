@@ -48,13 +48,13 @@ impl ReplyHandle<'_> {
     ///
     /// Only needs to do an HTTP request in the application command response case
     pub async fn into_message(self) -> Result<serenity::Message, serenity::Error> {
-        use ReplyHandleInner::*;
         match self.0 {
-            Prefix(msg) | Application { followup: Some(msg), .. } => Ok(*msg),
-            Application { http, interaction, followup: None } => {
+            ReplyHandleInner::Prefix(msg)
+            | ReplyHandleInner::Application { followup: Some(msg), .. } => Ok(*msg),
+            ReplyHandleInner::Application { http, interaction, followup: None } => {
                 interaction.get_response(http).await
             },
-            Autocomplete => panic!("reply is a no-op in autocomplete context"),
+            ReplyHandleInner::Autocomplete => panic!("reply is a no-op in autocomplete context"),
         }
     }
 
@@ -67,13 +67,13 @@ impl ReplyHandle<'_> {
     ///
     /// To get an owned [`serenity::Message`], use [`Self::into_message()`]
     pub async fn message(&self) -> Result<Cow<'_, serenity::Message>, serenity::Error> {
-        use ReplyHandleInner::*;
         match &self.0 {
-            Prefix(msg) | Application { followup: Some(msg), .. } => Ok(Cow::Borrowed(msg)),
-            Application { http, interaction, followup: None } => {
+            ReplyHandleInner::Prefix(msg)
+            | ReplyHandleInner::Application { followup: Some(msg), .. } => Ok(Cow::Borrowed(msg)),
+            ReplyHandleInner::Application { http, interaction, followup: None } => {
                 Ok(Cow::Owned(interaction.get_response(http).await?))
             },
-            Autocomplete => panic!("reply is a no-op in autocomplete context"),
+            ReplyHandleInner::Autocomplete => panic!("reply is a no-op in autocomplete context"),
         }
     }
 

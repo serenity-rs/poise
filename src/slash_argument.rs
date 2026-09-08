@@ -20,6 +20,7 @@ pub trait SlashArgument: Sized {
     fn create(builder: serenity::CreateCommandOption<'_>) -> serenity::CreateCommandOption<'_>;
 
     /// If this is a choice parameter, returns the choices
+    #[must_use]
     fn choices() -> CowVec<crate::CommandParameterChoice> {
         CowVec::default()
     }
@@ -104,6 +105,7 @@ macro_rules! impl_for_integer {
                 }
             }
 
+            #[allow(clippy::cast_lossless, clippy::cast_precision_loss)]
             fn create(builder: serenity::CreateCommandOption<'_>) -> serenity::CreateCommandOption<'_> {
                 builder
                     .min_number_value(f64::max(<$t>::MIN as f64, -9007199254740991.))
@@ -210,14 +212,17 @@ pub enum SlashArgError {
 /// Support functions for macro which can't create #[non_exhaustive] enum variants
 #[doc(hidden)]
 impl SlashArgError {
+    #[must_use]
     pub fn new_command_structure_mismatch(description: &'static str) -> Self {
         Self::CommandStructureMismatch { description }
     }
 
+    #[must_use]
     pub fn new_parse(error: Box<dyn std::error::Error + Send + Sync>, input: String) -> Self {
         Self::Parse { error, input }
     }
 
+    #[must_use]
     pub fn to_framework_error<U, E>(
         self,
         ctx: crate::ApplicationContext<'_, U, E>,
@@ -250,16 +255,16 @@ impl std::fmt::Display for SlashArgError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::CommandStructureMismatch { description } => {
-                write!(f, "Bot author did not register their commands correctly ({description})",)
+                write!(f, "Bot author did not register their commands correctly ({description})")
             },
             Self::Parse { error, input } => {
                 write!(f, "Failed to parse `{input}` as argument: {error}")
             },
             Self::Invalid(description) => {
-                write!(f, "You can't use this parameter here: {description}",)
+                write!(f, "You can't use this parameter here: {description}")
             },
             Self::Http(error) => {
-                write!(f, "Error occurred while retrieving data from Discord: {error}",)
+                write!(f, "Error occurred while retrieving data from Discord: {error}")
             },
             Self::__NonExhaustive => unreachable!(),
         }

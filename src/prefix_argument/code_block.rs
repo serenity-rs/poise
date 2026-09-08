@@ -77,7 +77,7 @@ fn pop_from(args: &str) -> Result<(&str, CodeBlock), CodeBlockError> {
 
         CodeBlock {
             code: code_block.to_owned(),
-            language: language.map(|x| x.to_owned()),
+            language: language.map(ToOwned::to_owned),
             __non_exhaustive: (),
         }
     } else if let Some(code_line) = args.strip_prefix('`') {
@@ -143,7 +143,7 @@ fn test_pop_code_block() {
             pop_from(string).unwrap().1,
             CodeBlock {
                 code: code.into(),
-                language: language.map(|x| x.into()),
+                language: language.map(Into::into),
                 __non_exhaustive: (),
             }
         );

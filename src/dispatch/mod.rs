@@ -31,6 +31,7 @@ impl<U, E> Clone for FrameworkContext<'_, U, E> {
 }
 impl<'a, U: Send + Sync + 'static, E> FrameworkContext<'a, U, E> {
     /// Returns the user ID of the bot.
+    #[must_use]
     pub fn bot_id(&self) -> serenity::UserId {
         #[cfg(feature = "cache")]
         let bot_id = self.serenity_context.cache.current_user().id;
@@ -44,11 +45,13 @@ impl<'a, U: Send + Sync + 'static, E> FrameworkContext<'a, U, E> {
     ///
     /// This function exists for API compatiblity with [`crate::Framework`]. On this type, you can
     /// also just access the public `options` field.
+    #[must_use]
     pub fn options(&self) -> &'a crate::FrameworkOptions<U, E> {
         self.options
     }
 
     /// Retrieves user data
+    #[must_use]
     pub fn user_data(&self) -> std::sync::Arc<U> {
         self.serenity_context.data::<U>()
     }
@@ -95,9 +98,10 @@ pub async fn dispatch_event<U: Send + Sync + 'static, E>(
                 if let Some(previously_tracked) = result {
                     let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
                     let mut command_tree = Vec::new();
-                    let trigger = match previously_tracked {
-                        true => crate::MessageDispatchTrigger::MessageEdit,
-                        false => crate::MessageDispatchTrigger::MessageEditFromInvalid,
+                    let trigger = if previously_tracked {
+                        crate::MessageDispatchTrigger::MessageEdit
+                    } else {
+                        crate::MessageDispatchTrigger::MessageEditFromInvalid
                     };
                     if let Err(error) = prefix::dispatch_message(
                         framework,

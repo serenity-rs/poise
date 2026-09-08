@@ -7,6 +7,7 @@ use crate::serenity_prelude as serenity;
 /// Message builder that abstracts over prefix and application command responses
 #[derive(Default, Clone)]
 #[allow(clippy::missing_docs_in_private_items)] // docs on setters
+#[must_use]
 pub struct CreateReply<'a> {
     content: Option<Cow<'a, str>>,
     embeds: Vec<serenity::CreateEmbed<'a>>,
@@ -133,7 +134,7 @@ impl<'a> CreateReply<'a> {
             builder = builder.components(components);
         }
         if let Some(flags) = flags {
-            builder = builder.flags(flags)
+            builder = builder.flags(flags);
         }
         if let Some(ephemeral) = ephemeral {
             builder = builder.ephemeral(ephemeral);
@@ -167,13 +168,13 @@ impl<'a> CreateReply<'a> {
         }
         builder = builder.embeds(embeds);
         if let Some(components) = components {
-            builder = builder.components(components)
+            builder = builder.components(components);
         }
         if let Some(allowed_mentions) = allowed_mentions {
             builder = builder.allowed_mentions(allowed_mentions);
         }
         if let Some(flags) = flags {
-            builder = builder.flags(flags)
+            builder = builder.flags(flags);
         }
         if let Some(ephemeral) = ephemeral {
             builder = builder.ephemeral(ephemeral);
@@ -213,7 +214,7 @@ impl<'a> CreateReply<'a> {
             builder = builder.allowed_mentions(allowed_mentions);
         }
         if let Some(flags) = flags {
-            builder = builder.flags(flags)
+            builder = builder.flags(flags);
         }
         for attachment in attachments {
             builder = builder.new_attachment(attachment);
@@ -252,7 +253,7 @@ impl<'a> CreateReply<'a> {
             builder = builder.allowed_mentions(allowed_mentions);
         }
         if let Some(flags) = flags {
-            builder = builder.flags(flags)
+            builder = builder.flags(flags);
         }
         if let Some(components) = components {
             builder = builder.components(components);
@@ -292,7 +293,7 @@ impl<'a> CreateReply<'a> {
             builder = builder.reference_message(invocation_message);
         }
         if let Some(flags) = flags {
-            builder = builder.flags(flags)
+            builder = builder.flags(flags);
         }
         if let Some(poll) = poll {
             builder = builder.poll(poll);

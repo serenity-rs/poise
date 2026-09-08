@@ -30,6 +30,7 @@ impl EditTracker {
     /// Note: [`EditTracker`] will only purge messages outside the duration when [`Self::purge`]
     /// is called. If you supply the created [`EditTracker`] to [`crate::Framework`], the framework
     /// will take care of that by calling [`Self::purge`] periodically.
+    #[must_use]
     pub fn for_timespan(duration: std::time::Duration) -> std::sync::RwLock<Self> {
         std::sync::RwLock::new(Self { max_duration: duration, cache: Vec::new() })
     }
@@ -100,6 +101,7 @@ impl EditTracker {
     }
 
     /// Given a message by a user, find the corresponding bot response, if one exists and is cached.
+    #[must_use]
     pub fn find_bot_response(
         &self,
         user_msg_id: serenity::MessageId,

@@ -7,7 +7,7 @@ use std::time::{Duration, Instant};
 
 /// Subset of [`crate::Context`] so that [`Cooldowns`] can be used without requiring a full [Context](`crate::Context`)
 /// (ie from within an `event_handler`)
-#[derive(Default, Clone, PartialEq, Eq, Debug, Hash)]
+#[derive(Default, Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub struct CooldownContext {
     /// The user associated with this request
     pub user_id: serenity::UserId,
@@ -56,6 +56,7 @@ pub struct CooldownTracker {
 ///
 /// Currently used for [CooldownTracker::set_last_invocation]
 #[non_exhaustive]
+#[derive(Debug, Clone, Copy)]
 pub enum CooldownType {
     /// A global cooldown that applies to all users, channels, and guilds.
     Global,
@@ -74,6 +75,7 @@ pub use CooldownTracker as Cooldowns;
 
 impl CooldownTracker {
     /// Create a new cooldown tracker
+    #[must_use]
     pub fn new() -> Self {
         Self {
             global_invocation: None,
@@ -86,6 +88,7 @@ impl CooldownTracker {
 
     /// Queries the cooldown buckets and checks if all cooldowns have expired and command
     /// execution may proceed. If not, Some is returned with the remaining cooldown
+    #[must_use]
     pub fn remaining_cooldown(
         &self,
         ctx: CooldownContext,
