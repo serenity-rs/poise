@@ -1,7 +1,7 @@
 //! Contains the [`ChoiceParameter`] trait and the blanket [`crate::SlashArgument`] and
 //! [`crate::PopArgument`] impl
 
-use crate::{serenity_prelude as serenity, CowVec, PopArgumentResult};
+use crate::{CowVec, PopArgumentResult, serenity_prelude as serenity};
 
 /// This trait is implemented by [`crate::macros::ChoiceParameter`]. See its docs for more
 /// information
@@ -34,7 +34,7 @@ impl<T: ChoiceParameter> crate::SlashArgument for T {
             _ => {
                 return Err(crate::SlashArgError::CommandStructureMismatch {
                     description: "expected u64",
-                })
+                });
             }
         };
 

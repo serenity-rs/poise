@@ -1,6 +1,6 @@
 //! Application command argument handling code
 
-use crate::{argument_convert::ArgumentConvert, serenity_prelude as serenity, BoxFuture, CowVec};
+use crate::{BoxFuture, CowVec, argument_convert::ArgumentConvert, serenity_prelude as serenity};
 
 /// Implement this trait on types that you want to use as a slash command parameter.
 #[async_trait::async_trait]

@@ -2,7 +2,7 @@
 
 use std::{borrow::Cow, collections::HashMap};
 
-use crate::{serenity_prelude as serenity, BoxFuture};
+use crate::{BoxFuture, serenity_prelude as serenity};
 
 use super::{CowStr, CowVec};
 

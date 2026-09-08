@@ -1,6 +1,6 @@
 //! The cache variant of prefix permissions calculation
 
-use crate::{serenity_prelude as serenity, PrefixContext};
+use crate::{PrefixContext, serenity_prelude as serenity};
 
 use crate::dispatch::permissions::PermissionsInfo;
 

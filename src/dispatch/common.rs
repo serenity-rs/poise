@@ -102,13 +102,13 @@ async fn check_permissions_and_cooldown_single<'a, U: Send + Sync + 'static, E>(
         match check(ctx).await {
             Ok(true) => {}
             Ok(false) => {
-                return Err(crate::FrameworkError::CommandCheckFailed { ctx, error: None })
+                return Err(crate::FrameworkError::CommandCheckFailed { ctx, error: None });
             }
             Err(error) => {
                 return Err(crate::FrameworkError::CommandCheckFailed {
                     error: Some(error),
                     ctx,
-                })
+                });
             }
         }
     }

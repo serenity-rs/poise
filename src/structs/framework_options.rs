@@ -1,6 +1,6 @@
 //! Just contains `FrameworkOptions`
 
-use crate::{serenity_prelude as serenity, BoxFuture};
+use crate::{BoxFuture, serenity_prelude as serenity};
 
 /// Framework configuration
 #[derive_where::derive_where(Debug)]

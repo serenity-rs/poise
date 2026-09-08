@@ -79,9 +79,11 @@ pub fn read_ftl() -> Result<Translations, Error> {
             .map_err(|(_, e)| format!("failed to parse {:?}: {:?}", path, e))?;
 
         // Associate .ftl resource with locale and bundle it
-        let mut bundle = FluentBundle::new_concurrent(vec![locale
-            .parse()
-            .map_err(|e| format!("invalid locale `{}`: {}", locale, e))?]);
+        let mut bundle = FluentBundle::new_concurrent(vec![
+            locale
+                .parse()
+                .map_err(|e| format!("invalid locale `{}`: {}", locale, e))?,
+        ]);
         bundle
             .add_resource(resource)
             .map_err(|e| format!("failed to add resource to bundle: {:?}", e))?;

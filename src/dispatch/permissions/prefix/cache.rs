@@ -1,6 +1,6 @@
 //! The cache variant of prefix permissions calculation
 
-use crate::{serenity_prelude as serenity, PrefixContext};
+use crate::{PrefixContext, serenity_prelude as serenity};
 
 use crate::dispatch::permissions::PermissionsInfo;
 
@@ -50,7 +50,10 @@ fn get_bot_permissions(
         // The message was either:
         // - Sent in a guild with broken caching
         // - Not set in a channel or thread?
-        tracing::warn!("Could not find channel/thread ({channel_id}) for permissions check in cache for guild: {}", guild.id);
+        tracing::warn!(
+            "Could not find channel/thread ({channel_id}) for permissions check in cache for guild: {}",
+            guild.id
+        );
         return None;
     };
 

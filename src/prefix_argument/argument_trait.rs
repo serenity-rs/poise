@@ -1,6 +1,6 @@
 //! Trait implemented for all types usable as prefix command parameters.
 
-use super::{pop_string, InvalidBool, MissingAttachment, TooFewArguments};
+use super::{InvalidBool, MissingAttachment, TooFewArguments, pop_string};
 use crate::argument_convert::ArgumentConvert;
 use crate::serenity_prelude as serenity;
 use std::str::FromStr;

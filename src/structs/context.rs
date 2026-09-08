@@ -2,7 +2,7 @@
 
 use std::borrow::Cow;
 
-use crate::{serenity_prelude as serenity, CommandInteractionType};
+use crate::{CommandInteractionType, serenity_prelude as serenity};
 
 // needed for proc macro
 #[doc(hidden)]
