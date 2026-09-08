@@ -83,12 +83,11 @@ pub async fn dispatch_event<U: Send + Sync + 'static, E>(
         } => {
             if let Some(edit_tracker) = &framework.options.prefix_options.edit_tracker {
                 #[cfg(feature = "cache")]
-                if framework.options().prefix_options.check_edits_against_cache {
-                    if let Some(old) = old_if_available {
-                        if event.message.content == old.content {
-                            return;
-                        }
-                    }
+                if framework.options().prefix_options.check_edits_against_cache
+                    && let Some(old) = old_if_available
+                    && event.message.content == old.content
+                {
+                    return;
                 }
 
                 let result = edit_tracker.write().unwrap().process_message_update(
@@ -133,13 +132,12 @@ pub async fn dispatch_event<U: Send + Sync + 'static, E>(
                     .write()
                     .unwrap()
                     .process_message_delete(*deleted_message_id);
-                if let Some(bot_response) = bot_response {
-                    if let Err(e) = bot_response
+                if let Some(bot_response) = bot_response
+                    && let Err(e) = bot_response
                         .delete(&framework.serenity_context.http, None)
                         .await
-                    {
-                        tracing::warn!("failed to delete bot response: {}", e);
-                    }
+                {
+                    tracing::warn!("failed to delete bot response: {}", e);
                 }
             }
         }

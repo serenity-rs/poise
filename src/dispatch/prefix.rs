@@ -30,10 +30,10 @@ async fn strip_prefix<'a, U: Send + Sync + 'static, E>(
     if let Some(dynamic_prefix) = framework.options.prefix_options.dynamic_prefix {
         match dynamic_prefix(partial_ctx).await {
             Ok(prefix) => {
-                if let Some(prefix) = prefix {
-                    if msg.content.starts_with(prefix.as_ref()) {
-                        return Some(prefix_len_to_u16(&prefix));
-                    }
+                if let Some(prefix) = prefix
+                    && msg.content.starts_with(prefix.as_ref())
+                {
+                    return Some(prefix_len_to_u16(&prefix));
                 }
             }
             Err(error) => {
@@ -47,10 +47,10 @@ async fn strip_prefix<'a, U: Send + Sync + 'static, E>(
         }
     }
 
-    if let Some(prefix) = framework.options.prefix_options.prefix.as_deref() {
-        if msg.content.starts_with(prefix) {
-            return Some(prefix_len_to_u16(prefix));
-        }
+    if let Some(prefix) = framework.options.prefix_options.prefix.as_deref()
+        && msg.content.starts_with(prefix)
+    {
+        return Some(prefix_len_to_u16(prefix));
     }
 
     if let Some(prefix) = framework

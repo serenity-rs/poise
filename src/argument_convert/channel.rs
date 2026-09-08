@@ -107,10 +107,10 @@ impl ArgumentConvert for serenity::Channel {
         let channel = lookup_channel_global(&ctx, guild_id, s).await?;
 
         // Don't yield for other guilds' channels
-        if let Some(guild_id) = guild_id {
-            if channel.guild_id().is_none_or(|id| id != guild_id) {
-                return Err(ChannelParseError::NotFoundOrMalformed);
-            }
+        if let Some(guild_id) = guild_id
+            && channel.guild_id().is_none_or(|id| id != guild_id)
+        {
+            return Err(ChannelParseError::NotFoundOrMalformed);
         }
 
         Ok(channel)
