@@ -26,7 +26,7 @@ pub fn choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, darling:
                 "Only enums can be used for choice parameters",
             )
             .into())
-        }
+        },
     };
 
     let mut variant_idents: Vec<proc_macro2::Ident> = Vec::new();
@@ -51,11 +51,8 @@ pub fn choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, darling:
             .collect();
         let mut attrs = <VariantAttribute as darling::FromMeta>::from_list(&attrs)?;
 
-        let main_name = if attrs.name.is_empty() {
-            variant.ident.to_string()
-        } else {
-            attrs.name.remove(0)
-        };
+        let main_name =
+            if attrs.name.is_empty() { variant.ident.to_string() } else { attrs.name.remove(0) };
 
         variant_idents.push(variant.ident);
         names.push(main_name);

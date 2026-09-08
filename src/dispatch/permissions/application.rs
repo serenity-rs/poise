@@ -18,14 +18,9 @@ pub(super) fn get_author_and_bot_permissions(
 
     let channel = &interaction.channel;
     if matches!(channel, serenity::GenericInteractionChannel::Thread(_)) {
-        author_permissions.set(
-            Permissions::SEND_MESSAGES,
-            author_permissions.send_messages_in_threads(),
-        );
-        bot_permissions.set(
-            Permissions::SEND_MESSAGES,
-            bot_permissions.send_messages_in_threads(),
-        );
+        author_permissions
+            .set(Permissions::SEND_MESSAGES, author_permissions.send_messages_in_threads());
+        bot_permissions.set(Permissions::SEND_MESSAGES, bot_permissions.send_messages_in_threads());
     }
 
     PermissionsInfo {

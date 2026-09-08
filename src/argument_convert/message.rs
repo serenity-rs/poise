@@ -30,7 +30,7 @@ impl fmt::Display for MessageParseError {
         match self {
             Self::Malformed => {
                 f.write_str("Provided string did not adhere to any known guild message format")
-            }
+            },
             Self::Http(_) => f.write_str("Failed to request message data via HTTP"),
             Self::HttpNotAvailable => f.write_str(
                 "Gateway feature is disabled and the required information was not in cache",
@@ -68,9 +68,6 @@ impl ArgumentConvert for serenity::Message {
             .or_else(extract_from_message_url)
             .ok_or(MessageParseError::Malformed)?;
 
-        channel_id
-            .message(ctx, message_id)
-            .await
-            .map_err(MessageParseError::Http)
+        channel_id.message(ctx, message_id).await.map_err(MessageParseError::Http)
     }
 }

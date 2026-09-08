@@ -172,11 +172,7 @@ macro_rules! snowflake_pop_argument {
         impl std::error::Error for $error_type {}
         impl std::fmt::Display for $error_type {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                f.write_str(concat!(
-                    "Enter a valid ",
-                    stringify!($error_type),
-                    " ID or a mention."
-                ))
+                f.write_str(concat!("Enter a valid ", stringify!($error_type), " ID or a mention."))
             }
         }
 
@@ -190,10 +186,8 @@ macro_rules! snowflake_pop_argument {
             ) -> PopArgumentResult<'a, Self> {
                 let (args, string) = pop_string(args).map_err(|e| (e.into(), None))?;
 
-                if let Some(parsed_id) = string
-                    .parse()
-                    .ok()
-                    .or_else(|| serenity::utils::$parse_fn(&string))
+                if let Some(parsed_id) =
+                    string.parse().ok().or_else(|| serenity::utils::$parse_fn(&string))
                 {
                     Ok((args.trim_start(), attachment_index, parsed_id))
                 } else {
@@ -205,9 +199,5 @@ macro_rules! snowflake_pop_argument {
 }
 
 snowflake_pop_argument!(serenity::UserId, parse_user_mention, InvalidUserId);
-snowflake_pop_argument!(
-    serenity::GenericChannelId,
-    parse_channel_mention,
-    InvalidChannelId
-);
+snowflake_pop_argument!(serenity::GenericChannelId, parse_channel_mention, InvalidChannelId);
 snowflake_pop_argument!(serenity::RoleId, parse_role_mention, InvalidRoleId);

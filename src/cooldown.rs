@@ -93,26 +93,16 @@ impl CooldownTracker {
     ) -> Option<Duration> {
         let mut cooldown_data = vec![
             (cooldown_durations.global, self.global_invocation),
-            (
-                cooldown_durations.user,
-                self.user_invocations.get(&ctx.user_id).copied(),
-            ),
-            (
-                cooldown_durations.channel,
-                self.channel_invocations.get(&ctx.channel_id).copied(),
-            ),
+            (cooldown_durations.user, self.user_invocations.get(&ctx.user_id).copied()),
+            (cooldown_durations.channel, self.channel_invocations.get(&ctx.channel_id).copied()),
         ];
 
         if let Some(guild_id) = ctx.guild_id {
-            cooldown_data.push((
-                cooldown_durations.guild,
-                self.guild_invocations.get(&guild_id).copied(),
-            ));
+            cooldown_data
+                .push((cooldown_durations.guild, self.guild_invocations.get(&guild_id).copied()));
             cooldown_data.push((
                 cooldown_durations.member,
-                self.member_invocations
-                    .get(&(ctx.user_id, guild_id))
-                    .copied(),
+                self.member_invocations.get(&(ctx.user_id, guild_id)).copied(),
             ));
         }
 
@@ -150,16 +140,16 @@ impl CooldownTracker {
             CooldownType::Global => self.global_invocation = Some(instant),
             CooldownType::User(user_id) => {
                 self.user_invocations.insert(user_id, instant);
-            }
+            },
             CooldownType::Guild(guild_id) => {
                 self.guild_invocations.insert(guild_id, instant);
-            }
+            },
             CooldownType::Channel(channel_id) => {
                 self.channel_invocations.insert(channel_id, instant);
-            }
+            },
             CooldownType::Member(member) => {
                 self.member_invocations.insert(member, instant);
-            }
+            },
         }
     }
 }

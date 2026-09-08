@@ -181,14 +181,11 @@ pub fn command(
             syn::FnArg::Typed(x) => x,
             syn::FnArg::Receiver(r) => {
                 return Err(syn::Error::new(r.span(), "self argument is invalid here").into());
-            }
+            },
         };
 
-        let attrs: Vec<_> = pattern
-            .attrs
-            .drain(..)
-            .map(|attr| darling::ast::NestedMeta::Meta(attr.meta))
-            .collect();
+        let attrs: Vec<_> =
+            pattern.attrs.drain(..).map(|attr| darling::ast::NestedMeta::Meta(attr.meta)).collect();
         let attrs = <ParamArgs as darling::FromMeta>::from_list(&attrs)?;
 
         let name = if let Some(rename) = &attrs.rename {
@@ -199,12 +196,7 @@ pub fn command(
             let message = "#[rename = \"...\"] must be specified for pattern parameters";
             return Err(syn::Error::new(pattern.pat.span(), message).into());
         };
-        parameters.push(CommandParameter {
-            name,
-            type_: (*pattern.ty).clone(),
-            args: attrs,
-            span,
-        });
+        parameters.push(CommandParameter { name, type_: (*pattern.ty).clone(), args: attrs, span });
     }
 
     // Extract the command descriptions from the function doc comments
@@ -217,7 +209,7 @@ pub fn command(
             Some(perms) => {
                 let perms = perms.iter();
                 syn::parse_quote! { #(poise::serenity_prelude::Permissions::#perms)|* }
-            }
+            },
             None => syn::parse_quote! { poise::serenity_prelude::Permissions::empty() },
         }
     }
@@ -260,9 +252,9 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
         Some(syn::FnArg::Typed(syn::PatType { ty, .. })) => &**ty,
         _ => {
             return Err(
-                syn::Error::new(inv.function.sig.span(), "expected a Context parameter").into(),
+                syn::Error::new(inv.function.sig.span(), "expected a Context parameter").into()
             )
-        }
+        },
     };
     // Needed because we're not allowed to have lifetimes in the hacky use case below
     let ctx_type_with_static =
@@ -281,23 +273,10 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
         None => None,
     });
 
-    let function_name = inv
-        .function
-        .sig
-        .ident
-        .to_string()
-        .trim_start_matches("r#")
-        .to_string();
-    let identifying_name = inv
-        .args
-        .identifying_name
-        .clone()
-        .unwrap_or_else(|| function_name.clone());
-    let command_name = &inv
-        .args
-        .rename
-        .clone()
-        .unwrap_or_else(|| function_name.clone());
+    let function_name = inv.function.sig.ident.to_string().trim_start_matches("r#").to_string();
+    let identifying_name =
+        inv.args.identifying_name.clone().unwrap_or_else(|| function_name.clone());
+    let command_name = &inv.args.rename.clone().unwrap_or_else(|| function_name.clone());
 
     let context_menu_name = wrap_option_to_string(inv.args.context_menu_command.as_ref());
 

@@ -6,7 +6,6 @@ pub async fn code(
     args: poise::KeyValueArgs,
     code: poise::CodeBlock,
 ) -> Result<(), Error> {
-    ctx.say(format!("Key value args: {:?}\nCode: {}", args, code))
-        .await?;
+    ctx.say(format!("Key value args: {:?}\nCode: {}", args, code)).await?;
     Ok(())
 }

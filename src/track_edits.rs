@@ -31,10 +31,7 @@ impl EditTracker {
     /// is called. If you supply the created [`EditTracker`] to [`crate::Framework`], the framework
     /// will take care of that by calling [`Self::purge`] periodically.
     pub fn for_timespan(duration: std::time::Duration) -> std::sync::RwLock<Self> {
-        std::sync::RwLock::new(Self {
-            max_duration: duration,
-            cache: Vec::new(),
-        })
+        std::sync::RwLock::new(Self { max_duration: duration, cache: Vec::new() })
     }
 
     /// Updates the internal invocation cache for a message and returns:
@@ -57,11 +54,7 @@ impl EditTracker {
             }
         }
 
-        match self
-            .cache
-            .iter_mut()
-            .find(|invocation| invocation.user_msg.id == new_message.id)
-        {
+        match self.cache.iter_mut().find(|invocation| invocation.user_msg.id == new_message.id) {
             Some(invocation) => {
                 if ignore_edits_if_not_yet_responded && invocation.bot_response.is_none() {
                     return None;
@@ -74,7 +67,7 @@ impl EditTracker {
 
                 invocation.user_msg.clone_from(new_message);
                 Some(true)
-            }
+            },
             None if ignore_edits_if_not_yet_responded => None,
             None => Some(false),
         }
@@ -92,21 +85,15 @@ impl EditTracker {
                 .iter()
                 .position(|invocation| invocation.user_msg.id == deleted_message_id)?,
         );
-        if invocation.track_deletion {
-            invocation.bot_response
-        } else {
-            None
-        }
+        if invocation.track_deletion { invocation.bot_response } else { None }
     }
 
     /// Forget all of the messages that are older than the specified duration.
     pub fn purge(&mut self) {
         let max_duration = self.max_duration;
         self.cache.retain(|invocation| {
-            let last_update = invocation
-                .user_msg
-                .edited_timestamp
-                .unwrap_or(invocation.user_msg.timestamp);
+            let last_update =
+                invocation.user_msg.edited_timestamp.unwrap_or(invocation.user_msg.timestamp);
             let age = serenity::Timestamp::now().unix_timestamp() - last_update.unix_timestamp();
             age < max_duration.as_secs() as i64
         });
@@ -117,10 +104,8 @@ impl EditTracker {
         &self,
         user_msg_id: serenity::MessageId,
     ) -> Option<&serenity::Message> {
-        let invocation = self
-            .cache
-            .iter()
-            .find(|invocation| invocation.user_msg.id == user_msg_id)?;
+        let invocation =
+            self.cache.iter().find(|invocation| invocation.user_msg.id == user_msg_id)?;
         invocation.bot_response.as_ref()
     }
 
@@ -132,10 +117,8 @@ impl EditTracker {
         bot_response: serenity::Message,
         track_deletion: bool,
     ) {
-        if let Some(invocation) = self
-            .cache
-            .iter_mut()
-            .find(|invocation| invocation.user_msg.id == user_msg.id)
+        if let Some(invocation) =
+            self.cache.iter_mut().find(|invocation| invocation.user_msg.id == user_msg.id)
         {
             invocation.bot_response = Some(bot_response);
         } else {
@@ -151,11 +134,7 @@ impl EditTracker {
     /// invocation message (e.g. removing embeds), we don't accidentally treat it as an
     /// `execute_untracked_edits` situation and start an infinite loop
     pub fn track_command(&mut self, user_msg: &serenity::Message, track_deletion: bool) {
-        if !self
-            .cache
-            .iter()
-            .any(|invocation| invocation.user_msg.id == user_msg.id)
-        {
+        if !self.cache.iter().any(|invocation| invocation.user_msg.id == user_msg.id) {
             self.cache.push(CachedInvocation {
                 user_msg: user_msg.clone(),
                 bot_response: None,

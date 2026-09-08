@@ -47,9 +47,8 @@ pub async fn paginate<U: Send + Sync + 'static, E>(
         serenity::CreateButton::new(&next_button_id).emoji('▶'),
     ];
 
-    let components = [serenity::CreateComponent::ActionRow(
-        serenity::CreateActionRow::buttons(&buttons),
-    )];
+    let components =
+        [serenity::CreateComponent::ActionRow(serenity::CreateActionRow::buttons(&buttons))];
     let reply = crate::CreateReply::default()
         .embed(serenity::CreateEmbed::default().description(pages[0]))
         .components(&components);
@@ -58,8 +57,7 @@ pub async fn paginate<U: Send + Sync + 'static, E>(
 
     // Loop through incoming interactions with the navigation buttons
     let mut current_page = 0;
-    while let Some(press) =
-        serenity::collector::ComponentInteractionCollector::new(ctx.serenity_context())
+    while let Some(press) = serenity::collector::ComponentInteractionCollector::new(ctx.serenity_context())
             // We defined our button IDs to start with `ctx_id`. If they don't, some other command's
             // button was pressed
             .filter(move |press| press.data.custom_id.starts_with(&ctx_id.to_string()))

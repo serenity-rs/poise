@@ -63,9 +63,8 @@ pub async fn send_application_reply<'ctx, U: Send + Sync + 'static, E>(
         return Ok(super::ReplyHandle(super::ReplyHandleInner::Autocomplete));
     }
 
-    let has_sent_initial_response = ctx
-        .has_sent_initial_response
-        .load(std::sync::atomic::Ordering::SeqCst);
+    let has_sent_initial_response =
+        ctx.has_sent_initial_response.load(std::sync::atomic::Ordering::SeqCst);
 
     let followup = if has_sent_initial_response {
         Some(Box::new({
@@ -79,13 +78,9 @@ pub async fn send_application_reply<'ctx, U: Send + Sync + 'static, E>(
             builder.to_slash_initial_response(serenity::CreateInteractionResponseMessage::new());
 
         ctx.interaction
-            .create_response(
-                ctx.http(),
-                serenity::CreateInteractionResponse::Message(builder),
-            )
+            .create_response(ctx.http(), serenity::CreateInteractionResponse::Message(builder))
             .await?;
-        ctx.has_sent_initial_response
-            .store(true, std::sync::atomic::Ordering::SeqCst);
+        ctx.has_sent_initial_response.store(true, std::sync::atomic::Ordering::SeqCst);
 
         None
     };
@@ -115,10 +110,7 @@ pub async fn send_prefix_reply<U: Send + Sync + 'static, E>(
 
     let command = ctx.command();
     let existing_response = if command.reuse_response {
-        lock_edit_tracker()
-            .as_mut()
-            .and_then(|t| t.find_bot_response(ctx.msg.id))
-            .cloned()
+        lock_edit_tracker().as_mut().and_then(|t| t.find_bot_response(ctx.msg.id)).cloned()
     } else {
         None
     };
@@ -148,11 +140,8 @@ pub async fn send_prefix_reply<U: Send + Sync + 'static, E>(
 
         response
     } else {
-        let new_response = ctx
-            .msg
-            .channel_id
-            .send_message(ctx.http(), builder.to_prefix(ctx.msg.into()))
-            .await?;
+        let new_response =
+            ctx.msg.channel_id.send_message(ctx.http(), builder.to_prefix(ctx.msg.into())).await?;
         // We don't check ctx.command.reuse_response because we need to store bot responses for
         // track_deletion too
         if let Some(track_edits) = &mut lock_edit_tracker() {

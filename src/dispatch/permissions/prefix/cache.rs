@@ -17,11 +17,8 @@ where
     // Should only fail if the guild is not cached, which is fair to bail on.
     let guild = ctx.cache().guild(guild_id)?;
 
-    let author_permissions = if skip_author {
-        None
-    } else {
-        Some(ctx.msg.author_permissions(ctx.cache())?)
-    };
+    let author_permissions =
+        if skip_author { None } else { Some(ctx.msg.author_permissions(ctx.cache())?) };
 
     let bot_permissions = if skip_bot {
         None
@@ -31,10 +28,7 @@ where
         Some(get_bot_permissions(&guild, channel_id, bot_user_id)?)
     };
 
-    Some(PermissionsInfo {
-        author_permissions,
-        bot_permissions,
-    })
+    Some(PermissionsInfo { author_permissions, bot_permissions })
 }
 
 /// Gets the permissions for the bot.
@@ -60,7 +54,7 @@ fn get_bot_permissions(
     match channel {
         serenity::GenericGuildChannelRef::Channel(channel) => {
             Some(guild.user_permissions_in(channel, bot_member))
-        }
+        },
         serenity::GenericGuildChannelRef::Thread(thread) => {
             let parent_channel = guild.channels.get(&thread.parent_id)?;
             let mut parent_permissions = guild.user_permissions_in(parent_channel, bot_member);
@@ -71,6 +65,6 @@ fn get_bot_permissions(
             );
 
             Some(parent_permissions)
-        }
+        },
     }
 }

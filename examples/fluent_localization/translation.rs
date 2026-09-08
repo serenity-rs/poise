@@ -80,9 +80,7 @@ pub fn read_ftl() -> Result<Translations, Error> {
 
         // Associate .ftl resource with locale and bundle it
         let mut bundle = FluentBundle::new_concurrent(vec![
-            locale
-                .parse()
-                .map_err(|e| format!("invalid locale `{}`: {}", locale, e))?,
+            locale.parse().map_err(|e| format!("invalid locale `{}`: {}", locale, e))?,
         ]);
         bundle
             .add_resource(resource)
@@ -142,10 +140,10 @@ pub fn apply_translations(
 
                 // If this is a choice parameter, insert its localized variants
                 for choice in parameter.choices.to_mut().iter_mut() {
-                    choice.localizations.to_mut().push((
-                        locale.clone(),
-                        format(bundle, &choice.name, None, None).unwrap(),
-                    ));
+                    choice
+                        .localizations
+                        .to_mut()
+                        .push((locale.clone(), format(bundle, &choice.name, None, None).unwrap()));
                 }
             }
         }

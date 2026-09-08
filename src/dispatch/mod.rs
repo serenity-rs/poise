@@ -75,12 +75,8 @@ pub async fn dispatch_event<U: Send + Sync + 'static, E>(
             {
                 error.handle(framework.options).await;
             }
-        }
-        serenity::FullEvent::MessageUpdate {
-            event,
-            old_if_available,
-            ..
-        } => {
+        },
+        serenity::FullEvent::MessageUpdate { event, old_if_available, .. } => {
             if let Some(edit_tracker) = &framework.options.prefix_options.edit_tracker {
                 #[cfg(feature = "cache")]
                 if framework.options().prefix_options.check_edits_against_cache
@@ -92,15 +88,8 @@ pub async fn dispatch_event<U: Send + Sync + 'static, E>(
 
                 let result = edit_tracker.write().unwrap().process_message_update(
                     event,
-                    framework
-                        .options()
-                        .prefix_options
-                        .ignore_edits_if_not_yet_responded,
-                    framework
-                        .options()
-                        .prefix_options
-                        .tracking_initiation_window
-                        .as_ref(),
+                    framework.options().prefix_options.ignore_edits_if_not_yet_responded,
+                    framework.options().prefix_options.tracking_initiation_window.as_ref(),
                 );
 
                 if let Some(previously_tracked) = result {
@@ -123,24 +112,19 @@ pub async fn dispatch_event<U: Send + Sync + 'static, E>(
                     }
                 }
             }
-        }
-        serenity::FullEvent::MessageDelete {
-            deleted_message_id, ..
-        } => {
+        },
+        serenity::FullEvent::MessageDelete { deleted_message_id, .. } => {
             if let Some(edit_tracker) = &framework.options.prefix_options.edit_tracker {
-                let bot_response = edit_tracker
-                    .write()
-                    .unwrap()
-                    .process_message_delete(*deleted_message_id);
+                let bot_response =
+                    edit_tracker.write().unwrap().process_message_delete(*deleted_message_id);
                 if let Some(bot_response) = bot_response
-                    && let Err(e) = bot_response
-                        .delete(&framework.serenity_context.http, None)
-                        .await
+                    && let Err(e) =
+                        bot_response.delete(&framework.serenity_context.http, None).await
                 {
                     tracing::warn!("failed to delete bot response: {}", e);
                 }
             }
-        }
+        },
         serenity::FullEvent::InteractionCreate {
             interaction: serenity::Interaction::Command(interaction),
             ..
@@ -159,7 +143,7 @@ pub async fn dispatch_event<U: Send + Sync + 'static, E>(
             {
                 error.handle(framework.options).await;
             }
-        }
+        },
         serenity::FullEvent::InteractionCreate {
             interaction: serenity::Interaction::Autocomplete(interaction),
             ..
@@ -178,7 +162,7 @@ pub async fn dispatch_event<U: Send + Sync + 'static, E>(
             {
                 error.handle(framework.options).await;
             }
-        }
-        _ => {}
+        },
+        _ => {},
     }
 }

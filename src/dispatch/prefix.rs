@@ -6,10 +6,7 @@ use crate::serenity_prelude as serenity;
 
 /// Converts a prefix string's length into u16, panicking if it doesn't fit.
 fn prefix_len_to_u16(prefix: &str) -> u16 {
-    prefix
-        .len()
-        .try_into()
-        .expect("messages should not be more than 64k bytes, let alone a prefix")
+    prefix.len().try_into().expect("messages should not be more than 64k bytes, let alone a prefix")
 }
 
 /// Checks if this message is a bot invocation by attempting to strip the prefix
@@ -35,7 +32,7 @@ async fn strip_prefix<'a, U: Send + Sync + 'static, E>(
                 {
                     return Some(prefix_len_to_u16(&prefix));
                 }
-            }
+            },
             Err(error) => {
                 (framework.options.on_error)(crate::FrameworkError::DynamicPrefix {
                     error,
@@ -43,7 +40,7 @@ async fn strip_prefix<'a, U: Send + Sync + 'static, E>(
                     msg,
                 })
                 .await;
-            }
+            },
         }
     }
 
@@ -53,12 +50,8 @@ async fn strip_prefix<'a, U: Send + Sync + 'static, E>(
         return Some(prefix_len_to_u16(prefix));
     }
 
-    if let Some(prefix) = framework
-        .options
-        .prefix_options
-        .additional_prefixes
-        .iter()
-        .find_map(|prefix| match prefix {
+    if let Some(prefix) = framework.options.prefix_options.additional_prefixes.iter().find_map(
+        |prefix| match prefix {
             &crate::Prefix::Literal(prefix) => Some(prefix),
             crate::Prefix::Regex(prefix) => {
                 let regex_match = prefix.find(&msg.content)?;
@@ -67,17 +60,17 @@ async fn strip_prefix<'a, U: Send + Sync + 'static, E>(
                 } else {
                     None
                 }
-            }
+            },
             crate::Prefix::__NonExhaustive => unreachable!(),
-        })
-    {
+        },
+    ) {
         return Some(prefix_len_to_u16(prefix));
     }
 
     if let Some(dynamic_prefix) = framework.options.prefix_options.stripped_dynamic_prefix {
         match dynamic_prefix(framework.serenity_context, msg, framework.user_data()).await {
             Ok(Some(prefix)) => return Some(prefix_len_to_u16(prefix)),
-            Ok(None) => {}
+            Ok(None) => {},
             Err(error) => {
                 (framework.options.on_error)(crate::FrameworkError::DynamicPrefix {
                     error,
@@ -85,7 +78,7 @@ async fn strip_prefix<'a, U: Send + Sync + 'static, E>(
                     msg,
                 })
                 .await;
-            }
+            },
         }
     }
 
@@ -165,23 +158,15 @@ pub fn find_command<'a, U, E>(
 
     for command in commands {
         let primary_name_matches = string_equal(&command.name, command_name);
-        let alias_matches = command
-            .aliases
-            .iter()
-            .any(|alias| string_equal(alias, command_name));
+        let alias_matches = command.aliases.iter().any(|alias| string_equal(alias, command_name));
         if !primary_name_matches && !alias_matches {
             continue;
         }
 
         command_tree.push(command);
         return Some(
-            find_command(
-                &command.subcommands,
-                remaining_message,
-                case_insensitive,
-                command_tree,
-            )
-            .unwrap_or((command_name, remaining_message)),
+            find_command(&command.subcommands, remaining_message, case_insensitive, command_tree)
+                .unwrap_or((command_name, remaining_message)),
         );
     }
 
@@ -199,20 +184,13 @@ pub async fn dispatch_message<'a, U: Send + Sync + 'static, E>(
     if let Some(ctx) =
         parse_invocation(framework, msg, trigger, invocation_data, command_tree).await?
     {
-        crate::catch_unwind_maybe(run_invocation(ctx))
-            .await
-            .map_err(|payload| crate::FrameworkError::CommandPanic {
-                payload: payload.map(Box::new),
-                ctx: ctx.into(),
-            })??;
+        crate::catch_unwind_maybe(run_invocation(ctx)).await.map_err(|payload| {
+            crate::FrameworkError::CommandPanic { payload: payload.map(Box::new), ctx: ctx.into() }
+        })??;
     } else if let Some(non_command_message) = framework.options.prefix_options.non_command_message {
-        non_command_message(&framework, msg).await.map_err(|e| {
-            crate::FrameworkError::NonCommandMessage {
-                error: e,
-                framework,
-                msg,
-            }
-        })?;
+        non_command_message(&framework, msg)
+            .await
+            .map_err(|e| crate::FrameworkError::NonCommandMessage { error: e, framework, msg })?;
     }
     Ok(())
 }
@@ -271,10 +249,7 @@ pub async fn parse_invocation<'a, U: Send + Sync + 'static, E>(
         trigger,
     })?;
 
-    if command_tree
-        .last()
-        .is_none_or(|c| c.prefix_action.is_none())
-    {
+    if command_tree.last().is_none_or(|c| c.prefix_action.is_none()) {
         return Ok(None);
     }
 
@@ -317,20 +292,14 @@ pub async fn run_invocation<U: Send + Sync + 'static, E>(
     if command.subcommand_required {
         // None of this command's subcommands were invoked, or else we'd have the subcommand in
         // ctx.command and not the parent command
-        return Err(crate::FrameworkError::SubcommandRequired {
-            ctx: crate::Context::Prefix(ctx),
-        });
+        return Err(crate::FrameworkError::SubcommandRequired { ctx: crate::Context::Prefix(ctx) });
     }
 
     super::common::check_permissions_and_cooldown(ctx.into()).await?;
 
     // Typing is broadcasted as long as this object is alive
     let _typing_broadcaster = if command.broadcast_typing {
-        Some(
-            ctx.msg
-                .channel_id
-                .start_typing(ctx.framework.serenity_context.http.clone()),
-        )
+        Some(ctx.msg.channel_id.start_typing(ctx.framework.serenity_context.http.clone()))
     } else {
         None
     };
@@ -342,10 +311,7 @@ pub async fn run_invocation<U: Send + Sync + 'static, E>(
     // execute_untracked_edits situation and start an infinite loop
     // Reported by vicky5124 https://discord.com/channels/381880193251409931/381912587505500160/897981367604903966
     if let Some(edit_tracker) = &ctx.framework.options.prefix_options.edit_tracker {
-        edit_tracker
-            .write()
-            .unwrap()
-            .track_command(ctx.msg, command.track_deletion);
+        edit_tracker.write().unwrap().track_command(ctx.msg, command.track_deletion);
     }
 
     // Execute command

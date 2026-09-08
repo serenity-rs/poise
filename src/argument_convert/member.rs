@@ -52,10 +52,7 @@ impl ArgumentConvert for serenity::Member {
         let guild_id = guild_id.ok_or(MemberParseError::OutsideGuild)?;
 
         // If string is a raw user ID or a mention
-        if let Some(user_id) = s
-            .parse()
-            .ok()
-            .or_else(|| serenity::utils::parse_user_mention(s))
+        if let Some(user_id) = s.parse().ok().or_else(|| serenity::utils::parse_user_mention(s))
             && let Ok(member) = guild_id.member(&ctx, user_id).await
         {
             return Ok(member);
@@ -76,9 +73,7 @@ impl ArgumentConvert for serenity::Member {
         if let Ok(member_results) = guild_id.search_members(ctx.http(), s, limit).await
             && let Some(member) = member_results.into_iter().find(|m| {
                 m.user.name.eq_ignore_ascii_case(s)
-                    || m.nick
-                        .as_ref()
-                        .is_some_and(|nick| nick.eq_ignore_ascii_case(s))
+                    || m.nick.as_ref().is_some_and(|nick| nick.eq_ignore_ascii_case(s))
             })
         {
             return Ok(member);

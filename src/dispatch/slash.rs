@@ -21,24 +21,22 @@ fn find_matching_command<'a, 'b, U, E>(
         match interaction_kind {
             serenity::CommandType::ChatInput => {
                 cmd.slash_action?;
-            }
+            },
             serenity::CommandType::User | serenity::CommandType::Message => {
                 cmd.context_menu_action
                     .map(serenity::CommandType::from)
                     .filter(|kind| kind == &interaction_kind)?;
-            }
+            },
             _ => unimplemented!(),
         }
 
         command_tree.push(cmd);
         if let Some((sub_name, sub_interaction)) =
-            interaction_options
-                .iter()
-                .find_map(|option| match &option.value {
-                    serenity::ResolvedValue::SubCommand(o)
-                    | serenity::ResolvedValue::SubCommandGroup(o) => Some((&option.name, o)),
-                    _ => None,
-                })
+            interaction_options.iter().find_map(|option| match &option.value {
+                serenity::ResolvedValue::SubCommand(o)
+                | serenity::ResolvedValue::SubCommandGroup(o) => Some((&option.name, o)),
+                _ => None,
+            })
         {
             find_matching_command(
                 sub_name,
@@ -73,10 +71,7 @@ fn extract_command<'a, U, E>(
         &framework.options.commands,
         command_tree,
     ) else {
-        return Err(crate::FrameworkError::UnknownInteraction {
-            framework,
-            interaction,
-        });
+        return Err(crate::FrameworkError::UnknownInteraction { framework, interaction });
     };
 
     Ok(crate::ApplicationContext {
@@ -135,11 +130,9 @@ async fn run_command<U: Send + Sync + 'static, E>(
     let command = ctx.command();
     let action_result = match ctx.interaction.data.kind {
         serenity::CommandType::ChatInput => {
-            let action = command
-                .slash_action
-                .ok_or(command_structure_mismatch_error)?;
+            let action = command.slash_action.ok_or(command_structure_mismatch_error)?;
             action(ctx).await
-        }
+        },
         serenity::CommandType::User => {
             match (command.context_menu_action, &ctx.interaction.data.target()) {
                 (
@@ -149,10 +142,10 @@ async fn run_command<U: Send + Sync + 'static, E>(
                     let mut user = (*user).clone();
                     user.member = member.map(|v| Box::new(v.clone()));
                     action(ctx, user).await
-                }
+                },
                 _ => return Err(command_structure_mismatch_error),
             }
-        }
+        },
         serenity::CommandType::Message => {
             match (command.context_menu_action, &ctx.interaction.data.target()) {
                 (
@@ -161,11 +154,11 @@ async fn run_command<U: Send + Sync + 'static, E>(
                 ) => action(ctx, (*message).clone()).await,
                 _ => return Err(command_structure_mismatch_error),
             }
-        }
+        },
         other => {
             tracing::warn!("unknown interaction command type: {:?}", other);
             return Ok(());
-        }
+        },
     };
     action_result?;
 
@@ -196,12 +189,9 @@ pub async fn dispatch_interaction<'a, U: Send + Sync + 'static, E>(
         command_tree,
     )?;
 
-    crate::catch_unwind_maybe(run_command(ctx))
-        .await
-        .map_err(|payload| crate::FrameworkError::CommandPanic {
-            payload: payload.map(Box::new),
-            ctx: ctx.into(),
-        })??;
+    crate::catch_unwind_maybe(run_command(ctx)).await.map_err(|payload| {
+        crate::FrameworkError::CommandPanic { payload: payload.map(Box::new), ctx: ctx.into() }
+    })??;
 
     Ok(())
 }
@@ -222,18 +212,17 @@ async fn run_autocomplete<U: Send + Sync + 'static, E>(
         None => {
             tracing::warn!("no option is focused in autocomplete interaction");
             return Ok(());
-        }
+        },
     };
 
     // Find the matching parameter from our Command object
     let parameters = &ctx.command().parameters;
-    let focused_parameter = parameters
-        .iter()
-        .find(|p| &p.name == focused_option_name)
-        .ok_or(crate::FrameworkError::CommandStructureMismatch {
+    let focused_parameter = parameters.iter().find(|p| &p.name == focused_option_name).ok_or(
+        crate::FrameworkError::CommandStructureMismatch {
             ctx,
             description: "focused autocomplete parameter name not recognized",
-        })?;
+        },
+    )?;
 
     // Only continue if this parameter supports autocomplete and Discord has given us a partial value
     let autocomplete_callback = match focused_parameter.autocomplete_callback {
@@ -280,12 +269,9 @@ pub async fn dispatch_autocomplete<'a, U: Send + Sync + 'static, E>(
         command_tree,
     )?;
 
-    crate::catch_unwind_maybe(run_autocomplete(ctx))
-        .await
-        .map_err(|payload| crate::FrameworkError::CommandPanic {
-            payload: payload.map(Box::new),
-            ctx: ctx.into(),
-        })??;
+    crate::catch_unwind_maybe(run_autocomplete(ctx)).await.map_err(|payload| {
+        crate::FrameworkError::CommandPanic { payload: payload.map(Box::new), ctx: ctx.into() }
+    })??;
 
     Ok(())
 }

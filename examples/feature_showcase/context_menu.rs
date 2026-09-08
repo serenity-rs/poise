@@ -7,11 +7,7 @@ pub async fn user_info(
     ctx: Context<'_>,
     #[description = "Discord profile to query information about"] user: serenity::User,
 ) -> Result<(), Error> {
-    let response = format!(
-        "**Name**: {}\n**Created**: {}",
-        user.name,
-        user.id.created_at()
-    );
+    let response = format!("**Name**: {}\n**Created**: {}", user.name, user.id.created_at());
 
     ctx.say(response).await?;
     Ok(())

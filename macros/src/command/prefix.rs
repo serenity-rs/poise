@@ -17,12 +17,7 @@ struct PrefixParameter<'a> {
 }
 
 fn get_modifier(param: &CommandParameter) -> Result<Option<Modifier>, syn::Error> {
-    match (
-        param.args.lazy,
-        param.args.rest,
-        param.args.flag,
-        param.args.string,
-    ) {
+    match (param.args.lazy, param.args.rest, param.args.flag, param.args.string) {
         (false, false, false, false) => Ok(None),
         (true, false, false, false) => Ok(Some(Modifier::Lazy)),
         (false, true, false, false) => Ok(Some(Modifier::Rest)),
@@ -30,12 +25,9 @@ fn get_modifier(param: &CommandParameter) -> Result<Option<Modifier>, syn::Error
             if param.type_ == syn::parse_quote! { bool } {
                 Ok(Some(Modifier::Flag))
             } else {
-                Err(syn::Error::new(
-                    param.type_.span(),
-                    "Must use bool for flags",
-                ))
+                Err(syn::Error::new(param.type_.span(), "Must use bool for flags"))
             }
-        }
+        },
         (false, false, false, true) => Ok(Some(Modifier::String)),
         _ => Err(syn::Error::new(
             param.span,
@@ -114,14 +106,10 @@ fn parse_prefix_params(
                     "can only decorate `Option<T>` with #[lazy]",
                 ));
             }
-        }
+        },
         Some(Modifier::Rest) => {
             let (ty, found, empty) = if let Some(ty) = unwrap_generic(ty, "Option") {
-                (
-                    ty,
-                    quote::quote! { Ok((Some(#token),)) },
-                    quote::quote! { Ok((None,)) },
-                )
+                (ty, quote::quote! { Ok((Some(#token),)) }, quote::quote! { Ok((None,)) })
             } else {
                 (
                     ty,
@@ -150,7 +138,7 @@ fn parse_prefix_params(
                     #found
                 }
             }
-        }
+        },
         Some(Modifier::Flag) => {
             // Parse `#[flag] name: bool` by checking for the string "name" and converting to `true`
             // if present and `false` otherwise.
@@ -196,7 +184,7 @@ fn parse_prefix_params(
                         })?;
                 Ok((#token, #( #parsed_tokens, )* ))
             }
-        }
+        },
         Some(Modifier::String) => {
             // Parse a type which implements `FromStr` yet doesn't implement `ArgumentConvert`.
             if let Some(ty) = unwrap_generic(ty, "Option") {
@@ -265,7 +253,7 @@ fn parse_prefix_params(
                     Ok((#token, #( #parsed_tokens, )* ))
                 }
             }
-        }
+        },
         None => {
             // Parse a parameter with no modifiers decorating it.
             if let Some(ty) = unwrap_generic(ty, "Option") {
@@ -355,7 +343,7 @@ fn parse_prefix_params(
                     Ok((#token, #( #parsed_tokens, )* ))
                 }
             }
-        }
+        },
     };
 
     parsed_types.insert(0, ty.clone());
@@ -363,9 +351,8 @@ fn parse_prefix_params(
 }
 
 pub fn generate_prefix_action(inv: &Invocation) -> Result<proc_macro2::TokenStream, syn::Error> {
-    let param_idents = (0..inv.parameters.len())
-        .map(|i| format_ident!("poise_param_{i}"))
-        .collect::<Vec<_>>();
+    let param_idents =
+        (0..inv.parameters.len()).map(|i| format_ident!("poise_param_{i}")).collect::<Vec<_>>();
 
     let mut params = inv
         .parameters
@@ -387,12 +374,7 @@ pub fn generate_prefix_action(inv: &Invocation) -> Result<proc_macro2::TokenStre
                     ));
                 }
             }
-            Ok(PrefixParameter {
-                idx,
-                modifier,
-                ty: param.type_.clone(),
-                name: &param.name,
-            })
+            Ok(PrefixParameter { idx, modifier, ty: param.type_.clone(), name: &param.name })
         })
         .collect::<Result<Vec<_>, _>>()?;
 

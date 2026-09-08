@@ -62,10 +62,7 @@ impl<U, E> crate::_GetGenerics for ApplicationContext<'_, U, E> {
 impl<U, E> ApplicationContext<'_, U, E> {
     /// See [`crate::Context::defer()`]
     pub async fn defer_response(&self, ephemeral: bool) -> Result<(), serenity::Error> {
-        if !self
-            .has_sent_initial_response
-            .load(std::sync::atomic::Ordering::SeqCst)
-        {
+        if !self.has_sent_initial_response.load(std::sync::atomic::Ordering::SeqCst) {
             let response = serenity::CreateInteractionResponse::Defer(
                 serenity::CreateInteractionResponseMessage::new().ephemeral(ephemeral),
             );
@@ -73,8 +70,7 @@ impl<U, E> ApplicationContext<'_, U, E> {
             let http = &self.framework.serenity_context.http;
             self.interaction.create_response(http, response).await?;
 
-            self.has_sent_initial_response
-                .store(true, std::sync::atomic::Ordering::SeqCst);
+            self.has_sent_initial_response.store(true, std::sync::atomic::Ordering::SeqCst);
         }
         Ok(())
     }
@@ -181,10 +177,8 @@ impl<U, E> CommandParameter<U, E> {
     /// Generates a slash command parameter builder from this [`CommandParameter`] instance. This
     /// can be used to register the command on Discord's servers
     pub fn create_as_slash_command_option(&self) -> Option<serenity::CreateCommandOption<'static>> {
-        let description = self
-            .description
-            .clone()
-            .unwrap_or(Cow::Borrowed("A slash command parameter"));
+        let description =
+            self.description.clone().unwrap_or(Cow::Borrowed("A slash command parameter"));
 
         let mut builder = serenity::CreateCommandOption::<'static>::new(
             serenity::CommandOptionType::String,
@@ -192,9 +186,8 @@ impl<U, E> CommandParameter<U, E> {
             description,
         );
 
-        builder = builder
-            .required(self.required)
-            .set_autocomplete(self.autocomplete_callback.is_some());
+        builder =
+            builder.required(self.required).set_autocomplete(self.autocomplete_callback.is_some());
 
         for (locale, name) in self.name_localizations.iter() {
             builder = builder.name_localized(locale.clone(), name.clone());

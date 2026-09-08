@@ -28,17 +28,13 @@ pub async fn welcome(
 ) -> Result<(), Error> {
     use poise::ChoiceParameter as _;
 
-    ctx.say(format!("<@{}> {}", user.id, tr!(ctx, message.name())))
-        .await?;
+    ctx.say(format!("<@{}> {}", user.id, tr!(ctx, message.name()))).await?;
     Ok(())
 }
 
 #[poise::command(slash_command)]
 pub async fn info(ctx: Context<'_>) -> Result<(), Error> {
-    let guild = ctx
-        .partial_guild()
-        .await
-        .ok_or_else(|| tr!(ctx, "not-in-guild-error"))?;
+    let guild = ctx.partial_guild().await.ok_or_else(|| tr!(ctx, "not-in-guild-error"))?;
 
     let response = tr!(ctx, "guild-info",
         name: &*guild.name,
@@ -75,10 +71,7 @@ async fn main() {
     let intents = serenity::GatewayIntents::non_privileged();
 
     let framework = poise::Framework::builder()
-        .options(poise::FrameworkOptions {
-            commands,
-            ..Default::default()
-        })
+        .options(poise::FrameworkOptions { commands, ..Default::default() })
         .build();
 
     let client = serenity::ClientBuilder::new(token, intents)

@@ -129,7 +129,7 @@ impl ModalDataResolved {
                     users: (!users.is_empty()).then(|| FixedArray::from_vec_trunc(users)),
                     ..Default::default()
                 }
-            }
+            },
             serenity::SelectMenuKind::Role {} => {
                 let mut roles = Vec::with_capacity(25);
                 for value in &select_menu.values {
@@ -147,7 +147,7 @@ impl ModalDataResolved {
                     roles: (!roles.is_empty()).then(|| FixedArray::from_vec_trunc(roles)),
                     ..Default::default()
                 }
-            }
+            },
             serenity::SelectMenuKind::Mentionable {} => {
                 let mut users = Vec::with_capacity(25);
                 let mut roles = Vec::with_capacity(25);
@@ -175,7 +175,7 @@ impl ModalDataResolved {
                     }),
                     ..Default::default()
                 }
-            }
+            },
             serenity::SelectMenuKind::Channel { channel_types: _ } => Self {
                 channels: {
                     let mut channels = Vec::with_capacity(25);
@@ -222,10 +222,7 @@ impl From<&mut serenity::all::CheckboxGroup> for ModalDataResolved {
 
 impl From<&mut serenity::all::Checkbox> for ModalDataResolved {
     fn from(checkbox: &mut serenity::all::Checkbox) -> Self {
-        Self {
-            checked: checkbox.value,
-            ..Default::default()
-        }
+        Self { checked: checkbox.value, ..Default::default() }
     }
 }
 
@@ -245,7 +242,7 @@ pub fn find_modal_data(
                     if input_text.custom_id == custom_id {
                         return ModalDataResolved::from(input_text);
                     }
-                }
+                },
                 serenity::LabelComponent::FileUpload(file_upload) => {
                     if file_upload.custom_id == custom_id {
                         return ModalDataResolved::extract_attachments(
@@ -253,27 +250,27 @@ pub fn find_modal_data(
                             &mut data.resolved,
                         );
                     }
-                }
+                },
                 serenity::LabelComponent::SelectMenu(select_menu) => {
                     if select_menu.custom_id == custom_id {
                         return ModalDataResolved::extract_selections(select_menu, &data.resolved);
                     }
-                }
+                },
                 serenity::LabelComponent::RadioGroup(radio_group) => {
                     if radio_group.custom_id == custom_id {
                         return ModalDataResolved::from(radio_group);
                     }
-                }
+                },
                 serenity::LabelComponent::CheckboxGroup(checkbox_group) => {
                     if checkbox_group.custom_id == custom_id {
                         return ModalDataResolved::from(checkbox_group);
                     }
-                }
+                },
                 serenity::LabelComponent::Checkbox(checkbox) => {
                     if checkbox.custom_id == custom_id {
                         return ModalDataResolved::from(checkbox);
                     }
-                }
+                },
                 _ => continue,
             },
             _ => continue,
@@ -309,9 +306,7 @@ async fn execute_modal_generic<
     };
 
     // Send acknowledgement so that the pop-up is closed
-    response
-        .create_response(&ctx.http, serenity::CreateInteractionResponse::Acknowledge)
-        .await?;
+    response.create_response(&ctx.http, serenity::CreateInteractionResponse::Acknowledge).await?;
 
     Ok(Some(M::parse(response.data)))
 }
@@ -345,8 +340,7 @@ pub async fn execute_modal<U: Send + Sync + 'static, E, M: Modal>(
         timeout,
     )
     .await?;
-    ctx.has_sent_initial_response
-        .store(true, std::sync::atomic::Ordering::SeqCst);
+    ctx.has_sent_initial_response.store(true, std::sync::atomic::Ordering::SeqCst);
     Ok(response)
 }
 

@@ -65,11 +65,8 @@ impl ArgumentConvert for serenity::Emoji {
             return Ok(emoji);
         }
 
-        if let Some(emoji) = guild
-            .emojis
-            .iter()
-            .find(|emoji| emoji.name.eq_ignore_ascii_case(s))
-            .cloned()
+        if let Some(emoji) =
+            guild.emojis.iter().find(|emoji| emoji.name.eq_ignore_ascii_case(s)).cloned()
         {
             return Ok(emoji);
         }

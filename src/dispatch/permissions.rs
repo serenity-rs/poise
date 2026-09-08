@@ -40,10 +40,10 @@ where
     match ctx {
         crate::Context::Application(ctx) => {
             Some(application::get_author_and_bot_permissions(ctx.interaction))
-        }
+        },
         crate::Context::Prefix(ctx) => {
             prefix::get_author_and_bot_permissions(ctx, guild_id, skip_author, skip_bot).await
-        }
+        },
     }
 }
 
@@ -60,10 +60,7 @@ where
 {
     // If both user and bot are None, return empty permissions
     if author_required_permissions.is_empty() && bot_required_permissions.is_empty() {
-        return Some((
-            serenity::Permissions::empty(),
-            serenity::Permissions::empty(),
-        ));
+        return Some((serenity::Permissions::empty(), serenity::Permissions::empty()));
     }
 
     // Fetch permissions, returning None if an error occurred

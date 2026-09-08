@@ -14,11 +14,7 @@ pub struct FrameworkBuilder<U, E> {
 
 impl<U, E> Default for FrameworkBuilder<U, E> {
     fn default() -> Self {
-        Self {
-            options: Default::default(),
-            commands: Default::default(),
-            initialize_owners: true,
-        }
+        Self { options: Default::default(), commands: Default::default(), initialize_owners: true }
     }
 }
 

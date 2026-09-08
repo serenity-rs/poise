@@ -76,9 +76,8 @@ pub async fn component_modal(ctx: crate::Context<'_>) -> Result<(), Error> {
         .label("Open modal")
         .style(poise::serenity_prelude::ButtonStyle::Success)];
 
-    let components = [serenity::CreateComponent::ActionRow(
-        serenity::CreateActionRow::buttons(&buttons),
-    )];
+    let components =
+        [serenity::CreateComponent::ActionRow(serenity::CreateActionRow::buttons(&buttons))];
     let reply = poise::CreateReply::default()
         .content("Click the button below to open the modal")
         .components(&components);

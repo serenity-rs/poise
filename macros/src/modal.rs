@@ -42,24 +42,20 @@ struct FieldAttributes {
 
 pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
     let fields = match input.data {
-        syn::Data::Struct(syn::DataStruct {
-            fields: syn::Fields::Named(fields),
-            ..
-        }) => fields.named,
+        syn::Data::Struct(syn::DataStruct { fields: syn::Fields::Named(fields), .. }) => {
+            fields.named
+        },
         _ => {
             return Err(syn::Error::new(
                 input.ident.span(),
                 "only structs with named fields can be used for derived modals",
             )
             .into())
-        }
+        },
     };
 
-    let struct_attrs: Vec<_> = input
-        .attrs
-        .into_iter()
-        .map(|attr| darling::ast::NestedMeta::Meta(attr.meta))
-        .collect();
+    let struct_attrs: Vec<_> =
+        input.attrs.into_iter().map(|attr| darling::ast::NestedMeta::Meta(attr.meta)).collect();
     let struct_attrs = <StructAttributes as darling::FromMeta>::from_list(&struct_attrs)?;
 
     let mut builders = Vec::new();
@@ -81,11 +77,8 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
 
     for field in fields {
         // Extract data from syn::Field
-        let attrs: Vec<_> = field
-            .attrs
-            .into_iter()
-            .map(|attr| darling::ast::NestedMeta::Meta(attr.meta))
-            .collect();
+        let attrs: Vec<_> =
+            field.attrs.into_iter().map(|attr| darling::ast::NestedMeta::Meta(attr.meta)).collect();
         let field_attrs = <FieldAttributes as darling::FromMeta>::from_list(&attrs)?;
         let field_ident = field.ident.unwrap();
 
@@ -181,7 +174,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                         return Err(err_on_attr(&attrs, err, "file_types"));
                     }
                     quote::quote! { .file_types( &[ #( Cow::Borrowed(#file_types) ),* ] ) }
-                }
+                },
                 None => quote::quote! {},
             };
             builders.push(quote::quote! {
@@ -309,18 +302,12 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                 let err = "maximum of 10 checkbox group options allowed";
                 return Err(err_on_attr(&attrs, err, "checkbox_group"));
             }
-            if field_attrs
-                .max_values
-                .is_some_and(|v| usize::from(v) > options.len())
-            {
+            if field_attrs.max_values.is_some_and(|v| usize::from(v) > options.len()) {
                 let err =
                     "value of `max_values` cannot be greater than the number of options provided";
                 return Err(darling::Error::custom(err).with_span(&field_attrs.max_values.span()));
             }
-            let descriptions = field_attrs
-                .checkbox_group_descriptions
-                .unwrap_or_default()
-                .0;
+            let descriptions = field_attrs.checkbox_group_descriptions.unwrap_or_default().0;
             let create_option = if descriptions.is_empty() {
                 quote::quote! {
                     #({
@@ -387,10 +374,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
 
         // If field is a select menu component, process and continue.
         let (select_menu_kind, kind) = match field_attrs {
-            FieldAttributes {
-                string_select: Some(string_select),
-                ..
-            } => {
+            FieldAttributes { string_select: Some(string_select), .. } => {
                 let strings = string_select.0;
                 if strings.is_empty() {
                     let err = "minimum of 1 string select option required";
@@ -399,10 +383,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                     let err = "maximum of 25 string select options allowed";
                     return Err(err_on_attr(&attrs, err, "string_select"));
                 }
-                if field_attrs
-                    .max_values
-                    .is_some_and(|v| usize::from(v) > strings.len())
-                {
+                if field_attrs.max_values.is_some_and(|v| usize::from(v) > strings.len()) {
                     let err =
                     "value of `max_values` cannot be greater than the number of options provided";
                     return Err(
@@ -491,11 +472,8 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                     },
                     quote::quote! { .strings },
                 )
-            }
-            FieldAttributes {
-                user_select: Some(()),
-                ..
-            } => (
+            },
+            FieldAttributes { user_select: Some(()), .. } => (
                 quote::quote! {
                     {
                         let default_users = if let Some(defaults) = &mut defaults {
@@ -512,10 +490,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                 },
                 quote::quote! { .users },
             ),
-            FieldAttributes {
-                role_select: Some(()),
-                ..
-            } => (
+            FieldAttributes { role_select: Some(()), .. } => (
                 quote::quote! {
                     {
                         let default_roles = if let Some(defaults) = &mut defaults {
@@ -532,10 +507,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                 },
                 quote::quote! { .roles },
             ),
-            FieldAttributes {
-                mentionable_select: Some(()),
-                ..
-            } => (
+            FieldAttributes { mentionable_select: Some(()), .. } => (
                 quote::quote! {
                     {
                         let (default_users, default_roles) =
@@ -565,16 +537,13 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                 },
                 quote::quote! { .mentionables },
             ),
-            FieldAttributes {
-                channel_select: Some(()),
-                ..
-            } => {
+            FieldAttributes { channel_select: Some(()), .. } => {
                 let channel_types = match &field_attrs.channel_types {
                     Some(crate::util::List(channel_types)) => {
                         quote::quote! {
                             Some(Cow::Borrowed(&[ #( serenity::ChannelType::#channel_types ),* ]))
                         }
-                    }
+                    },
                     None => quote::quote! { None },
                 };
                 (
@@ -595,7 +564,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                     },
                     quote::quote! { .channels },
                 )
-            }
+            },
             _ => (quote::quote! {}, quote::quote! {}),
         };
 

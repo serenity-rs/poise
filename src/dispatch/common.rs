@@ -16,13 +16,13 @@ async fn check_nsfw_channel<U: Send + Sync + 'static, E>(ctx: crate::Context<'_,
                 Err(e) => {
                     tracing::warn!("Error when getting thread parent for NSFW check: {e}");
                     false
-                }
+                },
             }
-        }
+        },
         None | Some(_) => {
             tracing::warn!("Error when getting channel for NSFW check");
             false
-        }
+        },
     }
 }
 
@@ -55,7 +55,7 @@ async fn check_permissions_and_cooldown_single<'a, U: Send + Sync + 'static, E>(
                 }
                 #[cfg(not(feature = "cache"))]
                 let _ = guild_id;
-            }
+            },
         }
     }
 
@@ -100,16 +100,13 @@ async fn check_permissions_and_cooldown_single<'a, U: Send + Sync + 'static, E>(
     // First perform global checks, then command checks (if necessary)
     for check in Option::iter(&ctx.framework().options().command_check).chain(&cmd.checks) {
         match check(ctx).await {
-            Ok(true) => {}
+            Ok(true) => {},
             Ok(false) => {
                 return Err(crate::FrameworkError::CommandCheckFailed { ctx, error: None });
-            }
+            },
             Err(error) => {
-                return Err(crate::FrameworkError::CommandCheckFailed {
-                    error: Some(error),
-                    ctx,
-                });
-            }
+                return Err(crate::FrameworkError::CommandCheckFailed { error: Some(error), ctx });
+            },
         }
     }
 
@@ -118,10 +115,7 @@ async fn check_permissions_and_cooldown_single<'a, U: Send + Sync + 'static, E>(
         let config = cmd.cooldown_config.read().unwrap();
         let remaining_cooldown = cooldowns.remaining_cooldown(ctx.cooldown_context(), &config);
         if let Some(remaining_cooldown) = remaining_cooldown {
-            return Err(crate::FrameworkError::CooldownHit {
-                ctx,
-                remaining_cooldown,
-            });
+            return Err(crate::FrameworkError::CooldownHit { ctx, remaining_cooldown });
         }
     }
 

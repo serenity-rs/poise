@@ -51,7 +51,7 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
                     ctx: poise::ApplicationContext<'_, _, _>,
                     partial: &str,
                 | Box::pin(#autocomplete_fn(ctx.into(), partial))) }
-            }
+            },
             None => quote::quote! { None },
         };
 
@@ -87,7 +87,7 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
                         #min_length_setter #max_length_setter
                     }) }
                 }
-            }
+            },
             false => quote::quote! { None },
         };
         // TODO: theoretically a problem that we don't store choices for non slash commands
@@ -146,10 +146,7 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
     }
     // Sort the parameters so that optional parameters come last - Discord requires this order
     parameter_structs.sort_by_key(|(_, required)| !required);
-    Ok(parameter_structs
-        .into_iter()
-        .map(|(builder, _)| builder)
-        .collect::<Vec<_>>())
+    Ok(parameter_structs.into_iter().map(|(builder, _)| builder).collect::<Vec<_>>())
 }
 
 pub fn generate_slash_action(inv: &Invocation) -> Result<proc_macro2::TokenStream, syn::Error> {
@@ -158,23 +155,15 @@ pub fn generate_slash_action(inv: &Invocation) -> Result<proc_macro2::TokenStrea
         if length > 100 {
             return Err(syn::Error::new(
                 inv.function.span(),
-                format!(
-                    "slash command description too long ({} chars, must be max 100)",
-                    length
-                ),
+                format!("slash command description too long ({} chars, must be max 100)", length),
             ));
         }
     }
 
-    let param_identifiers = (0..inv.parameters.len())
-        .map(|i| format_ident!("poise_param_{i}"))
-        .collect::<Vec<_>>();
+    let param_identifiers =
+        (0..inv.parameters.len()).map(|i| format_ident!("poise_param_{i}")).collect::<Vec<_>>();
 
-    let params = inv
-        .parameters
-        .iter()
-        .map(parse_slash_param)
-        .collect::<Vec<_>>();
+    let params = inv.parameters.iter().map(parse_slash_param).collect::<Vec<_>>();
 
     Ok(quote::quote! {
         |ctx| Box::pin(async move {
@@ -315,7 +304,7 @@ pub fn generate_context_menu_action(
                 inv.function.sig.inputs.span(),
                 "Context menu commands require exactly one parameter",
             ));
-        }
+        },
     };
 
     Ok(quote::quote! {

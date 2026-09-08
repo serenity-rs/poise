@@ -569,23 +569,23 @@ impl<'a, U, E> Context<'a, U, E> {
                             } else {
                                 Ok(())
                             }
-                        }
+                        },
                         crate::ContextMenuCommandAction::Message(action) => {
                             if let serenity::ResolvedTarget::Message(message) = target {
                                 action(ctx, (*message).clone()).await
                             } else {
                                 Ok(())
                             }
-                        }
+                        },
                         crate::ContextMenuCommandAction::__NonExhaustive => unreachable!(),
                     };
                 }
-            }
+            },
             Self::Prefix(ctx) => {
                 if let Some(action) = command.prefix_action {
                     return action(ctx).await;
                 }
-            }
+            },
         }
 
         // Fallback if the Command doesn't have the action it needs to execute this context

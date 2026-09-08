@@ -38,23 +38,13 @@ where
     let string = match value {
         serenity::ResolvedValue::String(str) => *str,
         _ => {
-            return Err(SlashArgError::CommandStructureMismatch {
-                description: "expected string",
-            });
-        }
+            return Err(SlashArgError::CommandStructureMismatch { description: "expected string" });
+        },
     };
 
-    T::convert(
-        ctx,
-        interaction.guild_id,
-        Some(interaction.channel_id),
-        string,
-    )
-    .await
-    .map_err(|e| SlashArgError::Parse {
-        error: e.into(),
-        input: string.into(),
-    })
+    T::convert(ctx, interaction.guild_id, Some(interaction.channel_id), string)
+        .await
+        .map_err(|e| SlashArgError::Parse { error: e.into(), input: string.into() })
 }
 
 /// Auto-impls `SlashArgument` for a type by deferring to [`extract_via_argumentconvert`].
@@ -164,25 +154,15 @@ impl_slash_argument!(serenity::Member, |ctx, interaction, User(user, _)| {
         .map_err(SlashArgError::Http)?
 });
 impl_slash_argument!(serenity::PartialMember, |_, _, User(_, member)| {
-    member
-        .ok_or(SlashArgError::Invalid("cannot use member parameter in DMs"))?
-        .clone()
+    member.ok_or(SlashArgError::Invalid("cannot use member parameter in DMs"))?.clone()
 });
 impl_slash_argument!(serenity::User, |_, _, User(user, _)| user.clone());
 impl_slash_argument!(serenity::UserId, |_, _, User(user, _)| user.id);
 impl_slash_argument!(serenity::Channel, |ctx, inter, Channel(channel)| {
-    channel
-        .id()
-        .to_channel(ctx, inter.guild_id)
-        .await
-        .map_err(SlashArgError::Http)?
+    channel.id().to_channel(ctx, inter.guild_id).await.map_err(SlashArgError::Http)?
 });
-impl_slash_argument!(serenity::GenericChannelId, |_, _, Channel(channel)| channel
-    .id());
-impl_slash_argument!(
-    serenity::GenericInteractionChannel,
-    |_, _, Channel(channel)| channel.clone()
-);
+impl_slash_argument!(serenity::GenericChannelId, |_, _, Channel(channel)| channel.id());
+impl_slash_argument!(serenity::GenericInteractionChannel, |_, _, Channel(channel)| channel.clone());
 impl_slash_argument!(serenity::GuildChannel, |ctx, inter, Channel(channel)| {
     channel
         .id()
@@ -245,7 +225,7 @@ impl SlashArgError {
         match self {
             Self::CommandStructureMismatch { description } => {
                 crate::FrameworkError::CommandStructureMismatch { ctx, description }
-            }
+            },
             Self::Parse { error, input } => crate::FrameworkError::ArgumentParse {
                 ctx: ctx.into(),
                 error,
@@ -270,23 +250,17 @@ impl std::fmt::Display for SlashArgError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::CommandStructureMismatch { description } => {
-                write!(
-                    f,
-                    "Bot author did not register their commands correctly ({description})",
-                )
-            }
+                write!(f, "Bot author did not register their commands correctly ({description})",)
+            },
             Self::Parse { error, input } => {
                 write!(f, "Failed to parse `{input}` as argument: {error}")
-            }
+            },
             Self::Invalid(description) => {
                 write!(f, "You can't use this parameter here: {description}",)
-            }
+            },
             Self::Http(error) => {
-                write!(
-                    f,
-                    "Error occurred while retrieving data from Discord: {error}",
-                )
-            }
+                write!(f, "Error occurred while retrieving data from Discord: {error}",)
+            },
             Self::__NonExhaustive => unreachable!(),
         }
     }

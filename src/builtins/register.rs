@@ -100,8 +100,7 @@ pub async fn register_application_commands<U: Send + Sync + 'static, E>(
     let num_commands = commands_builder.len();
 
     if global {
-        ctx.say(format!("Registering {num_commands} commands...",))
-            .await?;
+        ctx.say(format!("Registering {num_commands} commands...",)).await?;
         serenity::Command::set_global_commands(ctx.http(), &commands_builder).await?;
     } else {
         let guild_id = match ctx.guild_id() {
@@ -109,11 +108,10 @@ pub async fn register_application_commands<U: Send + Sync + 'static, E>(
             None => {
                 ctx.say("Must be called in guild").await?;
                 return Ok(());
-            }
+            },
         };
 
-        ctx.say(format!("Registering {num_commands} commands..."))
-            .await?;
+        ctx.say(format!("Registering {num_commands} commands...")).await?;
         guild_id.set_commands(ctx.http(), &commands_builder).await?;
     }
 
@@ -180,9 +178,8 @@ pub async fn register_application_commands_buttons<U: Send + Sync + 'static, E>(
             .emoji('🗑'),
     ];
 
-    let components = [serenity::CreateComponent::ActionRow(
-        serenity::CreateActionRow::buttons(&buttons),
-    )];
+    let components =
+        [serenity::CreateComponent::ActionRow(serenity::CreateActionRow::buttons(&buttons))];
     let builder = crate::CreateReply::default()
         .content("Choose what to do with the commands:")
         .components(&components);
@@ -199,9 +196,7 @@ pub async fn register_application_commands_buttons<U: Send + Sync + 'static, E>(
     reply
         .edit(
             ctx,
-            crate::CreateReply::default()
-                .components(vec![])
-                .content("Processing... Please wait."),
+            crate::CreateReply::default().components(vec![]).content("Processing... Please wait."),
         )
         .await?; // remove buttons after button press and edit message
     let pressed_button_id = match &interaction {
@@ -210,7 +205,7 @@ pub async fn register_application_commands_buttons<U: Send + Sync + 'static, E>(
             ctx.say(":warning: You didn't interact in time - please run the command again.")
                 .await?;
             return Ok(());
-        }
+        },
     };
 
     let (register, global) = match &**pressed_button_id {
@@ -221,17 +216,14 @@ pub async fn register_application_commands_buttons<U: Send + Sync + 'static, E>(
         other => {
             tracing::warn!("unknown register button ID: {:?}", other);
             return Ok(());
-        }
+        },
     };
 
     let start_time = std::time::Instant::now();
 
     if global {
         if register {
-            ctx.say(format!(
-                ":gear: Registering {num_commands} global commands...",
-            ))
-            .await?;
+            ctx.say(format!(":gear: Registering {num_commands} global commands...",)).await?;
             serenity::Command::set_global_commands(ctx.http(), &create_commands).await?;
         } else {
             ctx.say(":gear: Unregistering global commands...").await?;
@@ -243,13 +235,10 @@ pub async fn register_application_commands_buttons<U: Send + Sync + 'static, E>(
             None => {
                 ctx.say(":x: Must be called in guild").await?;
                 return Ok(());
-            }
+            },
         };
         if register {
-            ctx.say(format!(
-                ":gear: Registering {num_commands} guild commands...",
-            ))
-            .await?;
+            ctx.say(format!(":gear: Registering {num_commands} guild commands...",)).await?;
             guild_id.set_commands(ctx.http(), &create_commands).await?;
         } else {
             ctx.say(":gear: Unregistering guild commands...").await?;
@@ -259,11 +248,7 @@ pub async fn register_application_commands_buttons<U: Send + Sync + 'static, E>(
 
     // Calulate time taken and send message
     let time_taken = start_time.elapsed();
-    ctx.say(format!(
-        ":white_check_mark: Done! Took {}ms",
-        time_taken.as_millis()
-    ))
-    .await?;
+    ctx.say(format!(":white_check_mark: Done! Took {}ms", time_taken.as_millis())).await?;
 
     Ok(())
 }

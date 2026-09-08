@@ -43,12 +43,7 @@ pub struct CodeBlock {
 
 impl std::fmt::Display for CodeBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "```{}\n{}\n```",
-            self.language.as_deref().unwrap_or(""),
-            self.code
-        )
+        write!(f, "```{}\n{}\n```", self.language.as_deref().unwrap_or(""), self.code)
     }
 }
 
@@ -90,11 +85,7 @@ fn pop_from(args: &str) -> Result<(&str, CodeBlock), CodeBlockError> {
         rest = &code_line[(code_line_end + 1)..];
         let code_line = &code_line[..code_line_end];
 
-        CodeBlock {
-            code: code_line.to_owned(),
-            language: None,
-            __non_exhaustive: (),
-        }
+        CodeBlock { code: code_line.to_owned(), language: None, __non_exhaustive: () }
     } else {
         return Err(CodeBlockError::default());
     };

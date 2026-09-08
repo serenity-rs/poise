@@ -82,7 +82,7 @@ impl<T: darling::FromMeta> darling::FromMeta for Tuple2<T> {
                     "expected two items `(\"a\", \"b\")`",
                 )
                 .into())
-            }
+            },
         })
     }
 }
@@ -94,8 +94,7 @@ where
     T: std::ops::Deref<Target = D> + 'a,
     D: ?Sized + 'a,
 {
-    iter.into_iter()
-        .map(|Tuple2(t, v)| Tuple2(t.deref(), v.deref()))
+    iter.into_iter().map(|Tuple2(t, v)| Tuple2(t.deref(), v.deref()))
 }
 
 pub fn iter_tuple_2_to_vec_map<I, T>(v: I) -> proc_macro2::TokenStream
@@ -107,10 +106,7 @@ where
         return quote::quote!(Cow::Borrowed(&[]));
     }
 
-    let (keys, values) = v
-        .into_iter()
-        .map(|x| (x.0, x.1))
-        .unzip::<_, _, Vec<_>, Vec<_>>();
+    let (keys, values) = v.into_iter().map(|x| (x.0, x.1)).unzip::<_, _, Vec<_>, Vec<_>>();
 
     quote::quote! {
         Cow::Borrowed(&[

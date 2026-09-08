@@ -50,16 +50,10 @@ impl ReplyHandle<'_> {
     pub async fn into_message(self) -> Result<serenity::Message, serenity::Error> {
         use ReplyHandleInner::*;
         match self.0 {
-            Prefix(msg)
-            | Application {
-                followup: Some(msg),
-                ..
-            } => Ok(*msg),
-            Application {
-                http,
-                interaction,
-                followup: None,
-            } => interaction.get_response(http).await,
+            Prefix(msg) | Application { followup: Some(msg), .. } => Ok(*msg),
+            Application { http, interaction, followup: None } => {
+                interaction.get_response(http).await
+            },
             Autocomplete => panic!("reply is a no-op in autocomplete context"),
         }
     }
@@ -75,16 +69,10 @@ impl ReplyHandle<'_> {
     pub async fn message(&self) -> Result<Cow<'_, serenity::Message>, serenity::Error> {
         use ReplyHandleInner::*;
         match &self.0 {
-            Prefix(msg)
-            | Application {
-                followup: Some(msg),
-                ..
-            } => Ok(Cow::Borrowed(msg)),
-            Application {
-                http,
-                interaction,
-                followup: None,
-            } => Ok(Cow::Owned(interaction.get_response(http).await?)),
+            Prefix(msg) | Application { followup: Some(msg), .. } => Ok(Cow::Borrowed(msg)),
+            Application { http, interaction, followup: None } => {
+                Ok(Cow::Owned(interaction.get_response(http).await?))
+            },
             Autocomplete => panic!("reply is a no-op in autocomplete context"),
         }
     }
@@ -112,27 +100,19 @@ impl ReplyHandle<'_> {
                         reply.to_prefix_edit(serenity::EditMessage::new())
                     })
                     .await?;
-            }
-            ReplyHandleInner::Application {
-                http,
-                interaction,
-                followup: None,
-            } => {
+            },
+            ReplyHandleInner::Application { http, interaction, followup: None } => {
                 let builder =
                     reply.to_slash_initial_response_edit(serenity::EditInteractionResponse::new());
 
                 interaction.edit_response(http, builder).await?;
-            }
-            ReplyHandleInner::Application {
-                http,
-                interaction,
-                followup: Some(msg),
-            } => {
+            },
+            ReplyHandleInner::Application { http, interaction, followup: Some(msg) } => {
                 let builder = reply
                     .to_slash_followup_response(serenity::CreateInteractionResponseFollowup::new());
 
                 interaction.edit_followup(http, msg.id, builder).await?;
-            }
+            },
             ReplyHandleInner::Autocomplete => panic!("reply is a no-op in autocomplete context"),
         }
         Ok(())
@@ -145,17 +125,13 @@ impl ReplyHandle<'_> {
     ) -> Result<(), serenity::Error> {
         match &self.0 {
             ReplyHandleInner::Prefix(msg) => msg.delete(ctx.http(), None).await?,
-            ReplyHandleInner::Application {
-                http: _,
-                interaction,
-                followup,
-            } => match followup {
+            ReplyHandleInner::Application { http: _, interaction, followup } => match followup {
                 Some(followup) => {
                     interaction.delete_followup(ctx.http(), followup.id).await?;
-                }
+                },
                 None => {
                     interaction.delete_response(ctx.http()).await?;
-                }
+                },
             },
             ReplyHandleInner::Autocomplete => panic!("delete is a no-op in autocomplete context"),
         }

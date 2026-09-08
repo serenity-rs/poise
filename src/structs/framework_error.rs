@@ -234,10 +234,8 @@ impl<'a, U: Send + Sync + 'static, E> FrameworkError<'a, U, E> {
 
     /// Calls the appropriate `on_error` function (command-specific or global) with this error
     pub async fn handle(self, framework_options: &crate::FrameworkOptions<U, E>) {
-        let on_error = self
-            .ctx()
-            .and_then(|c| c.command().on_error)
-            .unwrap_or(framework_options.on_error);
+        let on_error =
+            self.ctx().and_then(|c| c.command().on_error).unwrap_or(framework_options.on_error);
         on_error(self).await;
     }
 }
@@ -254,11 +252,7 @@ impl<'a, U, E> FrameworkError<'a, U, E> {
         input: Option<String>,
         error: Box<dyn std::error::Error + Send + Sync>,
     ) -> Self {
-        Self::ArgumentParse {
-            error,
-            input: input.map(Box::new),
-            ctx,
-        }
+        Self::ArgumentParse { error, input: input.map(Box::new), ctx }
     }
 
     pub fn new_command_structure_mismatch(
@@ -283,22 +277,14 @@ impl<U: Send + Sync + 'static, E: std::fmt::Display> std::fmt::Display
         match self {
             Self::Command { error: _, ctx } => {
                 write!(f, "error in command `{}`", full_command_name!(ctx))
-            }
+            },
             Self::SubcommandRequired { ctx } => {
-                write!(
-                    f,
-                    "expected subcommand for command `{}`",
-                    full_command_name!(ctx)
-                )
-            }
+                write!(f, "expected subcommand for command `{}`", full_command_name!(ctx))
+            },
             Self::CommandPanic { ctx, payload: _ } => {
                 write!(f, "panic in command `{}`", full_command_name!(ctx))
-            }
-            Self::ArgumentParse {
-                error: _,
-                input,
-                ctx,
-            } => write!(
+            },
+            Self::ArgumentParse { error: _, input, ctx } => write!(
                 f,
                 "failed to parse argument in command `{}` on input {:?}",
                 full_command_name!(ctx),
@@ -310,28 +296,19 @@ impl<U: Send + Sync + 'static, E: std::fmt::Display> std::fmt::Display
                 full_command_name!(crate::Context::Application(*ctx)),
                 description
             ),
-            Self::CooldownHit {
-                remaining_cooldown,
-                ctx,
-            } => write!(
+            Self::CooldownHit { remaining_cooldown, ctx } => write!(
                 f,
                 "cooldown hit in command `{}` ({:?} remaining)",
                 full_command_name!(ctx),
                 remaining_cooldown
             ),
-            Self::MissingBotPermissions {
-                missing_permissions,
-                ctx,
-            } => write!(
+            Self::MissingBotPermissions { missing_permissions, ctx } => write!(
                 f,
                 "bot is missing permisions ({}) to execute command `{}`",
                 missing_permissions,
                 full_command_name!(ctx),
             ),
-            Self::MissingUserPermissions {
-                missing_permissions,
-                ctx,
-            } => write!(
+            Self::MissingUserPermissions { missing_permissions, ctx } => write!(
                 f,
                 "user is or may be missing permisions ({:?}) to execute command `{}`",
                 missing_permissions,
@@ -347,16 +324,12 @@ impl<U: Send + Sync + 'static, E: std::fmt::Display> std::fmt::Display
                 "owner-only command `{}` cannot be run by non-owners",
                 full_command_name!(ctx)
             ),
-            Self::GuildOnly { ctx } => write!(
-                f,
-                "guild-only command `{}` cannot run in DMs",
-                full_command_name!(ctx)
-            ),
-            Self::DmOnly { ctx } => write!(
-                f,
-                "DM-only command `{}` cannot run in guilds",
-                full_command_name!(ctx)
-            ),
+            Self::GuildOnly { ctx } => {
+                write!(f, "guild-only command `{}` cannot run in DMs", full_command_name!(ctx))
+            },
+            Self::DmOnly { ctx } => {
+                write!(f, "DM-only command `{}` cannot run in guilds", full_command_name!(ctx))
+            },
             Self::NsfwOnly { ctx } => write!(
                 f,
                 "nsfw-only command `{}` cannot run in non-nsfw channels",
@@ -367,33 +340,23 @@ impl<U: Send + Sync + 'static, E: std::fmt::Display> std::fmt::Display
                 "pre-command check for command `{}` either denied access or errored",
                 full_command_name!(ctx)
             ),
-            Self::DynamicPrefix {
-                error: _,
-                ctx: _,
-                msg,
-            } => {
-                write!(
-                    f,
-                    "dynamic prefix callback errored on message {:?}",
-                    msg.content
-                )
-            }
-            Self::UnknownCommand {
-                content_start, msg, ..
-            } => {
+            Self::DynamicPrefix { error: _, ctx: _, msg } => {
+                write!(f, "dynamic prefix callback errored on message {:?}", msg.content)
+            },
+            Self::UnknownCommand { content_start, msg, .. } => {
                 let msg_content = &msg.content[(*content_start).into()..];
                 write!(f, "unknown command `{}`", msg_content)
-            }
+            },
             Self::UnknownInteraction { interaction, .. } => {
                 write!(f, "unknown interaction `{}`", interaction.data.name)
-            }
+            },
             Self::NonCommandMessage { msg, .. } => {
                 write!(
                     f,
                     "error in non-command message handler in <@{}> (message ID {})",
                     msg.channel_id, msg.id
                 )
-            }
+            },
             Self::__NonExhaustive(unreachable) => match *unreachable {},
         }
     }

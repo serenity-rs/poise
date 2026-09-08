@@ -35,7 +35,7 @@ impl<T: ChoiceParameter> crate::SlashArgument for T {
                 return Err(crate::SlashArgError::CommandStructureMismatch {
                     description: "expected u64",
                 });
-            }
+            },
         };
 
         Self::from_index(choice_key as _).ok_or(crate::SlashArgError::CommandStructureMismatch {
@@ -67,9 +67,8 @@ impl<'a, T: ChoiceParameter> crate::PopArgument<'a> for T {
             args,
             attachment_index,
             Self::from_name(&s).ok_or((
-                Box::new(crate::InvalidChoice {
-                    __non_exhaustive: (),
-                }) as Box<dyn std::error::Error + Send + Sync>,
+                Box::new(crate::InvalidChoice { __non_exhaustive: () })
+                    as Box<dyn std::error::Error + Send + Sync>,
                 Some(s),
             ))?,
         ))

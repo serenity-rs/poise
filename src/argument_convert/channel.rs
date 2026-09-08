@@ -46,10 +46,7 @@ async fn lookup_channel_global(
         .or_else(|| serenity::utils::parse_channel_mention(s))
         .or_else(|| serenity::utils::parse_channel_url(s).map(|(_, channel_id)| channel_id))
     {
-        return channel_id
-            .to_channel(ctx, guild_id)
-            .await
-            .map_err(ChannelParseError::Http);
+        return channel_id.to_channel(ctx, guild_id).await.map_err(ChannelParseError::Http);
     }
 
     let guild_id = guild_id.ok_or(ChannelParseError::NotFoundOrMalformed)?;
@@ -57,10 +54,7 @@ async fn lookup_channel_global(
     #[cfg(feature = "cache")]
     if let Some(cache) = ctx.cache() {
         if let Some(guild) = cache.guild(guild_id) {
-            let channel = guild
-                .channels
-                .iter()
-                .find(|c| c.base.name.eq_ignore_ascii_case(s));
+            let channel = guild.channels.iter().find(|c| c.base.name.eq_ignore_ascii_case(s));
             if let Some(channel) = channel {
                 return Ok(serenity::Channel::Guild(channel.clone()));
             }
@@ -69,15 +63,8 @@ async fn lookup_channel_global(
         return Err(ChannelParseError::NotFoundOrMalformed);
     }
 
-    let channels = ctx
-        .http()
-        .get_channels(guild_id)
-        .await
-        .map_err(ChannelParseError::Http)?;
-    if let Some(channel) = channels
-        .into_iter()
-        .find(|c| c.base.name.eq_ignore_ascii_case(s))
-    {
+    let channels = ctx.http().get_channels(guild_id).await.map_err(ChannelParseError::Http)?;
+    if let Some(channel) = channels.into_iter().find(|c| c.base.name.eq_ignore_ascii_case(s)) {
         Ok(serenity::Channel::Guild(channel))
     } else {
         Err(ChannelParseError::NotFoundOrMalformed)
@@ -170,7 +157,7 @@ impl ArgumentConvert for serenity::GuildChannel {
             Err(ChannelParseError::Http(e)) => Err(GuildChannelParseError::Http(e)),
             Err(ChannelParseError::NotFoundOrMalformed) => {
                 Err(GuildChannelParseError::NotFoundOrMalformed)
-            }
+            },
         }
     }
 }

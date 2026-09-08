@@ -25,10 +25,8 @@ impl serenity::EventHandler for Handler {
         match event {
             serenity::FullEvent::Message { new_message, .. } => {
                 // FrameworkContext contains all data that poise::Framework usually manages
-                let framework_data = poise::FrameworkContext {
-                    serenity_context,
-                    options: &self.options,
-                };
+                let framework_data =
+                    poise::FrameworkContext { serenity_context, options: &self.options };
 
                 let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
                 let trigger = poise::MessageDispatchTrigger::MessageCreate;
@@ -45,9 +43,9 @@ impl serenity::EventHandler for Handler {
                 if let Err(err) = res.await {
                     err.handle(&self.options).await;
                 }
-            }
+            },
             // For slash commands or edit tracking to work, forward InteractionCreate and MessageUpdate.
-            _ => {}
+            _ => {},
         }
     }
 }
@@ -57,16 +55,12 @@ async fn main() -> Result<(), Error> {
     let token = serenity::Token::from_env("DISCORD_TOKEN").unwrap();
     let intents = serenity::GatewayIntents::non_privileged();
     let mut handler = Handler {
-        options: poise::FrameworkOptions {
-            commands: vec![ping()],
-            ..Default::default()
-        },
+        options: poise::FrameworkOptions { commands: vec![ping()], ..Default::default() },
     };
     poise::set_qualified_names(&mut handler.options.commands); // some setup
 
-    let mut client = serenity::Client::builder(token, intents)
-        .event_handler(Arc::new(handler))
-        .await?;
+    let mut client =
+        serenity::Client::builder(token, intents).event_handler(Arc::new(handler)).await?;
 
     client.start().await?;
 

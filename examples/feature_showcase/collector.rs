@@ -10,12 +10,9 @@ pub async fn boop(ctx: Context<'_>) -> Result<(), Error> {
         .style(serenity::ButtonStyle::Primary)
         .label("Boop me!")];
 
-    let components = [serenity::CreateComponent::ActionRow(
-        serenity::CreateActionRow::buttons(&buttons),
-    )];
-    let reply = CreateReply::default()
-        .content("I want some boops!")
-        .components(&components);
+    let components =
+        [serenity::CreateComponent::ActionRow(serenity::CreateActionRow::buttons(&buttons))];
+    let reply = CreateReply::default().content("I want some boops!").components(&components);
 
     ctx.send(reply).await?;
 
@@ -30,14 +27,10 @@ pub async fn boop(ctx: Context<'_>) -> Result<(), Error> {
         boop_count += 1;
 
         let mut msg = mci.message.clone();
-        msg.edit(
-            ctx,
-            serenity::EditMessage::new().content(format!("Boop count: {boop_count}")),
-        )
-        .await?;
-
-        mci.create_response(ctx.http(), serenity::CreateInteractionResponse::Acknowledge)
+        msg.edit(ctx, serenity::EditMessage::new().content(format!("Boop count: {boop_count}")))
             .await?;
+
+        mci.create_response(ctx.http(), serenity::CreateInteractionResponse::Acknowledge).await?;
     }
 
     Ok(())

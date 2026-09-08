@@ -14,8 +14,7 @@ pub async fn addmultiple(
     #[max = 1234567890987654_i64]
     c: i64,
 ) -> Result<(), Error> {
-    ctx.say(format!("Result: {}", a as i128 + b as i128 + c as i128))
-        .await?;
+    ctx.say(format!("Result: {}", a as i128 + b as i128 + c as i128)).await?;
 
     Ok(())
 }

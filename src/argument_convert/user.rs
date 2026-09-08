@@ -39,11 +39,7 @@ impl ArgumentConvert for serenity::User {
         }
 
         // If string is a raw user ID or a mention
-        if let Some(user_id) = s
-            .parse()
-            .ok()
-            .or_else(|| serenity::utils::parse_user_mention(s))
-        {
+        if let Some(user_id) = s.parse().ok().or_else(|| serenity::utils::parse_user_mention(s)) {
             // Now, we can still try UserId::to_user because it works for all users from all guilds
             // the bot is joined
             if let Ok(user) = user_id.to_user(&ctx).await {

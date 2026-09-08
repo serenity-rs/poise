@@ -50,11 +50,7 @@ impl<U, E> Framework<U, E> {
         U: Send + Sync + 'static + 'static,
         E: Send + 'static,
     {
-        Self {
-            bot_id: std::sync::OnceLock::new(),
-            edit_tracker_purge_task: None,
-            options,
-        }
+        Self { bot_id: std::sync::OnceLock::new(), edit_tracker_purge_task: None, options }
     }
 
     /// Return the stored framework options, including commands.
@@ -117,10 +113,7 @@ async fn raw_dispatch_event<U, E>(
     }
 
     #[cfg(not(feature = "cache"))]
-    let bot_id = *framework
-        .bot_id
-        .get()
-        .expect("bot ID not set even though we awaited Ready");
+    let bot_id = *framework.bot_id.get().expect("bot ID not set even though we awaited Ready");
     let framework = crate::FrameworkContext {
         #[cfg(not(feature = "cache"))]
         bot_id,
