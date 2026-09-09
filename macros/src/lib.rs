@@ -1,6 +1,22 @@
 /*!
 Procedural macros used in poise, like [`macro@command`]
 */
+#![warn(
+    unused,
+    clippy::pedantic,
+    clippy::clone_on_ref_ptr,
+    clippy::fallible_impl_from,
+    clippy::let_underscore_must_use,
+    clippy::format_push_string,
+    clippy::unused_async,
+    rust_2018_idioms,
+    missing_docs
+)]
+#![allow(
+    // Allowed as they are too pedantic
+    clippy::too_many_lines,
+    clippy::struct_excessive_bools
+)]
 
 mod choice_parameter;
 mod command;
@@ -48,7 +64,7 @@ for example for command-specific help (i.e. `~help command_name`). Escape newlin
     - Due to being checked server-side, users without the required permissions are prevented from executing the command in the first place, which is a better experience
     - However, `default_member_permissions` has no effect on subcommands, which always inherit their permissions from the top-level command
     - Also, guild owners can freely change the required permissions for any bot command for their guild
-- `owners_only`: Restricts command callers to a configurable list of owners (see FrameworkOptions)
+- `owners_only`: Restricts command callers to a configurable list of owners (see `FrameworkOptions`)
 - `guild_only`: Restricts command callers to only run on a guild
 - `dm_only`: Restricts command callers to only run on a DM
 - `nsfw_only`: Restricts command callers to only run on a NSFW channel
@@ -84,9 +100,9 @@ for example for command-specific help (i.e. `~help command_name`). Escape newlin
 
 # Function parameters
 
-`Context` is the first parameter of all command functions. It's an enum over either PrefixContext or
-SlashContext, which contain a variety of context data each. Context provides some utility methods to
-access data present in both PrefixContext and SlashContext, like `author()` or `created_at()`.
+`Context` is the first parameter of all command functions. It's an enum over either `PrefixContext` or
+`SlashContext`, which contain a variety of context data each. Context provides some utility methods to
+access data present in both `PrefixContext` and `SlashContext`, like `author()` or `created_at()`.
 
 All following parameters are inputs to the command. You can use all types that implement
 `PopArgument` (for prefix commands) or `SlashArgument` (for slash commands). You can also wrap

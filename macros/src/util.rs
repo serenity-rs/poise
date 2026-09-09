@@ -61,7 +61,7 @@ impl<T: darling::FromMeta> darling::FromMeta for List<T> {
 }
 impl<T> Default for List<T> {
     fn default() -> Self {
-        Self(Default::default())
+        Self(Vec::default())
     }
 }
 
@@ -90,7 +90,7 @@ where
     T: std::ops::Deref<Target = D> + 'a,
     D: ?Sized + 'a,
 {
-    iter.into_iter().map(|Tuple2(t, v)| Tuple2(t.deref(), v.deref()))
+    iter.into_iter().map(|Tuple2(t, v)| Tuple2(&**t, &**v))
 }
 
 pub fn iter_tuple_2_to_vec_map<I, T>(v: I) -> proc_macro2::TokenStream

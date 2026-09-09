@@ -18,15 +18,12 @@ struct VariantAttribute {
 }
 
 pub fn choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
-    let enum_ = match input.data {
-        syn::Data::Enum(x) => x,
-        _ => {
-            return Err(syn::Error::new(
-                input.ident.span(),
-                "Only enums can be used for choice parameters",
-            )
-            .into());
-        },
+    let syn::Data::Enum(enum_) = input.data else {
+        return Err(syn::Error::new(
+            input.ident.span(),
+            "Only enums can be used for choice parameters",
+        )
+        .into());
     };
 
     let mut variant_idents: Vec<proc_macro2::Ident> = Vec::new();

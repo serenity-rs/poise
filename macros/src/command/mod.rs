@@ -132,9 +132,9 @@ fn extract_help_from_doc_comments(attrs: &[syn::Attribute]) -> (Option<String>, 
     let mut paragraphs = doc_lines.splitn(2, "\n\n").filter(|x| !x.is_empty()); // "".split => [""]
 
     // Pop first paragraph as description if needed (but no newlines bc description is single line)
-    let description = paragraphs.next().map(|x| x.replace("\n", " "));
+    let description = paragraphs.next().map(|x| x.replace('\n', " "));
     // Use rest of doc comments as help text
-    let help_text = paragraphs.next().map(|x| x.to_owned());
+    let help_text = paragraphs.next().map(ToOwned::to_owned);
 
     (description, help_text)
 }
@@ -204,8 +204,9 @@ pub fn command(
     // Extract the command descriptions from the function doc comments
     let (description, help_text) = extract_help_from_doc_comments(&function.attrs);
 
+    #[expect(clippy::items_after_statements)]
     fn permissions_to_tokens(
-        perms: &Option<syn::punctuated::Punctuated<syn::Ident, syn::Token![|]>>,
+        perms: Option<&syn::punctuated::Punctuated<syn::Ident, syn::Token![|]>>,
     ) -> syn::Expr {
         match perms {
             Some(perms) => {
@@ -215,9 +216,10 @@ pub fn command(
             None => syn::parse_quote! { poise::serenity_prelude::Permissions::empty() },
         }
     }
-    let default_member_permissions = permissions_to_tokens(&args.default_member_permissions);
-    let required_permissions = permissions_to_tokens(&args.required_permissions);
-    let required_bot_permissions = permissions_to_tokens(&args.required_bot_permissions);
+    let default_member_permissions =
+        permissions_to_tokens(args.default_member_permissions.as_ref());
+    let required_permissions = permissions_to_tokens(args.required_permissions.as_ref());
+    let required_bot_permissions = permissions_to_tokens(args.required_bot_permissions.as_ref());
 
     let install_context = if let Some(contexts) = &args.install_context {
         let contexts = contexts.iter();
@@ -237,13 +239,13 @@ pub fn command(
         parameters,
         description,
         help_text,
-        args,
         function,
         default_member_permissions,
         required_permissions,
         required_bot_permissions,
         install_context,
         interaction_context,
+        args,
     };
 
     Ok(TokenStream::from(generate_command(inv)?))
@@ -262,17 +264,20 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
     let ctx_type_with_static =
         syn::fold::fold_type(&mut crate::util::AllLifetimesToStatic, ctx_type.clone());
 
-    let prefix_action = wrap_option(match inv.args.prefix_command {
-        true => Some(prefix::generate_prefix_action(&inv)?),
-        false => None,
+    let prefix_action = wrap_option(if inv.args.prefix_command {
+        Some(prefix::generate_prefix_action(&inv)?)
+    } else {
+        None
     });
-    let slash_action = wrap_option(match inv.args.slash_command {
-        true => Some(slash::generate_slash_action(&inv)?),
-        false => None,
+    let slash_action = wrap_option(if inv.args.slash_command {
+        Some(slash::generate_slash_action(&inv)?)
+    } else {
+        None
     });
-    let context_menu_action = wrap_option(match &inv.args.context_menu_command {
-        Some(_) => Some(slash::generate_context_menu_action(&inv)?),
-        None => None,
+    let context_menu_action = wrap_option(if inv.args.context_menu_command.is_some() {
+        Some(slash::generate_context_menu_action(&inv)?)
+    } else {
+        None
     });
 
     let function_name = inv.function.sig.ident.to_string().trim_start_matches("r#").to_string();
@@ -301,16 +306,18 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
     let install_context = &inv.install_context;
     let interaction_context = &inv.interaction_context;
 
-    let help_text = match &inv.help_text {
-        Some(extracted_explanation) => quote::quote! { Some(#extracted_explanation.into()) },
-        None => quote::quote! { None },
+    let help_text = if let Some(extracted_explanation) = &inv.help_text {
+        quote::quote! { Some(#extracted_explanation.into()) }
+    } else {
+        quote::quote! { None }
     };
 
     let checks = &inv.args.check;
     // Box::pin the callback in order to store it in a struct
-    let on_error = match &inv.args.on_error {
-        Some(on_error) => quote::quote! { Some(|err| Box::pin(#on_error(err))) },
-        None => quote::quote! { None },
+    let on_error = if let Some(on_error) = &inv.args.on_error {
+        quote::quote! { Some(|err| Box::pin(#on_error(err))) }
+    } else {
+        quote::quote! { None }
     };
 
     let invoke_on_edit = inv.args.invoke_on_edit || inv.args.track_edits;
@@ -322,9 +329,10 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
 
     let parameters = slash::generate_parameters(&inv)?;
     let ephemeral = inv.args.ephemeral;
-    let custom_data = match &inv.args.custom_data {
-        Some(custom_data) => quote::quote! { Box::new(#custom_data) },
-        None => quote::quote! { Box::new(()) },
+    let custom_data = if let Some(custom_data) = &inv.args.custom_data {
+        quote::quote! { Box::new(#custom_data) }
+    } else {
+        quote::quote! { Box::new(()) }
     };
 
     let name_localizations = iter_tuple_2_to_vec_map(inv.args.name_localized.into_iter());

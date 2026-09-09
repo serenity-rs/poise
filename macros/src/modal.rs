@@ -96,7 +96,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
         let description = field_attrs.description.into_iter();
         let required = crate::util::extract_type_parameter("Option", &field.ty).is_none();
         let ok_or = if required {
-            let error = format!("missing {}", field_ident);
+            let error = format!("missing {field_ident}");
             Some(quote::quote! { .expect(#error) })
         } else {
             None
@@ -104,15 +104,15 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
         let min_values = field_attrs.min_values.into_iter();
         let max_values = field_attrs.max_values.into_iter();
 
-        if field_attrs.file_upload.is_some() as usize
-            + field_attrs.string_select.is_some() as usize
-            + field_attrs.user_select.is_some() as usize
-            + field_attrs.role_select.is_some() as usize
-            + field_attrs.mentionable_select.is_some() as usize
-            + field_attrs.channel_select.is_some() as usize
-            + field_attrs.radio_group.is_some() as usize
-            + field_attrs.checkbox_group.is_some() as usize
-            + field_attrs.checkbox.is_some() as usize
+        if u8::from(field_attrs.file_upload.is_some())
+            + u8::from(field_attrs.string_select.is_some())
+            + u8::from(field_attrs.user_select.is_some())
+            + u8::from(field_attrs.role_select.is_some())
+            + u8::from(field_attrs.mentionable_select.is_some())
+            + u8::from(field_attrs.channel_select.is_some())
+            + u8::from(field_attrs.radio_group.is_some())
+            + u8::from(field_attrs.checkbox_group.is_some())
+            + u8::from(field_attrs.checkbox.is_some())
             > 1
         {
             let err = "cannot have multiple interactive component attributes on a single field";
@@ -533,14 +533,14 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                 quote::quote! { .mentionables },
             ),
             FieldAttributes { channel_select: Some(()), .. } => {
-                let channel_types = match &field_attrs.channel_types {
-                    Some(crate::util::List(channel_types)) => {
+                let channel_types =
+                    if let Some(crate::util::List(channel_types)) = &field_attrs.channel_types {
                         quote::quote! {
                             Some(Cow::Borrowed(&[ #( serenity::ChannelType::#channel_types ),* ]))
                         }
-                    },
-                    None => quote::quote! { None },
-                };
+                    } else {
+                        quote::quote! { None }
+                    };
                 (
                     quote::quote! {
                         {
@@ -681,7 +681,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
 /// Used to generate a [`darling::Error`] on a specific `target` attribute.
 #[doc(hidden)]
 fn err_on_attr(attrs: &[darling::ast::NestedMeta], err: &str, target: &str) -> darling::Error {
-    for attr in attrs.iter() {
+    for attr in attrs {
         if let darling::ast::NestedMeta::Meta(meta) = attr
             && meta.path().is_ident(target)
         {

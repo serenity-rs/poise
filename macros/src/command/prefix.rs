@@ -38,7 +38,7 @@ fn get_modifier(param: &CommandParameter) -> Result<Option<Modifier>, syn::Error
 }
 
 fn parse_prefix_params(
-    params: &[PrefixParameter],
+    params: &[PrefixParameter<'_>],
 ) -> Result<(proc_macro2::TokenStream, Vec<syn::Type>), syn::Error> {
     let Some((first, rest)) = params.split_first() else {
         // If the input is exhausted, we output success.
@@ -385,7 +385,7 @@ pub fn generate_prefix_action(inv: &Invocation) -> Result<proc_macro2::TokenStre
             modifier: Some(Modifier::Rest),
             ty: syn::parse_quote! { Option<String> },
             name: "rest",
-        })
+        });
     }
 
     let (parsed_params, _) = parse_prefix_params(&params)?;
