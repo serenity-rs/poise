@@ -32,7 +32,10 @@ impl EditTracker {
     /// will take care of that by calling [`Self::purge`] periodically.
     #[must_use]
     pub fn for_timespan(duration: std::time::Duration) -> std::sync::RwLock<Self> {
-        std::sync::RwLock::new(Self { max_duration: duration, cache: Vec::new() })
+        std::sync::RwLock::new(Self {
+            max_duration: duration,
+            cache: Vec::new(),
+        })
     }
 
     /// Updates the internal invocation cache for a message and returns:

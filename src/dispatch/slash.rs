@@ -71,7 +71,10 @@ fn extract_command<'a, U, E>(
         &framework.options.commands,
         command_tree,
     ) else {
-        return Err(crate::FrameworkError::UnknownInteraction { framework, interaction });
+        return Err(crate::FrameworkError::UnknownInteraction {
+            framework,
+            interaction,
+        });
     };
 
     Ok(crate::ApplicationContext {
@@ -190,7 +193,10 @@ pub async fn dispatch_interaction<'a, U: Send + Sync + 'static, E>(
     )?;
 
     crate::catch_unwind_maybe(run_command(ctx)).await.map_err(|payload| {
-        crate::FrameworkError::CommandPanic { payload: payload.map(Box::new), ctx: ctx.into() }
+        crate::FrameworkError::CommandPanic {
+            payload: payload.map(Box::new),
+            ctx: ctx.into(),
+        }
     })??;
 
     Ok(())
@@ -267,7 +273,10 @@ pub async fn dispatch_autocomplete<'a, U: Send + Sync + 'static, E>(
     )?;
 
     crate::catch_unwind_maybe(run_autocomplete(ctx)).await.map_err(|payload| {
-        crate::FrameworkError::CommandPanic { payload: payload.map(Box::new), ctx: ctx.into() }
+        crate::FrameworkError::CommandPanic {
+            payload: payload.map(Box::new),
+            ctx: ctx.into(),
+        }
     })??;
 
     Ok(())

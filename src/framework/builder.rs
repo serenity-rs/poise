@@ -15,7 +15,11 @@ pub struct FrameworkBuilder<U, E> {
 
 impl<U, E> Default for FrameworkBuilder<U, E> {
     fn default() -> Self {
-        Self { options: None, commands: Vec::new(), initialize_owners: true }
+        Self {
+            options: None,
+            commands: Vec::new(),
+            initialize_owners: true,
+        }
     }
 }
 

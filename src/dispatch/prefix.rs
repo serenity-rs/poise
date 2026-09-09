@@ -186,12 +186,19 @@ pub async fn dispatch_message<'a, U: Send + Sync + 'static, E>(
         parse_invocation(framework, msg, trigger, invocation_data, command_tree).await?
     {
         crate::catch_unwind_maybe(run_invocation(ctx)).await.map_err(|payload| {
-            crate::FrameworkError::CommandPanic { payload: payload.map(Box::new), ctx: ctx.into() }
+            crate::FrameworkError::CommandPanic {
+                payload: payload.map(Box::new),
+                ctx: ctx.into(),
+            }
         })??;
     } else if let Some(non_command_message) = framework.options.prefix_options.non_command_message {
-        non_command_message(&framework, msg)
-            .await
-            .map_err(|e| crate::FrameworkError::NonCommandMessage { error: e, framework, msg })?;
+        non_command_message(&framework, msg).await.map_err(|e| {
+            crate::FrameworkError::NonCommandMessage {
+                error: e,
+                framework,
+                msg,
+            }
+        })?;
     }
     Ok(())
 }
@@ -293,7 +300,9 @@ pub async fn run_invocation<U: Send + Sync + 'static, E>(
     if command.subcommand_required {
         // None of this command's subcommands were invoked, or else we'd have the subcommand in
         // ctx.command and not the parent command
-        return Err(crate::FrameworkError::SubcommandRequired { ctx: crate::Context::Prefix(ctx) });
+        return Err(crate::FrameworkError::SubcommandRequired {
+            ctx: crate::Context::Prefix(ctx),
+        });
     }
 
     super::common::check_permissions_and_cooldown(ctx.into()).await?;

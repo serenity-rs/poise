@@ -42,9 +42,10 @@ struct FieldAttributes {
 
 pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
     let fields = match input.data {
-        syn::Data::Struct(syn::DataStruct { fields: syn::Fields::Named(fields), .. }) => {
-            fields.named
-        },
+        syn::Data::Struct(syn::DataStruct {
+            fields: syn::Fields::Named(fields),
+            ..
+        }) => fields.named,
         _ => {
             return Err(syn::Error::new(
                 input.ident.span(),
@@ -372,7 +373,10 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
 
         // If field is a select menu component, process and continue.
         let (select_menu_kind, kind) = match field_attrs {
-            FieldAttributes { string_select: Some(string_select), .. } => {
+            FieldAttributes {
+                string_select: Some(string_select),
+                ..
+            } => {
                 let strings = string_select.0;
                 if strings.is_empty() {
                     let err = "minimum of 1 string select option required";
@@ -468,7 +472,10 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                     quote::quote! { .strings },
                 )
             },
-            FieldAttributes { user_select: Some(()), .. } => (
+            FieldAttributes {
+                user_select: Some(()),
+                ..
+            } => (
                 quote::quote! {
                     {
                         let default_users = if let Some(defaults) = &mut defaults {
@@ -485,7 +492,10 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                 },
                 quote::quote! { .users },
             ),
-            FieldAttributes { role_select: Some(()), .. } => (
+            FieldAttributes {
+                role_select: Some(()),
+                ..
+            } => (
                 quote::quote! {
                     {
                         let default_roles = if let Some(defaults) = &mut defaults {
@@ -502,7 +512,10 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                 },
                 quote::quote! { .roles },
             ),
-            FieldAttributes { mentionable_select: Some(()), .. } => (
+            FieldAttributes {
+                mentionable_select: Some(()),
+                ..
+            } => (
                 quote::quote! {
                     {
                         let (default_users, default_roles) =
@@ -532,7 +545,10 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                 },
                 quote::quote! { .mentionables },
             ),
-            FieldAttributes { channel_select: Some(()), .. } => {
+            FieldAttributes {
+                channel_select: Some(()),
+                ..
+            } => {
                 let channel_types =
                     if let Some(crate::util::List(channel_types)) = &field_attrs.channel_types {
                         quote::quote! {

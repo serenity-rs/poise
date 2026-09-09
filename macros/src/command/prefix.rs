@@ -375,7 +375,12 @@ pub fn generate_prefix_action(inv: &Invocation) -> Result<proc_macro2::TokenStre
                     ));
                 }
             }
-            Ok(PrefixParameter { idx, modifier, ty: param.type_.clone(), name: &param.name })
+            Ok(PrefixParameter {
+                idx,
+                modifier,
+                ty: param.type_.clone(),
+                name: &param.name,
+            })
         })
         .collect::<Result<Vec<_>, _>>()?;
 

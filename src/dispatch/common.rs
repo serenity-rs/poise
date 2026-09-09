@@ -45,7 +45,9 @@ async fn check_permissions_and_cooldown_single<'a, U: Send + Sync + 'static, E>(
 
     if cmd.guild_only {
         match ctx.guild_id() {
-            None => return Err(crate::FrameworkError::GuildOnly { ctx }),
+            None => {
+                return Err(crate::FrameworkError::GuildOnly { ctx });
+            },
             Some(guild_id) => {
                 #[cfg(feature = "cache")]
                 if ctx.framework().options().require_cache_for_guild_check
@@ -105,7 +107,10 @@ async fn check_permissions_and_cooldown_single<'a, U: Send + Sync + 'static, E>(
                 return Err(crate::FrameworkError::CommandCheckFailed { ctx, error: None });
             },
             Err(error) => {
-                return Err(crate::FrameworkError::CommandCheckFailed { error: Some(error), ctx });
+                return Err(crate::FrameworkError::CommandCheckFailed {
+                    error: Some(error),
+                    ctx,
+                });
             },
         }
     }
@@ -115,7 +120,10 @@ async fn check_permissions_and_cooldown_single<'a, U: Send + Sync + 'static, E>(
         let config = cmd.cooldown_config.read().unwrap();
         let remaining_cooldown = cooldowns.remaining_cooldown(ctx.cooldown_context(), &config);
         if let Some(remaining_cooldown) = remaining_cooldown {
-            return Err(crate::FrameworkError::CooldownHit { ctx, remaining_cooldown });
+            return Err(crate::FrameworkError::CooldownHit {
+                ctx,
+                remaining_cooldown,
+            });
         }
     }
 

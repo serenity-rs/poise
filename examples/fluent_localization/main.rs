@@ -71,7 +71,10 @@ async fn main() {
     let intents = serenity::GatewayIntents::non_privileged();
 
     let framework = poise::Framework::builder()
-        .options(poise::FrameworkOptions { commands, ..Default::default() })
+        .options(poise::FrameworkOptions {
+            commands,
+            ..Default::default()
+        })
         .build();
 
     let client = serenity::ClientBuilder::new(token, intents)

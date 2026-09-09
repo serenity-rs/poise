@@ -198,7 +198,12 @@ pub fn command(
             let message = "#[rename = \"...\"] must be specified for pattern parameters";
             return Err(syn::Error::new(pattern.pat.span(), message).into());
         };
-        parameters.push(CommandParameter { name, type_: (*pattern.ty).clone(), args: attrs, span });
+        parameters.push(CommandParameter {
+            name,
+            type_: (*pattern.ty).clone(),
+            args: attrs,
+            span,
+        });
     }
 
     // Extract the command descriptions from the function doc comments

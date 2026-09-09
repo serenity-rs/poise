@@ -40,13 +40,18 @@ where
     let string = match value {
         serenity::ResolvedValue::String(str) => *str,
         _ => {
-            return Err(SlashArgError::CommandStructureMismatch { description: "expected string" });
+            return Err(SlashArgError::CommandStructureMismatch {
+                description: "expected string",
+            });
         },
     };
 
-    T::convert(ctx, interaction.guild_id, Some(interaction.channel_id), string)
-        .await
-        .map_err(|e| SlashArgError::Parse { error: e.into(), input: string.into() })
+    T::convert(ctx, interaction.guild_id, Some(interaction.channel_id), string).await.map_err(|e| {
+        SlashArgError::Parse {
+            error: e.into(),
+            input: string.into(),
+        }
+    })
 }
 
 /// Auto-impls `SlashArgument` for a type by deferring to [`extract_via_argumentconvert`].

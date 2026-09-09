@@ -86,7 +86,11 @@ fn pop_from(args: &str) -> Result<(&str, CodeBlock), CodeBlockError> {
         rest = &code_line[(code_line_end + 1)..];
         let code_line = &code_line[..code_line_end];
 
-        CodeBlock { code: code_line.to_owned(), language: None, __non_exhaustive: () }
+        CodeBlock {
+            code: code_line.to_owned(),
+            language: None,
+            __non_exhaustive: (),
+        }
     } else {
         return Err(CodeBlockError::default());
     };

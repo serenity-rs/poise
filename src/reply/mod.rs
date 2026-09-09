@@ -51,10 +51,15 @@ impl ReplyHandle<'_> {
     pub async fn into_message(self) -> Result<serenity::Message, serenity::Error> {
         match self.0 {
             ReplyHandleInner::Prefix(msg)
-            | ReplyHandleInner::Application { followup: Some(msg), .. } => Ok(*msg),
-            ReplyHandleInner::Application { http, interaction, followup: None } => {
-                interaction.get_response(http).await
-            },
+            | ReplyHandleInner::Application {
+                followup: Some(msg),
+                ..
+            } => Ok(*msg),
+            ReplyHandleInner::Application {
+                http,
+                interaction,
+                followup: None,
+            } => interaction.get_response(http).await,
             ReplyHandleInner::Autocomplete => panic!("reply is a no-op in autocomplete context"),
         }
     }
@@ -71,10 +76,15 @@ impl ReplyHandle<'_> {
     pub async fn message(&self) -> Result<Cow<'_, serenity::Message>, serenity::Error> {
         match &self.0 {
             ReplyHandleInner::Prefix(msg)
-            | ReplyHandleInner::Application { followup: Some(msg), .. } => Ok(Cow::Borrowed(msg)),
-            ReplyHandleInner::Application { http, interaction, followup: None } => {
-                Ok(Cow::Owned(interaction.get_response(http).await?))
-            },
+            | ReplyHandleInner::Application {
+                followup: Some(msg),
+                ..
+            } => Ok(Cow::Borrowed(msg)),
+            ReplyHandleInner::Application {
+                http,
+                interaction,
+                followup: None,
+            } => Ok(Cow::Owned(interaction.get_response(http).await?)),
             ReplyHandleInner::Autocomplete => panic!("reply is a no-op in autocomplete context"),
         }
     }
@@ -103,13 +113,21 @@ impl ReplyHandle<'_> {
                     })
                     .await?;
             },
-            ReplyHandleInner::Application { http, interaction, followup: None } => {
+            ReplyHandleInner::Application {
+                http,
+                interaction,
+                followup: None,
+            } => {
                 let builder =
                     reply.to_slash_initial_response_edit(serenity::EditInteractionResponse::new());
 
                 interaction.edit_response(http, builder).await?;
             },
-            ReplyHandleInner::Application { http, interaction, followup: Some(msg) } => {
+            ReplyHandleInner::Application {
+                http,
+                interaction,
+                followup: Some(msg),
+            } => {
                 let builder = reply
                     .to_slash_followup_response(serenity::CreateInteractionResponseFollowup::new());
 
@@ -127,7 +145,11 @@ impl ReplyHandle<'_> {
     ) -> Result<(), serenity::Error> {
         match &self.0 {
             ReplyHandleInner::Prefix(msg) => msg.delete(ctx.http(), None).await?,
-            ReplyHandleInner::Application { http: _, interaction, followup } => match followup {
+            ReplyHandleInner::Application {
+                http: _,
+                interaction,
+                followup,
+            } => match followup {
                 Some(followup) => {
                     interaction.delete_followup(ctx.http(), followup.id).await?;
                 },

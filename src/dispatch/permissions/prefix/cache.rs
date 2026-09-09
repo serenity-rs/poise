@@ -27,7 +27,10 @@ where
         Some(get_bot_permissions(&guild, channel_id, bot_user_id)?)
     };
 
-    Some(PermissionsInfo { author_permissions, bot_permissions })
+    Some(PermissionsInfo {
+        author_permissions,
+        bot_permissions,
+    })
 }
 
 /// Gets the permissions for the bot.

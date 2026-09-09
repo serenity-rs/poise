@@ -52,7 +52,11 @@ impl<U, E> Framework<U, E> {
         U: Send + Sync + 'static + 'static,
         E: Send + 'static,
     {
-        Self { bot_id: std::sync::OnceLock::new(), edit_tracker_purge_task: None, options }
+        Self {
+            bot_id: std::sync::OnceLock::new(),
+            edit_tracker_purge_task: None,
+            options,
+        }
     }
 
     /// Return the stored framework options, including commands.

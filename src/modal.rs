@@ -222,7 +222,10 @@ impl From<&mut serenity::all::CheckboxGroup> for ModalDataResolved {
 
 impl From<&mut serenity::all::Checkbox> for ModalDataResolved {
     fn from(checkbox: &mut serenity::all::Checkbox) -> Self {
-        Self { checked: checkbox.value, ..Default::default() }
+        Self {
+            checked: checkbox.value,
+            ..Default::default()
+        }
     }
 }
 

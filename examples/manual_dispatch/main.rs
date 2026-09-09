@@ -26,8 +26,10 @@ impl serenity::EventHandler for Handler {
         match event {
             serenity::FullEvent::Message { new_message, .. } => {
                 // FrameworkContext contains all data that poise::Framework usually manages
-                let framework_data =
-                    poise::FrameworkContext { serenity_context, options: &self.options };
+                let framework_data = poise::FrameworkContext {
+                    serenity_context,
+                    options: &self.options,
+                };
 
                 let invocation_data = tokio::sync::Mutex::new(Box::new(()) as _);
                 let trigger = poise::MessageDispatchTrigger::MessageCreate;
@@ -57,7 +59,10 @@ async fn main() -> Result<(), Error> {
     let token = serenity::Token::from_env("DISCORD_TOKEN").unwrap();
     let intents = serenity::GatewayIntents::non_privileged();
     let mut handler = Handler {
-        options: poise::FrameworkOptions { commands: vec![ping()], ..Default::default() },
+        options: poise::FrameworkOptions {
+            commands: vec![ping()],
+            ..Default::default()
+        },
     };
     poise::set_qualified_names(&mut handler.options.commands); // some setup
 

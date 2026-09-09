@@ -115,20 +115,29 @@ pub async fn on_error<
                 );
             }
         },
-        crate::FrameworkError::CooldownHit { remaining_cooldown, ctx } => {
+        crate::FrameworkError::CooldownHit {
+            remaining_cooldown,
+            ctx,
+        } => {
             let msg = format!(
                 "You're too fast. Please wait {} seconds before retrying",
                 remaining_cooldown.as_secs()
             );
             ctx.send(CreateReply::default().content(msg).ephemeral(true)).await?;
         },
-        crate::FrameworkError::MissingBotPermissions { missing_permissions, ctx } => {
+        crate::FrameworkError::MissingBotPermissions {
+            missing_permissions,
+            ctx,
+        } => {
             let msg = format!(
                 "Command cannot be executed because the bot is lacking permissions: {missing_permissions}",
             );
             ctx.send(CreateReply::default().content(msg).ephemeral(true)).await?;
         },
-        crate::FrameworkError::MissingUserPermissions { missing_permissions, ctx } => {
+        crate::FrameworkError::MissingUserPermissions {
+            missing_permissions,
+            ctx,
+        } => {
             let response = if let Some(missing_permissions) = missing_permissions {
                 format!(
                     "You're lacking permissions for `{}{}`: {}",
@@ -171,7 +180,9 @@ pub async fn on_error<
                 display_error(error)
             );
         },
-        crate::FrameworkError::UnknownCommand { msg, content_start, .. } => {
+        crate::FrameworkError::UnknownCommand {
+            msg, content_start, ..
+        } => {
             let (prefix, msg_content) = msg.content.split_at(content_start.into());
             tracing::warn!(
                 "Recognized prefix `{}`, but didn't recognize command name in `{}`",

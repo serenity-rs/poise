@@ -35,5 +35,8 @@ where
         Some(guild.partial_member_permissions_in(&guild_channel, ctx.author().id, author_member))
     };
 
-    Some(PermissionsInfo { author_permissions, bot_permissions })
+    Some(PermissionsInfo {
+        author_permissions,
+        bot_permissions,
+    })
 }
