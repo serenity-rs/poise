@@ -16,13 +16,13 @@ async fn check_nsfw_channel<U: Send + Sync + 'static, E>(ctx: crate::Context<'_,
                 Err(e) => {
                     tracing::warn!("Error when getting thread parent for NSFW check: {e}");
                     false
-                }
+                },
             }
-        }
+        },
         None | Some(_) => {
             tracing::warn!("Error when getting channel for NSFW check");
             false
-        }
+        },
     }
 }
 
@@ -45,7 +45,9 @@ async fn check_permissions_and_cooldown_single<'a, U: Send + Sync + 'static, E>(
 
     if cmd.guild_only {
         match ctx.guild_id() {
-            None => return Err(crate::FrameworkError::GuildOnly { ctx }),
+            None => {
+                return Err(crate::FrameworkError::GuildOnly { ctx });
+            },
             Some(guild_id) => {
                 #[cfg(feature = "cache")]
                 if ctx.framework().options().require_cache_for_guild_check
@@ -55,7 +57,7 @@ async fn check_permissions_and_cooldown_single<'a, U: Send + Sync + 'static, E>(
                 }
                 #[cfg(not(feature = "cache"))]
                 let _ = guild_id;
-            }
+            },
         }
     }
 
@@ -100,16 +102,16 @@ async fn check_permissions_and_cooldown_single<'a, U: Send + Sync + 'static, E>(
     // First perform global checks, then command checks (if necessary)
     for check in Option::iter(&ctx.framework().options().command_check).chain(&cmd.checks) {
         match check(ctx).await {
-            Ok(true) => {}
+            Ok(true) => {},
             Ok(false) => {
-                return Err(crate::FrameworkError::CommandCheckFailed { ctx, error: None })
-            }
+                return Err(crate::FrameworkError::CommandCheckFailed { ctx, error: None });
+            },
             Err(error) => {
                 return Err(crate::FrameworkError::CommandCheckFailed {
                     error: Some(error),
                     ctx,
-                })
-            }
+                });
+            },
         }
     }
 
@@ -133,9 +135,9 @@ async fn check_permissions_and_cooldown_single<'a, U: Send + Sync + 'static, E>(
 /// Doesn't actually start the cooldown timer! This should be done by the caller later, after
 /// argument parsing.
 /// (A command that didn't even get past argument parsing shouldn't trigger cooldowns)
-pub async fn check_permissions_and_cooldown<'a, U: Send + Sync + 'static, E>(
-    ctx: crate::Context<'a, U, E>,
-) -> Result<(), crate::FrameworkError<'a, U, E>> {
+pub async fn check_permissions_and_cooldown<U: Send + Sync + 'static, E>(
+    ctx: crate::Context<'_, U, E>,
+) -> Result<(), crate::FrameworkError<'_, U, E>> {
     for command in ctx.command_tree() {
         check_permissions_and_cooldown_single(ctx, command).await?;
     }

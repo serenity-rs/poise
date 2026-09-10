@@ -1,19 +1,15 @@
 // ngl this is ugly
 // transforms a type of form `OuterType<T>` into `T`
 pub fn extract_type_parameter<'a>(outer_type: &str, t: &'a syn::Type) -> Option<&'a syn::Type> {
-    if let syn::Type::Path(path) = t {
-        if path.path.segments.len() == 1 {
-            let path = &path.path.segments[0];
-            if path.ident == outer_type {
-                if let syn::PathArguments::AngleBracketed(generics) = &path.arguments {
-                    if generics.args.len() == 1 {
-                        if let syn::GenericArgument::Type(t) = &generics.args[0] {
-                            return Some(t);
-                        }
-                    }
-                }
-            }
-        }
+    if let syn::Type::Path(path) = t
+        && path.path.segments.len() == 1
+        && let Some(path) = path.path.segments.first()
+        && path.ident == outer_type
+        && let syn::PathArguments::AngleBracketed(generics) = &path.arguments
+        && generics.args.len() == 1
+        && let syn::GenericArgument::Type(t) = &generics.args[0]
+    {
+        return Some(t);
     }
     None
 }
@@ -65,7 +61,7 @@ impl<T: darling::FromMeta> darling::FromMeta for List<T> {
 }
 impl<T> Default for List<T> {
     fn default() -> Self {
-        Self(Default::default())
+        Self(Vec::default())
     }
 }
 
@@ -81,8 +77,8 @@ impl<T: darling::FromMeta> darling::FromMeta for Tuple2<T> {
                     proc_macro2::Span::call_site(),
                     "expected two items `(\"a\", \"b\")`",
                 )
-                .into())
-            }
+                .into());
+            },
         })
     }
 }
@@ -94,8 +90,7 @@ where
     T: std::ops::Deref<Target = D> + 'a,
     D: ?Sized + 'a,
 {
-    iter.into_iter()
-        .map(|Tuple2(t, v)| Tuple2(t.deref(), v.deref()))
+    iter.into_iter().map(|Tuple2(t, v)| Tuple2(&**t, &**v))
 }
 
 pub fn iter_tuple_2_to_vec_map<I, T>(v: I) -> proc_macro2::TokenStream
@@ -107,10 +102,7 @@ where
         return quote::quote!(Cow::Borrowed(&[]));
     }
 
-    let (keys, values) = v
-        .into_iter()
-        .map(|x| (x.0, x.1))
-        .unzip::<_, _, Vec<_>, Vec<_>>();
+    let (keys, values) = v.into_iter().map(|x| (x.0, x.1)).unzip::<_, _, Vec<_>, Vec<_>>();
 
     quote::quote! {
         Cow::Borrowed(&[

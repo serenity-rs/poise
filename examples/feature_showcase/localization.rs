@@ -1,6 +1,6 @@
+use poise::{ChoiceParameter, serenity_prelude as serenity};
+
 use crate::{Context, Error};
-use poise::serenity_prelude as serenity;
-use poise::ChoiceParameter;
 
 #[derive(ChoiceParameter)]
 pub enum WelcomeChoice {
@@ -57,9 +57,8 @@ pub async fn welcome(
     #[description = "The message to send"]
     message: WelcomeChoice,
 ) -> Result<(), Error> {
-    let message = message
-        .localized_name(ctx.locale().unwrap_or(""))
-        .unwrap_or_else(|| message.name());
+    let message =
+        message.localized_name(ctx.locale().unwrap_or("")).unwrap_or_else(|| message.name());
     ctx.say(format!("<@{}> {}", user.id, message)).await?;
     Ok(())
 }

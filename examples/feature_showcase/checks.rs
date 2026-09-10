@@ -1,14 +1,13 @@
-/**
-Poise supports several pre-command checks (sorted by order of execution):
-- owners_only
-- required_permissions
-- required_bot_permissions
-- global check function
-- command-specific check function
-- cooldowns
-*/
-use crate::{Context, Error};
+//! Poise supports several pre-command checks (sorted by order of execution):
+//! - owners_only
+//! - required_permissions
+//! - required_bot_permissions
+//! - global check function
+//! - command-specific check function
+//! - cooldowns
 use poise::serenity_prelude as serenity;
+
+use crate::{Context, Error};
 
 #[poise::command(prefix_command, owners_only, hide_in_help)]
 pub async fn shutdown(ctx: Context<'_>) -> Result<(), Error> {
@@ -24,17 +23,12 @@ pub async fn shutdown(ctx: Context<'_>) -> Result<(), Error> {
     required_permissions = "MANAGE_MESSAGES | MANAGE_THREADS",
 )]
 pub async fn modonly(ctx: Context<'_>) -> Result<(), Error> {
-    ctx.say("You are a mod because you were able to invoke this command")
-        .await?;
+    ctx.say("You are a mod because you were able to invoke this command").await?;
     Ok(())
 }
 
 /// Deletes the given message
-#[poise::command(
-    prefix_command,
-    slash_command,
-    required_bot_permissions = "MANAGE_MESSAGES"
-)]
+#[poise::command(prefix_command, slash_command, required_bot_permissions = "MANAGE_MESSAGES")]
 pub async fn delete(
     ctx: Context<'_>,
     #[description = "Message to be deleted"] msg: serenity::Message,
@@ -113,11 +107,8 @@ pub async fn minmax(
 /// Get the guild name (guild-only)
 #[poise::command(prefix_command, slash_command, guild_only)]
 pub async fn get_guild_name(ctx: Context<'_>) -> Result<(), Error> {
-    ctx.say(format!(
-        "The name of this guild is: {}",
-        ctx.partial_guild().await.unwrap().name
-    ))
-    .await?;
+    ctx.say(format!("The name of this guild is: {}", ctx.partial_guild().await.unwrap().name))
+        .await?;
 
     Ok(())
 }

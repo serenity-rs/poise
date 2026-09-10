@@ -2,7 +2,7 @@
 
 use std::borrow::Cow;
 
-use crate::{serenity_prelude as serenity, CommandInteractionType};
+use crate::{CommandInteractionType, serenity_prelude as serenity};
 
 // needed for proc macro
 #[doc(hidden)]
@@ -40,8 +40,8 @@ impl<'a, U, E> From<crate::PrefixContext<'a, U, E>> for Context<'a, U, E> {
         Self::Prefix(x)
     }
 }
-/// Macro to generate Context methods and also PrefixContext and ApplicationContext methods that
-/// delegate to Context
+/// Macro to generate Context methods and also `PrefixContext` and `ApplicationContext` methods
+/// that delegate to Context
 macro_rules! context_methods {
     ( $(
         $( #[$($attrs:tt)*] )*
@@ -50,6 +50,7 @@ macro_rules! context_methods {
         $($await:ident)? ( $fn_name:ident $self:ident $($arg:ident)* )
         ( $($sig:tt)* ) $(where $b1:lifetime : $b2:lifetime)? $body:block
     )* ) => {
+        #[expect(clippy::unused_async_trait_impl)]
         impl<'a, U: Send + Sync + 'static, E> Context<'a, U, E> { $(
             $( #[$($attrs)*] )*
             $($sig)* $(where $b1:$b2)* $body
@@ -116,7 +117,7 @@ context_methods! {
             Self::Prefix(ctx) => Some(
                 ctx.msg
                     .channel_id
-                    .start_typing(ctx.serenity_context().http.clone()),
+                    .start_typing(std::sync::Arc::clone(&ctx.serenity_context().http)),
             ),
         })
     }
@@ -306,7 +307,7 @@ context_methods! {
                     // insert those bits into the ID
                     let timestamp_millis = edited_timestamp.timestamp_millis();
 
-                    id |= ((timestamp_millis - 1420070400000) as u64) << 22;
+                    id |= ((timestamp_millis - 1_420_070_400_000) as u64) << 22;
                 }
                 id
             }
@@ -391,7 +392,7 @@ context_methods! {
             // current command invocation parsed successfully, we can always expect that a command
             // rerun will still parse successfully.
             // Also: can't debug print error because then we need U: Debug + E: Debug bound arghhhhh
-            Err(_other) => panic!("unexpected error before entering command"),
+            _ => panic!("unexpected error before entering command"),
         }
     }
 
@@ -416,25 +417,39 @@ context_methods! {
                     string += arg.name;
                     string += ":";
 
-                    let _ = match arg.value {
+                    match arg.value {
                         // This was verified to match Discord behavior when copy-pasting a not-yet
                         // sent slash command invocation
-                        serenity::ResolvedValue::Attachment(_) => write!(string, ""),
-                        serenity::ResolvedValue::Boolean(x) => write!(string, "{}", x),
-                        serenity::ResolvedValue::Integer(x) => write!(string, "{}", x),
-                        serenity::ResolvedValue::Number(x) => write!(string, "{}", x),
-                        serenity::ResolvedValue::String(x) => write!(string, "{}", x),
+                        serenity::ResolvedValue::Attachment(_) => {
+                            write!(string, "").expect("writing to a string should never fail");
+                        }
+                        serenity::ResolvedValue::Boolean(x) => {
+                            write!(string, "{x}").expect("writing to a string should never fail");
+                        }
+                        serenity::ResolvedValue::Integer(x) => {
+                            write!(string, "{x}").expect("writing to a string should never fail");
+                        }
+                        serenity::ResolvedValue::Number(x) => {
+                            write!(string, "{x}").expect("writing to a string should never fail");
+                        }
+                        serenity::ResolvedValue::String(x) => {
+                            write!(string, "{x}").expect("writing to a string should never fail");
+                        }
                         serenity::ResolvedValue::Channel(x) => {
                             write!(string, "#{}", x.base().name.as_deref().unwrap_or(""))
+                                .expect("writing to a string should never fail");
                         }
-                        serenity::ResolvedValue::Role(x) => write!(string, "@{}", x.name),
+                        serenity::ResolvedValue::Role(x) => {
+                            write!(string, "@{}", x.name)
+                                .expect("writing to a string should never fail");
+                        }
                         serenity::ResolvedValue::User(x, _) => {
                             string.push('@');
                             string.push_str(&x.name);
                             if let Some(discrim) = x.discriminator {
-                                let _ = write!(string, "#{discrim:04}");
+                                write!(string, "#{discrim:04}")
+                                    .expect("writing to a string should never fail");
                             }
-                            Ok(())
                         }
 
                         serenity::ResolvedValue::Unresolved(_)
@@ -442,14 +457,12 @@ context_methods! {
                         | serenity::ResolvedValue::SubCommandGroup(_)
                         | serenity::ResolvedValue::Autocomplete { .. } => {
                             tracing::warn!("unexpected interaction option type");
-                            Ok(())
                         }
                         // We need this because ResolvedValue is #[non_exhaustive]
                         _ => {
                             tracing::warn!("newly-added unknown interaction option type");
-                            Ok(())
                         }
-                    };
+                    }
                 }
                 string
             }
@@ -536,7 +549,8 @@ context_methods! {
 }
 
 impl<'a, U, E> Context<'a, U, E> {
-    /// Actual implementation of rerun() that returns `FrameworkError` for implementation convenience
+    /// Actual implementation of `rerun()` that returns `FrameworkError` for implementation
+    /// convenience
     async fn rerun_inner(self) -> Result<(), crate::FrameworkError<'a, U, E>> {
         let command = match self {
             Self::Prefix(x) => x.command_tree.last().unwrap(),
@@ -569,23 +583,23 @@ impl<'a, U, E> Context<'a, U, E> {
                             } else {
                                 Ok(())
                             }
-                        }
+                        },
                         crate::ContextMenuCommandAction::Message(action) => {
                             if let serenity::ResolvedTarget::Message(message) = target {
                                 action(ctx, (*message).clone()).await
                             } else {
                                 Ok(())
                             }
-                        }
+                        },
                         crate::ContextMenuCommandAction::__NonExhaustive => unreachable!(),
                     };
                 }
-            }
+            },
             Self::Prefix(ctx) => {
                 if let Some(action) = command.prefix_action {
                     return action(ctx).await;
                 }
-            }
+            },
         }
 
         // Fallback if the Command doesn't have the action it needs to execute this context
@@ -603,8 +617,8 @@ impl<'a, U, E> Context<'a, U, E> {
     }
 }
 
-/// Forwards for serenity::Context's impls. With these, poise's Context types can be passed in as-is
-/// to serenity API functions.
+/// Forwards for `serenity::Context`'s impls. With these, poise's Context types can be passed in as
+/// is to serenity API functions.
 macro_rules! context_trait_impls {
     ($($type:tt)*) => {
         #[cfg(feature = "cache")]

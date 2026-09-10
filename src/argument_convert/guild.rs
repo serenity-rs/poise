@@ -57,10 +57,7 @@ impl ArgumentConvert for serenity::Guild {
     ) -> Result<Self, Self::Err> {
         let cache = ctx.cache().ok_or(GuildParseError::NoCache)?;
         let guild_id = s.parse().map_err(GuildParseError::Malformed)?;
-        cache
-            .guild(guild_id)
-            .map(|g| g.clone())
-            .ok_or(GuildParseError::NotFound)
+        cache.guild(guild_id).map(|g| g.clone()).ok_or(GuildParseError::NotFound)
     }
 }
 

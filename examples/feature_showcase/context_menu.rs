@@ -1,5 +1,6 @@
-use crate::{Context, Error};
 use poise::serenity_prelude as serenity;
+
+use crate::{Context, Error};
 
 /// Query information about a Discord profile
 #[poise::command(context_menu_command = "User information", slash_command)]
@@ -7,11 +8,7 @@ pub async fn user_info(
     ctx: Context<'_>,
     #[description = "Discord profile to query information about"] user: serenity::User,
 ) -> Result<(), Error> {
-    let response = format!(
-        "**Name**: {}\n**Created**: {}",
-        user.name,
-        user.id.created_at()
-    );
+    let response = format!("**Name**: {}\n**Created**: {}", user.name, user.id.created_at());
 
     ctx.say(response).await?;
     Ok(())

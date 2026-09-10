@@ -1,8 +1,7 @@
 //! The cache variant of prefix permissions calculation
 
-use crate::{serenity_prelude as serenity, PrefixContext};
-
 use crate::dispatch::permissions::PermissionsInfo;
+use crate::{PrefixContext, serenity_prelude as serenity};
 
 /// Gets the permissions of the ctx author and the bot.
 pub(in crate::dispatch::permissions) async fn get_author_and_bot_permissions<U, E>(

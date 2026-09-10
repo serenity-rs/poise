@@ -1,13 +1,14 @@
 //! Infrastructure for command cooldowns
 
-use crate::serenity_prelude as serenity;
 // I usually don't really do imports, but these are very convenient
 use std::collections::HashMap;
 use std::time::{Duration, Instant};
 
-/// Subset of [`crate::Context`] so that [`Cooldowns`] can be used without requiring a full [Context](`crate::Context`)
-/// (ie from within an `event_handler`)
-#[derive(Default, Clone, PartialEq, Eq, Debug, Hash)]
+use crate::serenity_prelude as serenity;
+
+/// Subset of [`crate::Context`] so that [`Cooldowns`] can be used without requiring a full
+/// [Context](`crate::Context`) (i.e., from within an `event_handler`)
+#[derive(Default, Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub struct CooldownContext {
     /// The user associated with this request
     pub user_id: serenity::UserId,
@@ -54,8 +55,9 @@ pub struct CooldownTracker {
 
 /// Possible types of command cooldowns.
 ///
-/// Currently used for [CooldownTracker::set_last_invocation]
+/// Currently used for [`CooldownTracker::set_last_invocation`]
 #[non_exhaustive]
+#[derive(Debug, Clone, Copy)]
 pub enum CooldownType {
     /// A global cooldown that applies to all users, channels, and guilds.
     Global,
@@ -74,6 +76,7 @@ pub use CooldownTracker as Cooldowns;
 
 impl CooldownTracker {
     /// Create a new cooldown tracker
+    #[must_use]
     pub fn new() -> Self {
         Self {
             global_invocation: None,
@@ -86,6 +89,7 @@ impl CooldownTracker {
 
     /// Queries the cooldown buckets and checks if all cooldowns have expired and command
     /// execution may proceed. If not, Some is returned with the remaining cooldown
+    #[must_use]
     pub fn remaining_cooldown(
         &self,
         ctx: CooldownContext,
@@ -93,26 +97,16 @@ impl CooldownTracker {
     ) -> Option<Duration> {
         let mut cooldown_data = vec![
             (cooldown_durations.global, self.global_invocation),
-            (
-                cooldown_durations.user,
-                self.user_invocations.get(&ctx.user_id).copied(),
-            ),
-            (
-                cooldown_durations.channel,
-                self.channel_invocations.get(&ctx.channel_id).copied(),
-            ),
+            (cooldown_durations.user, self.user_invocations.get(&ctx.user_id).copied()),
+            (cooldown_durations.channel, self.channel_invocations.get(&ctx.channel_id).copied()),
         ];
 
         if let Some(guild_id) = ctx.guild_id {
-            cooldown_data.push((
-                cooldown_durations.guild,
-                self.guild_invocations.get(&guild_id).copied(),
-            ));
+            cooldown_data
+                .push((cooldown_durations.guild, self.guild_invocations.get(&guild_id).copied()));
             cooldown_data.push((
                 cooldown_durations.member,
-                self.member_invocations
-                    .get(&(ctx.user_id, guild_id))
-                    .copied(),
+                self.member_invocations.get(&(ctx.user_id, guild_id)).copied(),
             ));
         }
 
@@ -150,16 +144,16 @@ impl CooldownTracker {
             CooldownType::Global => self.global_invocation = Some(instant),
             CooldownType::User(user_id) => {
                 self.user_invocations.insert(user_id, instant);
-            }
+            },
             CooldownType::Guild(guild_id) => {
                 self.guild_invocations.insert(guild_id, instant);
-            }
+            },
             CooldownType::Channel(channel_id) => {
                 self.channel_invocations.insert(channel_id, instant);
-            }
+            },
             CooldownType::Member(member) => {
                 self.member_invocations.insert(member, instant);
-            }
+            },
         }
     }
 }

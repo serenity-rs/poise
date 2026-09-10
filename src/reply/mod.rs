@@ -1,5 +1,7 @@
 //! Infrastructure for replying, i.e. sending a message in a command context
 
+use std::borrow::Cow;
+
 mod builder;
 pub use builder::*;
 
@@ -7,7 +9,6 @@ mod send_reply;
 pub use send_reply::*;
 
 use crate::serenity_prelude as serenity;
-use std::borrow::Cow;
 
 /// Private enum so we can extend, split apart, or merge variants without breaking changes
 #[derive(Clone)]
@@ -48,19 +49,18 @@ impl ReplyHandle<'_> {
     ///
     /// Only needs to do an HTTP request in the application command response case
     pub async fn into_message(self) -> Result<serenity::Message, serenity::Error> {
-        use ReplyHandleInner::*;
         match self.0 {
-            Prefix(msg)
-            | Application {
+            ReplyHandleInner::Prefix(msg)
+            | ReplyHandleInner::Application {
                 followup: Some(msg),
                 ..
             } => Ok(*msg),
-            Application {
+            ReplyHandleInner::Application {
                 http,
                 interaction,
                 followup: None,
             } => interaction.get_response(http).await,
-            Autocomplete => panic!("reply is a no-op in autocomplete context"),
+            ReplyHandleInner::Autocomplete => panic!("reply is a no-op in autocomplete context"),
         }
     }
 
@@ -69,23 +69,23 @@ impl ReplyHandle<'_> {
     /// Note: to delete or edit, use [`ReplyHandle::delete()`] and [`ReplyHandle::edit()`] directly!
     /// Doing it via the methods from a Message object will fail for ephemeral messages
     ///
-    /// Returns a reference to the known Message object, or fetches the message from the discord API.
+    /// Returns a reference to the known Message object, or fetches the message from the discord
+    /// API.
     ///
     /// To get an owned [`serenity::Message`], use [`Self::into_message()`]
     pub async fn message(&self) -> Result<Cow<'_, serenity::Message>, serenity::Error> {
-        use ReplyHandleInner::*;
         match &self.0 {
-            Prefix(msg)
-            | Application {
+            ReplyHandleInner::Prefix(msg)
+            | ReplyHandleInner::Application {
                 followup: Some(msg),
                 ..
             } => Ok(Cow::Borrowed(msg)),
-            Application {
+            ReplyHandleInner::Application {
                 http,
                 interaction,
                 followup: None,
             } => Ok(Cow::Owned(interaction.get_response(http).await?)),
-            Autocomplete => panic!("reply is a no-op in autocomplete context"),
+            ReplyHandleInner::Autocomplete => panic!("reply is a no-op in autocomplete context"),
         }
     }
 
@@ -112,7 +112,7 @@ impl ReplyHandle<'_> {
                         reply.to_prefix_edit(serenity::EditMessage::new())
                     })
                     .await?;
-            }
+            },
             ReplyHandleInner::Application {
                 http,
                 interaction,
@@ -122,7 +122,7 @@ impl ReplyHandle<'_> {
                     reply.to_slash_initial_response_edit(serenity::EditInteractionResponse::new());
 
                 interaction.edit_response(http, builder).await?;
-            }
+            },
             ReplyHandleInner::Application {
                 http,
                 interaction,
@@ -132,7 +132,7 @@ impl ReplyHandle<'_> {
                     .to_slash_followup_response(serenity::CreateInteractionResponseFollowup::new());
 
                 interaction.edit_followup(http, msg.id, builder).await?;
-            }
+            },
             ReplyHandleInner::Autocomplete => panic!("reply is a no-op in autocomplete context"),
         }
         Ok(())
@@ -152,10 +152,10 @@ impl ReplyHandle<'_> {
             } => match followup {
                 Some(followup) => {
                     interaction.delete_followup(ctx.http(), followup.id).await?;
-                }
+                },
                 None => {
                     interaction.delete_response(ctx.http()).await?;
-                }
+                },
             },
             ReplyHandleInner::Autocomplete => panic!("delete is a no-op in autocomplete context"),
         }

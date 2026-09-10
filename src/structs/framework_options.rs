@@ -1,6 +1,6 @@
 //! Just contains `FrameworkOptions`
 
-use crate::{serenity_prelude as serenity, BoxFuture};
+use crate::{BoxFuture, serenity_prelude as serenity};
 
 /// Framework configuration
 #[derive_where::derive_where(Debug)]
@@ -43,14 +43,14 @@ pub struct FrameworkOptions<U, E> {
     /// Useful for implementing custom cooldown behavior. See [`crate::Command::cooldowns`] and
     /// the methods on [`crate::Cooldowns`] for how to do that.
     pub manual_cooldowns: bool,
-    /// If `true`, changes behavior of guild_only command check to abort execution if the guild is
-    /// not in cache.
+    /// If `true`, changes behavior of `guild_only` command check to abort execution if the guild
+    /// is not in cache.
     ///
     /// **If `cache` feature is disabled, this has no effect!**
     pub require_cache_for_guild_check: bool,
     /// Prefix command specific options.
     pub prefix_options: crate::PrefixFrameworkOptions<U, E>,
-    /// User IDs which are allowed to use owners_only commands
+    /// User IDs which are allowed to use `owners_only` commands
     pub owners: std::collections::HashSet<serenity::UserId>,
     /// If true, [`Self::owners`] is automatically initialized with the results of
     /// [`serenity::Http::get_current_application_info()`].
@@ -111,8 +111,8 @@ where
             reply_callback: None,
             manual_cooldowns: false,
             require_cache_for_guild_check: false,
-            prefix_options: Default::default(),
-            owners: Default::default(),
+            prefix_options: crate::PrefixFrameworkOptions::default(),
+            owners: std::collections::HashSet::default(),
             initialize_owners: true,
             initialized_team_roles: None,
             __non_exhaustive: (),

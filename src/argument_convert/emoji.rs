@@ -59,17 +59,14 @@ impl ArgumentConvert for serenity::Emoji {
         let direct_id = s.parse().ok();
         let id_from_mention = serenity::utils::parse_emoji(s).map(|e| e.id);
 
-        if let Some(emoji_id) = direct_id.or(id_from_mention) {
-            if let Some(emoji) = guild.emojis.get(&emoji_id).cloned() {
-                return Ok(emoji);
-            }
+        if let Some(emoji_id) = direct_id.or(id_from_mention)
+            && let Some(emoji) = guild.emojis.get(&emoji_id).cloned()
+        {
+            return Ok(emoji);
         }
 
-        if let Some(emoji) = guild
-            .emojis
-            .iter()
-            .find(|emoji| emoji.name.eq_ignore_ascii_case(s))
-            .cloned()
+        if let Some(emoji) =
+            guild.emojis.iter().find(|emoji| emoji.name.eq_ignore_ascii_case(s)).cloned()
         {
             return Ok(emoji);
         }

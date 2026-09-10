@@ -1,5 +1,6 @@
-use crate::{Context, Error};
 use poise::serenity_prelude as serenity;
+
+use crate::{Context, Error};
 
 /// View the difference between two file sizes
 #[poise::command(prefix_command, slash_command)]
