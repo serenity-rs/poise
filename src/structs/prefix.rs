@@ -166,15 +166,15 @@ pub struct PrefixFrameworkOptions<U, E> {
             &'a serenity::Message,
         ) -> crate::BoxFuture<'a, Result<(), E>>,
     >,
-    /* // TODO: implement
-    /// Whether to invoke help command when someone sends a message with just a bot mention
-    pub help_when_mentioned: bool,
-    /// The bot's general help command. Currently used for [`Self::help_when_mentioned`].
-    pub help_commmand: Option<Command<U, E>>,
-    // /// The bot's help command for individial commands. Currently used when a command group without
-    // /// any specific subcommand is invoked. This command is expected to take the command name as a
-    // /// single parameter
-    // pub command_specific_help_commmand: Option<Command<U, E>>, */
+    // TODO: implement
+    // /// Whether to invoke help command when someone sends a message with just a bot mention
+    // pub help_when_mentioned: bool,
+    // /// The bot's general help command. Currently used for [`Self::help_when_mentioned`].
+    // pub help_commmand: Option<Command<U, E>>,
+    // /// The bot's help command for individial commands. Currently used when a command group
+    // /// without any specific subcommand is invoked. This command is expected to take the
+    // /// command name as a single parameter
+    // pub command_specific_help_commmand: Option<Command<U, E>>,
     // #[non_exhaustive] forbids struct update syntax for ?? reason
     #[doc(hidden)]
     pub __non_exhaustive: (),

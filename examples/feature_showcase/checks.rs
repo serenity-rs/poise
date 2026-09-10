@@ -1,12 +1,10 @@
-/**
-Poise supports several pre-command checks (sorted by order of execution):
-- owners_only
-- required_permissions
-- required_bot_permissions
-- global check function
-- command-specific check function
-- cooldowns
-*/
+//! Poise supports several pre-command checks (sorted by order of execution):
+//! - owners_only
+//! - required_permissions
+//! - required_bot_permissions
+//! - global check function
+//! - command-specific check function
+//! - cooldowns
 use poise::serenity_prelude as serenity;
 
 use crate::{Context, Error};
