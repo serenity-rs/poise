@@ -57,7 +57,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@nightly
         with:
           components: rustfmt
       - uses: Swatinem/rust-cache@v2
@@ -68,11 +68,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@nightly
         with:
           components: clippy
       - uses: Swatinem/rust-cache@v2
-      - run: cargo clippy --all-features -- -D warnings
+      - name: cargo clippy (poise)
+        run: cargo clippy --all-features -- -D warnings
+      - name: cargo clippy (poise_macros)
+        run: cargo clippy -- -D warnings
+        working-directory: ./macros
 
   docs:
     name: Build docs
