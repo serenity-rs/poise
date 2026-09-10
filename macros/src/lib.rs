@@ -163,7 +163,11 @@ use proc_macro::TokenStream;
 ///
 /// Example:
 ///
-/// ```rust,ignore (poise not in scope)
+/// ```rust,no_run
+/// # use poise;
+/// # type Data = ();
+/// # type Error = poise::serenity_prelude::Error;
+/// # type Context<'a> = poise::Context<'a, Data, Error>;
 /// /// This is the description of my cool command, it can span multiple
 /// /// lines if you need to
 /// ///
@@ -173,15 +177,24 @@ use proc_macro::TokenStream;
 /// /// You could also put example invocations here:
 /// /// `~coolcommand test`
 /// #[poise::command(slash_command)]
-/// pub async fn coolcommand(ctx: Context<'_>, s: String) -> Result<(), Error> { ... }
+/// pub async fn coolcommand(ctx: Context<'_>, s: String) -> Result<(), Error> {
+///     // code
+/// # Ok(())
+/// }
 /// ```
 /// results in
-/// ```rust,ignore (poise not in scope)
+/// ```rust,no_run
+/// # use poise;
+/// # type Data = ();
+/// # type Error = poise::serenity_prelude::Error;
+/// # fn foo() -> poise::Command<Data, Error> {
 /// poise::Command {
 ///     description: Some("This is the description of my cool command, it can span multiple lines if you need to".into()),
 ///     help_text: Some("Here in the following paragraphs, you can give information on how to use the command that will be shown in your command's help.\n\nYou could also put example invocations here:\n`~coolcommand test`".into()),
-///     ...
+///     // ...
+/// #   ..Default::default()
 /// }
+/// # }
 /// ```
 ///
 /// # Internals
@@ -189,27 +202,40 @@ use proc_macro::TokenStream;
 /// Internally, this attribute macro generates a function with a single `poise::Command`
 /// return type, which contains all data about this command. For example, it transforms a function
 /// of this form:
-/// ```rust,ignore (poise not in scope)
+/// ```rust,no_run
+/// # use poise;
+/// # type Data = ();
+/// # type Error = poise::serenity_prelude::Error;
+/// # type Context<'a> = poise::Context<'a, Data, Error>;
 /// /// This is a command
 /// #[poise::command(slash_command, prefix_command)]
 /// async fn my_command(ctx: Context<'_>) -> Result<(), Error> {
 ///     // code
+/// # Ok(())
 /// }
 /// ```
 /// into something like
-/// ```rust,ignore (poise not in scope)
+/// ```rust,no_run
+/// # use poise;
+/// # use std::borrow::Cow;
+/// # type Data = ();
+/// # type Error = poise::serenity_prelude::Error;
+/// # type Context<'a> = poise::Context<'a, Data, Error>;
 /// fn my_command() -> poise::Command<Data, Error> {
+/// # type Error<'a> = poise::FrameworkError<'a, (), poise::serenity_prelude::Error>;
 ///     async fn inner(ctx: Context<'_>) -> Result<(), Error> {
 ///         // code
+/// # Ok(())
 ///     }
 ///
 ///     poise::Command {
-///         name: "my_command",
-///         description: "This is a command",
+///         name: Cow::Borrowed("my_command"),
+///         description: Some(Cow::Borrowed("This is a command")),
 ///         prefix_action: Some(|ctx| Box::pin(async move { inner(ctx.into()).await })),
 ///         slash_action: Some(|ctx| Box::pin(async move { inner(ctx.into()).await })),
 ///         context_menu_action: None,
 ///         // ...
+/// #       ..Default::default()
 ///     }
 /// }
 /// ```
@@ -239,7 +265,8 @@ pub fn command(args: TokenStream, function: TokenStream) -> TokenStream {
 /// Use this derive macro on an enum to easily generate a choice parameter type. A choice parameter
 /// is mainly useful in slash commands. It allows you to constrain input to a fixed set of choices.
 ///
-/// ```rust,ignore (poise not in scope)
+/// ```rust,no_run
+/// # use poise;
 /// #[derive(poise::ChoiceParameter)]
 /// pub enum MyChoice {
 ///     #[name = "The first choice"]
@@ -263,7 +290,8 @@ pub fn command(args: TokenStream, function: TokenStream) -> TokenStream {
 ///
 /// In slash commands, you can take advantage of Discord's localization.
 ///
-/// ```rust,ignore (poise not in scope)
+/// ```rust,no_run
+/// # use poise;
 /// #[derive(poise::ChoiceParameter)]
 /// pub enum Food {
 ///     #[name_localized("de", "Eier")]
@@ -307,7 +335,7 @@ pub fn slash_choice_parameter(input: TokenStream) -> TokenStream {
 ///
 /// # Example
 ///
-/// ```rust,ignore (poise not in scope)
+/// ```rust,no_run
 /// # use poise::serenity_prelude as serenity;
 /// # use poise::serenity_prelude::small_fixed_array::{FixedArray, FixedString};
 /// # type Data = ();
@@ -358,7 +386,8 @@ pub fn slash_choice_parameter(input: TokenStream) -> TokenStream {
 /// It is possible to create an informational modal with no interactive components by defining an
 /// empty struct with a text display component.
 ///
-/// ```rust,ignore (poise not in scope)
+/// ```rust,no_run
+/// # use poise::Modal;
 /// #[derive(Debug, Modal)]
 /// #[name = "My Informational Modal"]
 /// #[text_display = "This is my very informative text."]
@@ -378,13 +407,18 @@ pub fn slash_choice_parameter(input: TokenStream) -> TokenStream {
 /// be paired with interactive (input) components. Position of the attribute relative to the
 /// interactive component attribute does not matter; the text display will be rendered on top.
 ///
-/// ```rust,ignore (poise not in scope)
+/// ```rust,no_run
+/// # use poise::Modal;
+/// # use poise::serenity_prelude::small_fixed_array::{FixedArray, FixedString};
+/// # #[derive(Debug, Modal)]
+/// # struct MyModal {
 /// #[text_display = "**Huge** markdown-friendly text. Shown *above* the `text input` component."]
 /// #[name = "Input Label #1"]
 /// text_input_one: Option<FixedString<u16>>,
 /// #[name = "Input Label #2"]
 /// #[text_display = "Despite the attribute position, still shows __above__ 'Input Label 2'."]
 /// text_input_two: Option<FixedString<u16>>,
+/// # }
 /// ```
 ///
 /// The following field attributes are shared by all interactive components:
@@ -431,7 +465,11 @@ pub fn slash_choice_parameter(input: TokenStream) -> TokenStream {
 /// directly. Custom emojis should use the Discord angle bracket format: `<:NAME:EMOJI_ID>` for
 /// static or `<a:NAME:EMOJI_ID>` for animated. Emojis given in an invalid format will be ignored.
 ///
-/// ```rust,ignore (poise not in scope)
+/// ```rust,no_run
+/// # use poise::Modal;
+/// # use poise::serenity_prelude::small_fixed_array::FixedArray;
+/// # #[derive(Debug, Modal)]
+/// # struct MyModal {
 /// #[name = "My cool select menu"]
 /// #[string_select("Option 1", "Option 2", "Option 3")]
 /// #[string_select_emojis(
@@ -444,7 +482,8 @@ pub fn slash_choice_parameter(input: TokenStream) -> TokenStream {
 ///     "Uses a custom static icon",
 ///     "Uses a custom animated icon"
 /// )]
-/// selections: Option<FixedArray<String>>
+/// selections: Option<FixedArray<String>>,
+/// # }
 /// ```
 ///
 /// Minimum and maximum values for file upload select menu, and checkbox group components are
@@ -454,11 +493,16 @@ pub fn slash_choice_parameter(input: TokenStream) -> TokenStream {
 /// - `#[max_values = 25]`: 1-10 for files/checkbox groups; 1-25 for select menus. Defaults to 1 for
 ///   files and select menus; defaults to the number of options for checkbox groups.
 ///
-/// ```rust,ignore (poise not in scope)
+/// ```rust,no_run
+/// # use poise::{Modal, serenity_prelude as serenity};
+/// # use poise::serenity_prelude::small_fixed_array::FixedArray;
+/// # #[derive(Debug, Modal)]
+/// # struct MyModal {
 /// #[name = "Role select menu"]
 /// #[role_select]
 /// #[max_values = 1]
-/// roles: Option<FixedArray<serenity::Role>>
+/// roles: Option<FixedArray<serenity::Role>>,
+/// # }
 /// ```
 ///
 /// Note that file upload, select menu, and checkbox group components can be optional ***and*** have
@@ -466,11 +510,15 @@ pub fn slash_choice_parameter(input: TokenStream) -> TokenStream {
 /// into effect when input is attempted. In the following example, the user would be able to submit
 /// the modal with either no mentionables ***or*** at least three mentionables selected.
 ///
-/// ```rust,ignore (poise not in scope)
+/// ```rust,no_run
+/// # use poise::{Mentionables, Modal};
+/// # #[derive(Debug, Modal)]
+/// # struct MyModal {
 /// #[name = "Mentionable select menu"]
 /// #[mentionable_select]
 /// #[min_values = 3]
-/// mentionables: Option<poise::Mentionables>
+/// mentionables: Option<Mentionables>,
+/// # }
 /// ```
 ///
 /// For the channel select menu, channel types to include in the list may optionally be defined
@@ -478,11 +526,16 @@ pub fn slash_choice_parameter(input: TokenStream) -> TokenStream {
 ///
 /// - `#[channel_types("", "")]`: See [`ChannelType`] for valid channel types.
 ///
-/// ```rust,ignore (poise not in scope)
+/// ```rust,no_run
+/// # use poise::{Modal, serenity_prelude as serenity};
+/// # use poise::serenity_prelude::small_fixed_array::FixedArray;
+/// # #[derive(Debug, Modal)]
+/// # struct MyModal {
 /// #[name = "Channel select menu"]
 /// #[channel_select]
 /// #[channel_types("Text", "Forum")]
-/// channels: FixedArray<serenity::GenericChannelId>
+/// channels: FixedArray<serenity::GenericChannelId>,
+/// # }
 /// ```
 ///
 /// For file uploads, allowed file types may optionally be defined using the following field
@@ -491,11 +544,16 @@ pub fn slash_choice_parameter(input: TokenStream) -> TokenStream {
 /// - `#[file_types("", "")]`: Valid types include `image`, `video`, `audio`, and any dot-prefixed
 ///   extension such as `.pdf`. See [File Type Filtering] for details. Maximum of 10 types.
 ///
-/// ```rust,ignore (poise not in scope)
+/// ```rust,no_run
+/// # use poise::{Modal, serenity_prelude as serenity};
+/// # use poise::serenity_prelude::small_fixed_array::FixedArray;
+/// # #[derive(Debug, Modal)]
+/// # struct MyModal {
 /// #[name = "Image or PDF upload"]
 /// #[file_upload]
 /// #[file_types("image", ".pdf")]
-/// files: FixedArray<serenity::Attachment>
+/// files: FixedArray<serenity::Attachment>,
+/// # }
 /// ```
 ///
 /// # Specifying defaults
@@ -504,7 +562,23 @@ pub fn slash_choice_parameter(input: TokenStream) -> TokenStream {
 /// of the modal struct with [`execute_with_defaults()`], or with [`execute_modal()`] if you wish to
 /// specify a timeout. For example, assuming the struct from the initial example:
 ///
-/// ```rust,ignore (poise not in scope)
+/// ```rust,no_run
+/// # use poise::{Modal, serenity_prelude as serenity};
+/// # use poise::serenity_prelude::small_fixed_array::{FixedArray, FixedString};
+/// # #[derive(Debug, Modal)]
+/// # struct MyModal {
+/// #     first_input: FixedString<u16>,
+/// #     second_input: Option<FixedString<u16>>,
+/// #     #[file_upload]
+/// #     third_input: FixedArray<serenity::Attachment>,
+/// #     #[string_select("Option 1", "Option 2")]
+/// #     fourth_input: FixedArray<String>,
+/// # }
+/// # type Data = ();
+/// # type Error = serenity::Error;
+/// # type ApplicationContext<'a> = poise::ApplicationContext<'a, Data, Error>;
+/// # #[poise::command(slash_command)]
+/// # pub async fn modal(ctx: ApplicationContext<'_>) -> Result<(), Error> {
 /// let data = MyModal::execute_with_defaults(ctx, MyModal {
 ///     first_input: FixedString::from_static_trunc("Default text input"),
 ///     second_input: None,
@@ -512,22 +586,56 @@ pub fn slash_choice_parameter(input: TokenStream) -> TokenStream {
 ///     fourth_input: FixedArray::from_vec_trunc(vec!["Option 2".to_string()]),
 /// })
 /// .await?;
+/// # Ok(()) }
 /// ```
 ///
 /// Alternatively, if the struct also derives `Default`:
 ///
-/// ```rust,ignore (poise not in scope)
+/// ```rust,no_run
+/// # use poise::{Modal, serenity_prelude as serenity};
+/// # use poise::serenity_prelude::small_fixed_array::{FixedArray, FixedString};
+/// # #[derive(Debug, Default, Modal)]
+/// # struct MyModal {
+/// #     first_input: FixedString<u16>,
+/// #     second_input: Option<FixedString<u16>>,
+/// #     #[file_upload]
+/// #     third_input: FixedArray<serenity::Attachment>,
+/// #     #[string_select("Option 1", "Option 2")]
+/// #     fourth_input: FixedArray<String>,
+/// # }
+/// # type Data = ();
+/// # type Error = serenity::Error;
+/// # type ApplicationContext<'a> = poise::ApplicationContext<'a, Data, Error>;
+/// # #[poise::command(slash_command)]
+/// # pub async fn modal(ctx: ApplicationContext<'_>) -> Result<(), Error> {
 /// let data = MyModal::execute_with_defaults(ctx, MyModal {
 ///     first_input: FixedString::from_static_trunc("Default text input"),
 ///     fourth_input: FixedArray::from_vec_trunc(vec!["Option 2".to_string()]),
 ///     ..Default::default()
 /// })
 /// .await?;
+/// # Ok(()) }
 /// ```
 ///
 /// And using [`execute_modal()`] with a timeout:
 ///
-/// ```rust,ignore (poise not in scope)
+/// ```rust,no_run
+/// # use poise::{Modal, serenity_prelude as serenity};
+/// # use poise::serenity_prelude::small_fixed_array::{FixedArray, FixedString};
+/// # #[derive(Debug, Default, Modal)]
+/// # struct MyModal {
+/// #     first_input: FixedString<u16>,
+/// #     second_input: Option<FixedString<u16>>,
+/// #     #[file_upload]
+/// #     third_input: FixedArray<serenity::Attachment>,
+/// #     #[string_select("Option 1", "Option 2")]
+/// #     fourth_input: FixedArray<String>,
+/// # }
+/// # type Data = ();
+/// # type Error = serenity::Error;
+/// # type ApplicationContext<'a> = poise::ApplicationContext<'a, Data, Error>;
+/// # #[poise::command(slash_command)]
+/// # pub async fn modal(ctx: ApplicationContext<'_>) -> Result<(), Error> {
 /// let data = poise::execute_modal(
 ///     ctx,
 ///     Some(MyModal {
@@ -538,6 +646,7 @@ pub fn slash_choice_parameter(input: TokenStream) -> TokenStream {
 ///     Some(std::time::Duration::from_secs(300)),
 /// )
 /// .await?;
+/// # Ok(()) }
 /// ```
 ///
 /// [available modal components]:https://docs.discord.com/developers/components/reference#component-object-component-types
