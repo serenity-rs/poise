@@ -10,10 +10,7 @@ type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, (), Error>;
 
 async fn my_check(ctx: Context<'_>) -> Result<bool, Error> {
-    println!(
-        "In command specific check: {:?}",
-        ctx.invocation_data::<&str>().await.as_deref()
-    );
+    println!("In command specific check: {:?}", ctx.invocation_data::<&str>().await.as_deref());
 
     Ok(true)
 }
@@ -22,10 +19,7 @@ async fn my_autocomplete<'a>(
     ctx: Context<'a>,
     _: &'a str,
 ) -> serenity::CreateAutocompleteResponse<'a> {
-    println!(
-        "In autocomplete: {:?}",
-        ctx.invocation_data::<&str>().await.as_deref()
-    );
+    println!("In autocomplete: {:?}", ctx.invocation_data::<&str>().await.as_deref());
 
     serenity::CreateAutocompleteResponse::new()
 }
@@ -38,16 +32,9 @@ pub async fn invocation_data_test(
     #[autocomplete = "my_autocomplete"]
     should_succeed: u32,
 ) -> Result<(), Error> {
-    println!(
-        "In command: {:?}",
-        ctx.invocation_data::<&str>().await.as_deref()
-    );
+    println!("In command: {:?}", ctx.invocation_data::<&str>().await.as_deref());
 
-    if should_succeed > 0 {
-        Ok(())
-    } else {
-        Err("".into())
-    }
+    if should_succeed > 0 { Ok(()) } else { Err("".into()) }
 }
 
 #[poise::command(prefix_command, owners_only)]
@@ -68,10 +55,7 @@ async fn main() {
     let options = poise::FrameworkOptions {
         pre_command: |ctx| {
             Box::pin(async move {
-                println!(
-                    "In pre_command: {:?}",
-                    ctx.invocation_data::<&str>().await.as_deref()
-                );
+                println!("In pre_command: {:?}", ctx.invocation_data::<&str>().await.as_deref());
             })
         },
         command_check: Some(|ctx| {
@@ -81,20 +65,14 @@ async fn main() {
                 println!("Writing invocation data!");
                 ctx.set_invocation_data("hello").await;
 
-                println!(
-                    "In global check: {:?}",
-                    ctx.invocation_data::<&str>().await.as_deref()
-                );
+                println!("In global check: {:?}", ctx.invocation_data::<&str>().await.as_deref());
 
                 Ok(true)
             })
         }),
         post_command: |ctx| {
             Box::pin(async move {
-                println!(
-                    "In post_command: {:?}",
-                    ctx.invocation_data::<&str>().await.as_deref()
-                );
+                println!("In post_command: {:?}", ctx.invocation_data::<&str>().await.as_deref());
             })
         },
         on_error: |err| {
@@ -105,7 +83,7 @@ async fn main() {
                             "In on_error: {:?}",
                             ctx.invocation_data::<&str>().await.as_deref()
                         );
-                    }
+                    },
                     err => poise::builtins::on_error(err).await.unwrap(),
                 }
             })

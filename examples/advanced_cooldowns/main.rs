@@ -17,8 +17,8 @@ async fn dynamic_cooldowns(ctx: Context<'_>) -> Result<(), Error> {
 
         match cooldown_tracker.remaining_cooldown(ctx.cooldown_context(), &cooldown_durations) {
             Some(remaining) => {
-                return Err(format!("Please wait {} seconds", remaining.as_secs()).into())
-            }
+                return Err(format!("Please wait {} seconds", remaining.as_secs()).into());
+            },
             None => cooldown_tracker.start_cooldown(ctx.cooldown_context()),
         }
     };

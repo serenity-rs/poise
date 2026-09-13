@@ -51,15 +51,12 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                 input.ident.span(),
                 "only structs with named fields can be used for derived modals",
             )
-            .into())
-        }
+            .into());
+        },
     };
 
-    let struct_attrs: Vec<_> = input
-        .attrs
-        .into_iter()
-        .map(|attr| darling::ast::NestedMeta::Meta(attr.meta))
-        .collect();
+    let struct_attrs: Vec<_> =
+        input.attrs.into_iter().map(|attr| darling::ast::NestedMeta::Meta(attr.meta)).collect();
     let struct_attrs = <StructAttributes as darling::FromMeta>::from_list(&struct_attrs)?;
 
     let mut builders = Vec::new();
@@ -81,11 +78,8 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
 
     for field in fields {
         // Extract data from syn::Field
-        let attrs: Vec<_> = field
-            .attrs
-            .into_iter()
-            .map(|attr| darling::ast::NestedMeta::Meta(attr.meta))
-            .collect();
+        let attrs: Vec<_> =
+            field.attrs.into_iter().map(|attr| darling::ast::NestedMeta::Meta(attr.meta)).collect();
         let field_attrs = <FieldAttributes as darling::FromMeta>::from_list(&attrs)?;
         let field_ident = field.ident.unwrap();
 
@@ -103,7 +97,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
         let description = field_attrs.description.into_iter();
         let required = crate::util::extract_type_parameter("Option", &field.ty).is_none();
         let ok_or = if required {
-            let error = format!("missing {}", field_ident);
+            let error = format!("missing {field_ident}");
             Some(quote::quote! { .expect(#error) })
         } else {
             None
@@ -111,15 +105,15 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
         let min_values = field_attrs.min_values.into_iter();
         let max_values = field_attrs.max_values.into_iter();
 
-        if field_attrs.file_upload.is_some() as usize
-            + field_attrs.string_select.is_some() as usize
-            + field_attrs.user_select.is_some() as usize
-            + field_attrs.role_select.is_some() as usize
-            + field_attrs.mentionable_select.is_some() as usize
-            + field_attrs.channel_select.is_some() as usize
-            + field_attrs.radio_group.is_some() as usize
-            + field_attrs.checkbox_group.is_some() as usize
-            + field_attrs.checkbox.is_some() as usize
+        if u8::from(field_attrs.file_upload.is_some())
+            + u8::from(field_attrs.string_select.is_some())
+            + u8::from(field_attrs.user_select.is_some())
+            + u8::from(field_attrs.role_select.is_some())
+            + u8::from(field_attrs.mentionable_select.is_some())
+            + u8::from(field_attrs.channel_select.is_some())
+            + u8::from(field_attrs.radio_group.is_some())
+            + u8::from(field_attrs.checkbox_group.is_some())
+            + u8::from(field_attrs.checkbox.is_some())
             > 1
         {
             let err = "cannot have multiple interactive component attributes on a single field";
@@ -181,7 +175,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                         return Err(err_on_attr(&attrs, err, "file_types"));
                     }
                     quote::quote! { .file_types( &[ #( Cow::Borrowed(#file_types) ),* ] ) }
-                }
+                },
                 None => quote::quote! {},
             };
             builders.push(quote::quote! {
@@ -255,8 +249,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                 }
             } else {
                 if descriptions.len() < options.len() {
-                    let err =
-                        "number of descriptions must not be less than the number of radio group options";
+                    let err = "number of descriptions must not be less than the number of radio group options";
                     return Err(err_on_attr(&attrs, err, "radio_group_descriptions"));
                 }
                 quote::quote! {
@@ -309,18 +302,12 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                 let err = "maximum of 10 checkbox group options allowed";
                 return Err(err_on_attr(&attrs, err, "checkbox_group"));
             }
-            if field_attrs
-                .max_values
-                .is_some_and(|v| usize::from(v) > options.len())
-            {
+            if field_attrs.max_values.is_some_and(|v| usize::from(v) > options.len()) {
                 let err =
                     "value of `max_values` cannot be greater than the number of options provided";
                 return Err(darling::Error::custom(err).with_span(&field_attrs.max_values.span()));
             }
-            let descriptions = field_attrs
-                .checkbox_group_descriptions
-                .unwrap_or_default()
-                .0;
+            let descriptions = field_attrs.checkbox_group_descriptions.unwrap_or_default().0;
             let create_option = if descriptions.is_empty() {
                 quote::quote! {
                     #({
@@ -335,8 +322,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                 }
             } else {
                 if descriptions.len() < options.len() {
-                    let err =
-                        "number of descriptions must not be less than the number of checkbox group options";
+                    let err = "number of descriptions must not be less than the number of checkbox group options";
                     return Err(err_on_attr(&attrs, err, "checkbox_group_descriptions"));
                 }
                 quote::quote! {
@@ -399,26 +385,20 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                     let err = "maximum of 25 string select options allowed";
                     return Err(err_on_attr(&attrs, err, "string_select"));
                 }
-                if field_attrs
-                    .max_values
-                    .is_some_and(|v| usize::from(v) > strings.len())
-                {
-                    let err =
-                    "value of `max_values` cannot be greater than the number of options provided";
+                if field_attrs.max_values.is_some_and(|v| usize::from(v) > strings.len()) {
+                    let err = "value of `max_values` cannot be greater than the number of options provided";
                     return Err(
                         darling::Error::custom(err).with_span(&field_attrs.max_values.span())
                     );
                 }
                 let emojis = field_attrs.string_select_emojis.unwrap_or_default().0;
                 if !emojis.is_empty() && emojis.len() < strings.len() {
-                    let err =
-                        "number of emojis must not be less than the number of string select options";
+                    let err = "number of emojis must not be less than the number of string select options";
                     return Err(err_on_attr(&attrs, err, "string_select_emojis"));
                 }
                 let descriptions = field_attrs.string_select_descriptions.unwrap_or_default().0;
                 if !descriptions.is_empty() && descriptions.len() < strings.len() {
-                    let err =
-                        "number of descriptions must not be less than the number of string select options";
+                    let err = "number of descriptions must not be less than the number of string select options";
                     return Err(err_on_attr(&attrs, err, "string_select_descriptions"));
                 }
                 let create_option = match (emojis.is_empty(), descriptions.is_empty()) {
@@ -491,7 +471,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                     },
                     quote::quote! { .strings },
                 )
-            }
+            },
             FieldAttributes {
                 user_select: Some(()),
                 ..
@@ -569,14 +549,14 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                 channel_select: Some(()),
                 ..
             } => {
-                let channel_types = match &field_attrs.channel_types {
-                    Some(crate::util::List(channel_types)) => {
+                let channel_types =
+                    if let Some(crate::util::List(channel_types)) = &field_attrs.channel_types {
                         quote::quote! {
                             Some(Cow::Borrowed(&[ #( serenity::ChannelType::#channel_types ),* ]))
                         }
-                    }
-                    None => quote::quote! { None },
-                };
+                    } else {
+                        quote::quote! { None }
+                    };
                 (
                     quote::quote! {
                         {
@@ -595,7 +575,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
                     },
                     quote::quote! { .channels },
                 )
-            }
+            },
             _ => (quote::quote! {}, quote::quote! {}),
         };
 
@@ -717,11 +697,11 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
 /// Used to generate a [`darling::Error`] on a specific `target` attribute.
 #[doc(hidden)]
 fn err_on_attr(attrs: &[darling::ast::NestedMeta], err: &str, target: &str) -> darling::Error {
-    for attr in attrs.iter() {
-        if let darling::ast::NestedMeta::Meta(meta) = attr {
-            if meta.path().is_ident(target) {
-                return darling::Error::custom(err).with_span(&meta.path());
-            }
+    for attr in attrs {
+        if let darling::ast::NestedMeta::Meta(meta) = attr
+            && meta.path().is_ident(target)
+        {
+            return darling::Error::custom(err).with_span(&meta.path());
         }
     }
     darling::Error::custom(err)

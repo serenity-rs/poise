@@ -129,15 +129,15 @@ fn test_pop_string() {
     assert_eq!(pop_string("AA BB").unwrap().0, " BB");
 
     for &(string, arg) in &[
-        (r#"AA BB"#, r#"AA"#),
-        (r#""AA BB""#, r#"AA BB"#),
-        (r#""AA BB"#, r#"AA BB"#),
-        (r#""AA "BB"#, r#"AA BB"#),
-        (r#"""""A""A" "B"""B"#, r#"AA BB"#),
+        (r"AA BB", r"AA"),
+        (r#""AA BB""#, r"AA BB"),
+        (r#""AA BB"#, r"AA BB"),
+        (r#""AA "BB"#, r"AA BB"),
+        (r#"""""A""A" "B"""B"#, r"AA BB"),
         (r#"\"AA BB\""#, r#""AA"#),
         (r#"\"AA\ BB\""#, r#""AA BB""#),
         (r#""\"AA BB\"""#, r#""AA BB""#),
-        (r#"   AA BB"#, r#"AA"#),
+        (r"   AA BB", r"AA"),
     ] {
         assert_eq!(pop_string(string).unwrap().1, arg);
     }

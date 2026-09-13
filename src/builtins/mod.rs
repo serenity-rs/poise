@@ -3,6 +3,8 @@
 //! This file provides sample commands and utility functions like pagination or error handlers to
 //! use as a starting point for the framework.
 
+use std::fmt::{self, Display};
+
 mod register;
 pub use register::*;
 
@@ -11,22 +13,24 @@ mod paginate;
 #[cfg(feature = "chrono")]
 pub use paginate::*;
 
-use crate::{serenity_prelude as serenity, serenity_prelude::CreateAllowedMentions, CreateReply};
-use std::fmt::{self, Display};
+use crate::serenity_prelude::CreateAllowedMentions;
+use crate::{CreateReply, serenity_prelude as serenity};
 
-/// An error handler that logs errors either via the [`tracing`] crate or via a Discord message. Set
-/// up a logger like tracing subscriber
-/// (e.g. `tracing_subscriber::fmt::init()`) to see the logged errors from this method.
+/// An error handler that logs errors via either the [`tracing`] crate or a Discord message. Set
+/// up a logger like tracing subscriber (e.g., `tracing_subscriber::fmt::init()`) to see the logged
+/// errors from this method.
 ///
-/// If the user invoked the command wrong ([`crate::FrameworkError::ArgumentParse`]), the command
-/// help is displayed and the user is directed to the help menu.
+/// If the user invoked the command incorrectly ([`crate::FrameworkError::ArgumentParse`]), the
+/// command help is displayed and the user is directed to the help menu.
+///
+/// # Errors
 ///
 /// Can return an error if sending the Discord error message failed. You can decide for yourself
 /// how to handle this, for example:
 /// ```rust,no_run
 /// # async { let error: poise::FrameworkError<'_, (), &str> = todo!();
 /// if let Err(e) = poise::builtins::on_error(error).await {
-///     tracing::error!("Fatal error while sending error message: {}", e);
+///     tracing::error!("Fatal error while sending error message: {e}");
 /// }
 /// # };
 /// ```
@@ -39,35 +43,25 @@ pub async fn on_error<
     match error {
         crate::FrameworkError::Command { ctx, error } => {
             let error = display_error(error).to_string();
-            eprintln!("An error occured in a command: {}", error);
+            eprintln!("An error occured in a command: {error}");
 
-            let mentions = CreateAllowedMentions::new()
-                .everyone(false)
-                .all_roles(false)
-                .all_users(false);
+            let mentions =
+                CreateAllowedMentions::new().everyone(false).all_roles(false).all_users(false);
 
             ctx.send(
-                CreateReply::default()
-                    .content(error)
-                    .allowed_mentions(mentions)
-                    .ephemeral(true),
+                CreateReply::default().content(error).allowed_mentions(mentions).ephemeral(true),
             )
             .await?;
-        }
+        },
         crate::FrameworkError::SubcommandRequired { ctx } => {
-            let subcommands = ctx
-                .command()
-                .subcommands
-                .iter()
-                .map(|s| &*s.name)
-                .collect::<Vec<_>>();
+            let subcommands =
+                ctx.command().subcommands.iter().map(|s| &*s.name).collect::<Vec<_>>();
             let response = format!(
                 "You must specify one of the following subcommands: {}",
                 subcommands.join(", ")
             );
-            ctx.send(CreateReply::default().content(response).ephemeral(true))
-                .await?;
-        }
+            ctx.send(CreateReply::default().content(response).ephemeral(true)).await?;
+        },
         crate::FrameworkError::CommandPanic { ctx, payload: _ } => {
             // Not showing the payload to the user because it may contain sensitive info
             let embed = serenity::CreateEmbed::default()
@@ -75,9 +69,8 @@ pub async fn on_error<
                 .color((255, 0, 0))
                 .description("An unexpected internal error has occurred.");
 
-            ctx.send(CreateReply::default().embed(embed).ephemeral(true))
-                .await?;
-        }
+            ctx.send(CreateReply::default().embed(embed).ephemeral(true)).await?;
+        },
         crate::FrameworkError::ArgumentParse { ctx, input, error } => {
             // If we caught an argument parse error, give a helpful error message with the
             // command explanation if available
@@ -86,46 +79,41 @@ pub async fn on_error<
                 None => "Please check the help menu for usage information",
             };
             let response = if let Some(input) = input {
-                format!(
-                    "**Cannot parse `{}` as argument: {}**\n{}",
-                    input, error, usage
-                )
+                format!("**Cannot parse `{input}` as argument: {error}**\n{usage}")
             } else {
-                format!("**{}**\n{}", error, usage)
+                format!("**{error}**\n{usage}")
             };
 
-            let mentions = CreateAllowedMentions::new()
-                .everyone(false)
-                .all_roles(false)
-                .all_users(false);
+            let mentions =
+                CreateAllowedMentions::new().everyone(false).all_roles(false).all_users(false);
 
             ctx.send(
-                CreateReply::default()
-                    .content(response)
-                    .allowed_mentions(mentions)
-                    .ephemeral(true),
+                CreateReply::default().content(response).allowed_mentions(mentions).ephemeral(true),
             )
             .await?;
-        }
+        },
         crate::FrameworkError::CommandStructureMismatch { ctx, description } => {
             tracing::error!(
                 "Error: failed to deserialize interaction arguments for `/{}`: {}",
                 ctx.command().name,
                 description,
             );
-        }
-        crate::FrameworkError::CommandCheckFailed { ctx, error } => match error {
-            Some(error) => tracing::error!(
-                "A command check failed in command {} for user {}: {}",
-                ctx.command().name,
-                ctx.author().name,
-                display_error(error),
-            ),
-            None => tracing::error!(
-                "A command check failed in command {} for user {}",
-                ctx.command().name,
-                ctx.author().name,
-            ),
+        },
+        crate::FrameworkError::CommandCheckFailed { ctx, error } => {
+            if let Some(error) = error {
+                tracing::error!(
+                    "A command check failed in command {} for user {}: {}",
+                    ctx.command().name,
+                    ctx.author().name,
+                    display_error(error),
+                );
+            } else {
+                tracing::error!(
+                    "A command check failed in command {} for user {}",
+                    ctx.command().name,
+                    ctx.author().name,
+                );
+            }
         },
         crate::FrameworkError::CooldownHit {
             remaining_cooldown,
@@ -135,20 +123,17 @@ pub async fn on_error<
                 "You're too fast. Please wait {} seconds before retrying",
                 remaining_cooldown.as_secs()
             );
-            ctx.send(CreateReply::default().content(msg).ephemeral(true))
-                .await?;
-        }
+            ctx.send(CreateReply::default().content(msg).ephemeral(true)).await?;
+        },
         crate::FrameworkError::MissingBotPermissions {
             missing_permissions,
             ctx,
         } => {
             let msg = format!(
-                "Command cannot be executed because the bot is lacking permissions: {}",
-                missing_permissions,
+                "Command cannot be executed because the bot is lacking permissions: {missing_permissions}",
             );
-            ctx.send(CreateReply::default().content(msg).ephemeral(true))
-                .await?;
-        }
+            ctx.send(CreateReply::default().content(msg).ephemeral(true)).await?;
+        },
         crate::FrameworkError::MissingUserPermissions {
             missing_permissions,
             ctx,
@@ -167,40 +152,34 @@ pub async fn on_error<
                     ctx.command().name,
                 )
             };
-            ctx.send(CreateReply::default().content(response).ephemeral(true))
-                .await?;
-        }
+            ctx.send(CreateReply::default().content(response).ephemeral(true)).await?;
+        },
         crate::FrameworkError::PermissionFetchFailed { ctx } => {
-            ctx.say("An error occurred when fetching permissions.")
-                .await?;
-        }
+            ctx.say("An error occurred when fetching permissions.").await?;
+        },
         crate::FrameworkError::NotAnOwner { ctx } => {
             let response = "Only bot owners can call this command";
-            ctx.send(CreateReply::default().content(response).ephemeral(true))
-                .await?;
-        }
+            ctx.send(CreateReply::default().content(response).ephemeral(true)).await?;
+        },
         crate::FrameworkError::GuildOnly { ctx } => {
             let response = "You cannot run this command in DMs.";
-            ctx.send(CreateReply::default().content(response).ephemeral(true))
-                .await?;
-        }
+            ctx.send(CreateReply::default().content(response).ephemeral(true)).await?;
+        },
         crate::FrameworkError::DmOnly { ctx } => {
             let response = "You cannot run this command outside DMs.";
-            ctx.send(CreateReply::default().content(response).ephemeral(true))
-                .await?;
-        }
+            ctx.send(CreateReply::default().content(response).ephemeral(true)).await?;
+        },
         crate::FrameworkError::NsfwOnly { ctx } => {
             let response = "You cannot run this command outside NSFW channels.";
-            ctx.send(CreateReply::default().content(response).ephemeral(true))
-                .await?;
-        }
+            ctx.send(CreateReply::default().content(response).ephemeral(true)).await?;
+        },
         crate::FrameworkError::DynamicPrefix { error, msg, .. } => {
             tracing::error!(
                 "Dynamic prefix failed for message {:?}: {}",
                 msg.content,
                 display_error(error)
             );
-        }
+        },
         crate::FrameworkError::UnknownCommand {
             msg, content_start, ..
         } => {
@@ -210,16 +189,13 @@ pub async fn on_error<
                 prefix,
                 msg_content,
             );
-        }
+        },
         crate::FrameworkError::UnknownInteraction { interaction, .. } => {
             tracing::warn!("received unknown interaction \"{}\"", interaction.data.name);
-        }
+        },
         crate::FrameworkError::NonCommandMessage { error, .. } => {
-            tracing::warn!(
-                "error in non-command message handler: {}",
-                display_error(error)
-            );
-        }
+            tracing::warn!("error in non-command message handler: {}", display_error(error));
+        },
         crate::FrameworkError::__NonExhaustive(unreachable) => match unreachable {},
     }
 
@@ -229,15 +205,13 @@ pub async fn on_error<
 /// An autocomplete function that can be used for the command parameter in your help function.
 ///
 /// See `examples/feature_showcase` for an example
-#[allow(clippy::unused_async)] // Required for the return type
+#[expect(clippy::unused_async)] // Required for the return type
 pub async fn autocomplete_command<'a, U: Send + Sync + 'static, E>(
     ctx: crate::Context<'a, U, E>,
     partial: &'a str,
 ) -> serenity::CreateAutocompleteResponse<'a> {
     let commands = ctx.framework().options.commands.iter();
-    let filtered_commands = commands
-        .filter(|cmd| cmd.name.starts_with(partial))
-        .take(25);
+    let filtered_commands = commands.filter(|cmd| cmd.name.starts_with(partial)).take(25);
 
     let choices: Vec<_> = filtered_commands
         .map(|cmd| serenity::AutocompleteChoice::from(cmd.name.as_ref()))
@@ -277,25 +251,23 @@ pub async fn servers<U: Send + Sync + 'static, E>(
                 if !is_public && !show_private_guilds {
                     hidden_guilds += 1; // private guild whose name and size shouldn't be exposed
                 } else {
-                    shown_guilds.push((guild.name.clone(), guild.member_count.get()))
+                    shown_guilds.push((guild.name.clone(), guild.member_count.get()));
                 }
-            }
+            },
             None => hidden_guilds += 1, // uncached guild
         }
     }
     shown_guilds.sort_by_key(|(_, member)| u32::MAX - member); // sort largest guilds first
 
     // Iterate guilds and build up the response message line by line
-    let mut response = format!(
-        "I am currently in {} servers!\n",
-        shown_guilds.len() + hidden_guilds
-    );
+    let mut response =
+        format!("I am currently in {} servers!\n", shown_guilds.len() + hidden_guilds);
     if show_private_guilds {
         response.insert_str(0, "_Showing private guilds because you are a bot owner_\n");
     }
     let mut guilds = shown_guilds.into_iter().peekable();
     while let Some((name, member_count)) = guilds.peek() {
-        let line = format!("- **{}** ({} members)\n", name, member_count);
+        let line = format!("- **{name}** ({member_count} members)\n");
 
         // Make sure we don't exceed a certain number of characters below the 2000 char limit so
         // we have enough space for the remaining servers line
@@ -311,11 +283,11 @@ pub async fn servers<U: Send + Sync + 'static, E>(
         guilds.next(); // advance peekable iterator
     }
     if hidden_guilds > 0 {
-        let _ = writeln!(
+        writeln!(
             response,
-            "- {} remaining servers with {} members total",
-            hidden_guilds, hidden_guilds_members
-        );
+            "- {hidden_guilds} remaining servers with {hidden_guilds_members} members total"
+        )
+        .expect("writing to a string should never fail");
     }
 
     // Final safe guard (shouldn't be hit at the time of writing)
@@ -328,9 +300,7 @@ pub async fn servers<U: Send + Sync + 'static, E>(
     }
 
     // If we show sensitive data (private guilds), it mustn't be made public, so it's ephemeral
-    let reply = CreateReply::default()
-        .content(response)
-        .ephemeral(show_private_guilds);
+    let reply = CreateReply::default().content(response).ephemeral(show_private_guilds);
 
     ctx.send(reply).await?;
     Ok(())

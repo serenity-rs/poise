@@ -1,8 +1,7 @@
 //! Application command permissions calculation
 use self::serenity::Permissions;
-use crate::serenity_prelude as serenity;
-
 use super::PermissionsInfo;
+use crate::serenity_prelude as serenity;
 
 /// Gets the permissions of the ctx author and the bot.
 pub(super) fn get_author_and_bot_permissions(
@@ -18,14 +17,9 @@ pub(super) fn get_author_and_bot_permissions(
 
     let channel = &interaction.channel;
     if matches!(channel, serenity::GenericInteractionChannel::Thread(_)) {
-        author_permissions.set(
-            Permissions::SEND_MESSAGES,
-            author_permissions.send_messages_in_threads(),
-        );
-        bot_permissions.set(
-            Permissions::SEND_MESSAGES,
-            bot_permissions.send_messages_in_threads(),
-        );
+        author_permissions
+            .set(Permissions::SEND_MESSAGES, author_permissions.send_messages_in_threads());
+        bot_permissions.set(Permissions::SEND_MESSAGES, bot_permissions.send_messages_in_threads());
     }
 
     PermissionsInfo {

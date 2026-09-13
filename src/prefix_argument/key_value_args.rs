@@ -11,7 +11,7 @@ pub struct KeyValueArgs(pub std::collections::HashMap<String, String>);
 impl KeyValueArgs {
     /// Retrieve a single value by its key
     pub fn get(&self, key: &str) -> Option<&str> {
-        self.0.get(key).map(|x| x.as_str())
+        self.0.get(key).map(String::as_str)
     }
 
     /// Reads a single key value pair ("key=value") from the front of the arguments
@@ -90,33 +90,15 @@ impl<'a> PopArgument<'a> for KeyValueArgs {
 #[test]
 fn test_key_value_args() {
     for &(string, pairs, remaining_args) in &[
-        (
-            r#"key1=value1 key2=value2"#,
-            &[("key1", "value1"), ("key2", "value2")][..],
-            "",
-        ),
-        (
-            r#""key 1"=value\ 1 key\ 2="value 2""#,
-            &[("key 1", "value 1"), ("key 2", "value 2")],
-            "",
-        ),
-        (
-            r#"key1"=value1 key2=value2"#,
-            &[],
-            r#"key1"=value1 key2=value2"#,
-        ),
-        (r#"dummyval"#, &[], "dummyval"),
-        (r#"dummyval="#, &[("dummyval", "")], ""),
+        (r"key1=value1 key2=value2", &[("key1", "value1"), ("key2", "value2")][..], ""),
+        (r#""key 1"=value\ 1 key\ 2="value 2""#, &[("key 1", "value 1"), ("key 2", "value 2")], ""),
+        (r#"key1"=value1 key2=value2"#, &[], r#"key1"=value1 key2=value2"#),
+        (r"dummyval", &[], "dummyval"),
+        (r"dummyval=", &[("dummyval", "")], ""),
     ] {
         let (args, kv_args) = KeyValueArgs::pop_from(string);
 
-        assert_eq!(
-            kv_args.0,
-            pairs
-                .iter()
-                .map(|&(k, v)| (k.to_owned(), v.to_owned()))
-                .collect(),
-        );
+        assert_eq!(kv_args.0, pairs.iter().map(|&(k, v)| (k.to_owned(), v.to_owned())).collect(),);
         assert_eq!(args, remaining_args);
     }
 }

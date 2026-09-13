@@ -18,21 +18,11 @@ async fn child2(ctx: Context<'_>, _b: bool, _s: String, _i: u32) -> Result<(), E
     ctx.say(ctx.invocation_string()).await?;
     Ok(())
 }
-#[poise::command(
-    slash_command,
-    prefix_command,
-    subcommands("child2"),
-    check = "child1_check"
-)]
+#[poise::command(slash_command, prefix_command, subcommands("child2"), check = "child1_check")]
 async fn child1(_ctx: Context<'_>) -> Result<(), Error> {
     Ok(())
 }
-#[poise::command(
-    slash_command,
-    prefix_command,
-    subcommands("child1"),
-    check = "parent_check"
-)]
+#[poise::command(slash_command, prefix_command, subcommands("child1"), check = "parent_check")]
 pub async fn parent_checks(_ctx: Context<'_>) -> Result<(), Error> {
     Ok(())
 }

@@ -70,17 +70,9 @@ impl ArgumentConvert for serenity::Role {
         };
 
         #[cfg(not(feature = "cache"))]
-        let roles = ctx
-            .http()
-            .get_guild_roles(guild_id)
-            .await
-            .map_err(RoleParseError::Http)?;
+        let roles = ctx.http().get_guild_roles(guild_id).await.map_err(RoleParseError::Http)?;
 
-        if let Some(role_id) = s
-            .parse()
-            .ok()
-            .or_else(|| serenity::utils::parse_role_mention(s))
-        {
+        if let Some(role_id) = s.parse().ok().or_else(|| serenity::utils::parse_role_mention(s)) {
             #[cfg(feature = "cache")]
             if let Some(role) = roles.get(&role_id) {
                 return Ok(role.clone());
@@ -96,10 +88,7 @@ impl ArgumentConvert for serenity::Role {
             return Ok(role.clone());
         }
         #[cfg(not(feature = "cache"))]
-        if let Some(role) = roles
-            .into_iter()
-            .find(|role| role.name.eq_ignore_ascii_case(s))
-        {
+        if let Some(role) = roles.into_iter().find(|role| role.name.eq_ignore_ascii_case(s)) {
             return Ok(role);
         }
 

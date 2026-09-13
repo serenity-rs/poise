@@ -2,12 +2,11 @@
 
 mod commands;
 
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
+use std::time::Duration;
+
 use poise::serenity_prelude as serenity;
-use std::{
-    collections::HashMap,
-    sync::{Arc, Mutex},
-    time::Duration,
-};
 
 // Types used by all command functions
 type Error = Box<dyn std::error::Error + Send + Sync>;
@@ -25,12 +24,12 @@ async fn on_error(error: poise::FrameworkError<'_, Data, Error>) {
     match error {
         poise::FrameworkError::Command { error, ctx, .. } => {
             println!("Error in command `{}`: {:?}", ctx.command().name, error,);
-        }
+        },
         error => {
             if let Err(e) = poise::builtins::on_error(error).await {
                 println!("Error while handling error: {}", e)
             }
-        }
+        },
     }
 }
 
@@ -53,9 +52,7 @@ async fn main() {
         commands: vec![register_commands(), commands::vote(), commands::getvotes()],
         prefix_options: poise::PrefixFrameworkOptions {
             prefix: Some("~".into()),
-            edit_tracker: Some(Arc::new(poise::EditTracker::for_timespan(
-                Duration::from_secs(3600),
-            ))),
+            edit_tracker: Some(Arc::new(poise::EditTracker::for_timespan(Duration::from_hours(1)))),
             additional_prefixes: vec![
                 poise::Prefix::Literal("hey bot,"),
                 poise::Prefix::Literal("hey bot"),

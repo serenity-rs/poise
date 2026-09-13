@@ -1,6 +1,7 @@
 //! Application command argument handling code
 
-use crate::{argument_convert::ArgumentConvert, serenity_prelude as serenity, BoxFuture, CowVec};
+use crate::argument_convert::ArgumentConvert;
+use crate::{BoxFuture, CowVec, serenity_prelude as serenity};
 
 /// Implement this trait on types that you want to use as a slash command parameter.
 #[async_trait::async_trait]
@@ -20,6 +21,7 @@ pub trait SlashArgument: Sized {
     fn create(builder: serenity::CreateCommandOption<'_>) -> serenity::CreateCommandOption<'_>;
 
     /// If this is a choice parameter, returns the choices
+    #[must_use]
     fn choices() -> CowVec<crate::CommandParameterChoice> {
         CowVec::default()
     }
@@ -41,19 +43,14 @@ where
             return Err(SlashArgError::CommandStructureMismatch {
                 description: "expected string",
             });
-        }
+        },
     };
 
-    T::convert(
-        ctx,
-        interaction.guild_id,
-        Some(interaction.channel_id),
-        string,
-    )
-    .await
-    .map_err(|e| SlashArgError::Parse {
-        error: e.into(),
-        input: string.into(),
+    T::convert(ctx, interaction.guild_id, Some(interaction.channel_id), string).await.map_err(|e| {
+        SlashArgError::Parse {
+            error: e.into(),
+            input: string.into(),
+        }
     })
 }
 
@@ -114,6 +111,7 @@ macro_rules! impl_for_integer {
                 }
             }
 
+            #[allow(clippy::cast_lossless, clippy::cast_precision_loss)]
             fn create(builder: serenity::CreateCommandOption<'_>) -> serenity::CreateCommandOption<'_> {
                 builder
                     .min_number_value(f64::max(<$t>::MIN as f64, -9007199254740991.))
@@ -164,25 +162,15 @@ impl_slash_argument!(serenity::Member, |ctx, interaction, User(user, _)| {
         .map_err(SlashArgError::Http)?
 });
 impl_slash_argument!(serenity::PartialMember, |_, _, User(_, member)| {
-    member
-        .ok_or(SlashArgError::Invalid("cannot use member parameter in DMs"))?
-        .clone()
+    member.ok_or(SlashArgError::Invalid("cannot use member parameter in DMs"))?.clone()
 });
 impl_slash_argument!(serenity::User, |_, _, User(user, _)| user.clone());
 impl_slash_argument!(serenity::UserId, |_, _, User(user, _)| user.id);
 impl_slash_argument!(serenity::Channel, |ctx, inter, Channel(channel)| {
-    channel
-        .id()
-        .to_channel(ctx, inter.guild_id)
-        .await
-        .map_err(SlashArgError::Http)?
+    channel.id().to_channel(ctx, inter.guild_id).await.map_err(SlashArgError::Http)?
 });
-impl_slash_argument!(serenity::GenericChannelId, |_, _, Channel(channel)| channel
-    .id());
-impl_slash_argument!(
-    serenity::GenericInteractionChannel,
-    |_, _, Channel(channel)| channel.clone()
-);
+impl_slash_argument!(serenity::GenericChannelId, |_, _, Channel(channel)| channel.id());
+impl_slash_argument!(serenity::GenericInteractionChannel, |_, _, Channel(channel)| channel.clone());
 impl_slash_argument!(serenity::GuildChannel, |ctx, inter, Channel(channel)| {
     channel
         .id()
@@ -230,14 +218,17 @@ pub enum SlashArgError {
 /// Support functions for macro which can't create #[non_exhaustive] enum variants
 #[doc(hidden)]
 impl SlashArgError {
+    #[must_use]
     pub fn new_command_structure_mismatch(description: &'static str) -> Self {
         Self::CommandStructureMismatch { description }
     }
 
+    #[must_use]
     pub fn new_parse(error: Box<dyn std::error::Error + Send + Sync>, input: String) -> Self {
         Self::Parse { error, input }
     }
 
+    #[must_use]
     pub fn to_framework_error<U, E>(
         self,
         ctx: crate::ApplicationContext<'_, U, E>,
@@ -245,7 +236,7 @@ impl SlashArgError {
         match self {
             Self::CommandStructureMismatch { description } => {
                 crate::FrameworkError::CommandStructureMismatch { ctx, description }
-            }
+            },
             Self::Parse { error, input } => crate::FrameworkError::ArgumentParse {
                 ctx: ctx.into(),
                 error,
@@ -270,23 +261,17 @@ impl std::fmt::Display for SlashArgError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::CommandStructureMismatch { description } => {
-                write!(
-                    f,
-                    "Bot author did not register their commands correctly ({description})",
-                )
-            }
+                write!(f, "Bot author did not register their commands correctly ({description})")
+            },
             Self::Parse { error, input } => {
                 write!(f, "Failed to parse `{input}` as argument: {error}")
-            }
+            },
             Self::Invalid(description) => {
-                write!(f, "You can't use this parameter here: {description}",)
-            }
+                write!(f, "You can't use this parameter here: {description}")
+            },
             Self::Http(error) => {
-                write!(
-                    f,
-                    "Error occurred while retrieving data from Discord: {error}",
-                )
-            }
+                write!(f, "Error occurred while retrieving data from Discord: {error}")
+            },
             Self::__NonExhaustive => unreachable!(),
         }
     }

@@ -36,8 +36,7 @@ pub async fn inline_choice(
     #[choices("Europe", "Asia", "Africa", "America", "Australia", "Antarctica")]
     continent: &'static str,
 ) -> Result<(), Error> {
-    ctx.say(format!("{} is a great continent!", continent))
-        .await?;
+    ctx.say(format!("{} is a great continent!", continent)).await?;
     Ok(())
 }
 
@@ -49,8 +48,7 @@ pub async fn inline_choice_int(
     number: Option<u32>,
 ) -> Result<(), Error> {
     if let Some(number) = number {
-        ctx.say(format!("You chose {}... for better or for worse", number))
-            .await?;
+        ctx.say(format!("You chose {}... for better or for worse", number)).await?;
     }
     Ok(())
 }

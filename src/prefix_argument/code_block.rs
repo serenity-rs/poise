@@ -1,7 +1,8 @@
 //! Parsing code for [`CodeBlock`], a prefix-specific command parameter type
 
-use super::*;
 use trim_in_place::TrimInPlace;
+
+use super::*;
 
 /// Error thrown when parsing a malformed [`CodeBlock`] ([`CodeBlock::pop_from`])
 #[derive(Default, Debug, Clone)]
@@ -43,12 +44,7 @@ pub struct CodeBlock {
 
 impl std::fmt::Display for CodeBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "```{}\n{}\n```",
-            self.language.as_deref().unwrap_or(""),
-            self.code
-        )
+        write!(f, "```{}\n{}\n```", self.language.as_deref().unwrap_or(""), self.code)
     }
 }
 
@@ -82,7 +78,7 @@ fn pop_from(args: &str) -> Result<(&str, CodeBlock), CodeBlockError> {
 
         CodeBlock {
             code: code_block.to_owned(),
-            language: language.map(|x| x.to_owned()),
+            language: language.map(ToOwned::to_owned),
             __non_exhaustive: (),
         }
     } else if let Some(code_line) = args.strip_prefix('`') {
@@ -148,14 +144,11 @@ fn test_pop_code_block() {
         ),
         ("```c#\nusing System;\n```", "using System;", Some("c#")),
     ] {
-        assert_eq!(
-            pop_from(string).unwrap().1,
-            CodeBlock {
-                code: code.into(),
-                language: language.map(|x| x.into()),
-                __non_exhaustive: (),
-            }
-        );
+        assert_eq!(pop_from(string).unwrap().1, CodeBlock {
+            code: code.into(),
+            language: language.map(Into::into),
+            __non_exhaustive: (),
+        });
     }
 
     assert!(pop_from("").is_err());

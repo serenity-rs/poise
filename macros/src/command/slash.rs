@@ -1,9 +1,13 @@
-use super::{unwrap_generic, CommandParameter, Invocation};
-use crate::util::{
-    extract_type_parameter, iter_tuple_2_to_vec_map, tuple_2_iter_deref, wrap_option_to_string,
-};
 use quote::format_ident;
 use syn::spanned::Spanned as _;
+
+use super::{CommandParameter, Invocation, unwrap_generic};
+use crate::util::{
+    extract_type_parameter,
+    iter_tuple_2_to_vec_map,
+    tuple_2_iter_deref,
+    wrap_option_to_string,
+};
 
 fn lit_to_string(lit: &syn::Lit) -> Result<String, syn::Error> {
     match lit {
@@ -45,14 +49,13 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
         let desc_localizations =
             iter_tuple_2_to_vec_map(tuple_2_iter_deref(&param.args.description_localized));
 
-        let autocomplete_callback = match &param.args.autocomplete {
-            Some(autocomplete_fn) => {
-                quote::quote! { Some(|
-                    ctx: poise::ApplicationContext<'_, _, _>,
-                    partial: &str,
-                | Box::pin(#autocomplete_fn(ctx.into(), partial))) }
-            }
-            None => quote::quote! { None },
+        let autocomplete_callback = if let Some(autocomplete_fn) = &param.args.autocomplete {
+            quote::quote! { Some(|
+                ctx: poise::ApplicationContext<'_, _, _>,
+                partial: &str,
+            | Box::pin(#autocomplete_fn(ctx.into(), partial))) }
+        } else {
+            quote::quote! { None }
         };
 
         // We can just cast to f64 here because Discord only uses f64 precision anyways
@@ -74,21 +77,20 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
             Some(x) => quote::quote! { .max_length(#x) },
             None => quote::quote! {},
         };
-        let type_setter = match inv.args.slash_command {
-            true => {
-                if let Some(_choices) = &param.args.choices {
-                    quote::quote! { Some(|o| o.kind(::poise::serenity_prelude::CommandOptionType::Integer)) }
-                } else if param.args.string {
-                    quote::quote! { Some(|o| o.kind(::poise::serenity_prelude::CommandOptionType::String)) }
-                } else {
-                    quote::quote! { Some(|o| {
-                        <#type_ as ::poise::SlashArgument>::create(o)
-                        #min_value_setter #max_value_setter
-                        #min_length_setter #max_length_setter
-                    }) }
-                }
+        let type_setter = if inv.args.slash_command {
+            if let Some(_choices) = &param.args.choices {
+                quote::quote! { Some(|o| o.kind(::poise::serenity_prelude::CommandOptionType::Integer)) }
+            } else if param.args.string {
+                quote::quote! { Some(|o| o.kind(::poise::serenity_prelude::CommandOptionType::String)) }
+            } else {
+                quote::quote! { Some(|o| {
+                    <#type_ as ::poise::SlashArgument>::create(o)
+                    #min_value_setter #max_value_setter
+                    #min_length_setter #max_length_setter
+                }) }
             }
-            false => quote::quote! { None },
+        } else {
+            quote::quote! { None }
         };
         // TODO: theoretically a problem that we don't store choices for non slash commands
         // TODO: move this to poise::CommandParameter::choices (is there a reason not to?)
@@ -111,18 +113,21 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
             quote::quote! { Cow::Borrowed(&[]) }
         };
 
-        let channel_types = match &param.args.channel_types {
-            Some(crate::util::List(channel_types)) => quote::quote! { Some(
-                Cow::Borrowed(&[ #( poise::serenity_prelude::ChannelType::#channel_types ),* ])
-            ) },
-            None => quote::quote! { None },
-        };
+        let channel_types =
+            if let Some(crate::util::List(channel_types)) = &param.args.channel_types {
+                quote::quote! { Some(
+                    Cow::Borrowed(&[ #( poise::serenity_prelude::ChannelType::#channel_types ),* ])
+                ) }
+            } else {
+                quote::quote! { None }
+            };
 
-        let file_types = match &param.args.file_types {
-            Some(crate::util::List(file_types)) => quote::quote! { Some(
+        let file_types = if let Some(crate::util::List(file_types)) = &param.args.file_types {
+            quote::quote! { Some(
                 Cow::Borrowed(&[ #( Cow::Borrowed(#file_types) ),* ])
-            ) },
-            None => quote::quote! { None },
+            ) }
+        } else {
+            quote::quote! { None }
         };
 
         parameter_structs.push((
@@ -146,10 +151,7 @@ pub fn generate_parameters(inv: &Invocation) -> Result<Vec<proc_macro2::TokenStr
     }
     // Sort the parameters so that optional parameters come last - Discord requires this order
     parameter_structs.sort_by_key(|(_, required)| !required);
-    Ok(parameter_structs
-        .into_iter()
-        .map(|(builder, _)| builder)
-        .collect::<Vec<_>>())
+    Ok(parameter_structs.into_iter().map(|(builder, _)| builder).collect::<Vec<_>>())
 }
 
 pub fn generate_slash_action(inv: &Invocation) -> Result<proc_macro2::TokenStream, syn::Error> {
@@ -158,23 +160,15 @@ pub fn generate_slash_action(inv: &Invocation) -> Result<proc_macro2::TokenStrea
         if length > 100 {
             return Err(syn::Error::new(
                 inv.function.span(),
-                format!(
-                    "slash command description too long ({} chars, must be max 100)",
-                    length
-                ),
+                format!("slash command description too long ({length} chars, must be max 100)"),
             ));
         }
     }
 
-    let param_identifiers = (0..inv.parameters.len())
-        .map(|i| format_ident!("poise_param_{i}"))
-        .collect::<Vec<_>>();
+    let param_identifiers =
+        (0..inv.parameters.len()).map(|i| format_ident!("poise_param_{i}")).collect::<Vec<_>>();
 
-    let params = inv
-        .parameters
-        .iter()
-        .map(parse_slash_param)
-        .collect::<Vec<_>>();
+    let params = inv.parameters.iter().map(parse_slash_param).collect::<Vec<_>>();
 
     Ok(quote::quote! {
         |ctx| Box::pin(async move {
@@ -217,6 +211,12 @@ fn parse_slash_param(param: &CommandParameter) -> proc_macro2::TokenStream {
         }
     }
 
+    enum Wrapper {
+        Option,
+        Vec,
+        Plain,
+    }
+
     let name = &param.name;
     let ty = &param.type_;
 
@@ -229,12 +229,6 @@ fn parse_slash_param(param: &CommandParameter) -> proc_macro2::TokenStream {
                 None => false,
             }
         };
-    }
-
-    enum Wrapper {
-        Option,
-        Vec,
-        Plain,
     }
 
     let (wrapper, ty) = if let Some(ty) = unwrap_generic(ty, "Option") {
@@ -315,7 +309,7 @@ pub fn generate_context_menu_action(
                 inv.function.sig.inputs.span(),
                 "Context menu commands require exactly one parameter",
             ));
-        }
+        },
     };
 
     Ok(quote::quote! {

@@ -100,7 +100,7 @@ async fn main() {
                 match error {
                     poise::FrameworkError::ArgumentParse { error, .. } => {
                         println!("Parse error: {error:?}")
-                    }
+                    },
                     other => poise::builtins::on_error(other).await.unwrap(),
                 }
             })

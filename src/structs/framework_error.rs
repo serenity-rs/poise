@@ -16,7 +16,8 @@ pub enum FrameworkError<'a, U, E> {
         /// General context
         ctx: crate::Context<'a, U, E>,
     },
-    /// Command was invoked without specifying a subcommand, but the command has `subcommand_required` set
+    /// Command was invoked without specifying a subcommand, but the command has
+    /// `subcommand_required` set
     SubcommandRequired {
         /// General context
         ctx: crate::Context<'a, U, E>,
@@ -185,24 +186,24 @@ impl<'a, U: Send + Sync + 'static, E> FrameworkError<'a, U, E> {
     /// Returns the [`serenity::Context`] of this error
     pub fn serenity_context(&self) -> &'a serenity::Context {
         match *self {
-            Self::Command { ctx, .. } => ctx.serenity_context(),
-            Self::SubcommandRequired { ctx } => ctx.serenity_context(),
-            Self::CommandPanic { ctx, .. } => ctx.serenity_context(),
-            Self::ArgumentParse { ctx, .. } => ctx.serenity_context(),
             Self::CommandStructureMismatch { ctx, .. } => ctx.framework.serenity_context,
-            Self::CooldownHit { ctx, .. } => ctx.serenity_context(),
-            Self::MissingBotPermissions { ctx, .. } => ctx.serenity_context(),
-            Self::MissingUserPermissions { ctx, .. } => ctx.serenity_context(),
-            Self::PermissionFetchFailed { ctx } => ctx.serenity_context(),
-            Self::NotAnOwner { ctx, .. } => ctx.serenity_context(),
-            Self::GuildOnly { ctx, .. } => ctx.serenity_context(),
-            Self::DmOnly { ctx, .. } => ctx.serenity_context(),
-            Self::NsfwOnly { ctx, .. } => ctx.serenity_context(),
-            Self::CommandCheckFailed { ctx, .. } => ctx.serenity_context(),
+            Self::Command { ctx, .. }
+            | Self::SubcommandRequired { ctx }
+            | Self::CommandPanic { ctx, .. }
+            | Self::ArgumentParse { ctx, .. }
+            | Self::CooldownHit { ctx, .. }
+            | Self::MissingBotPermissions { ctx, .. }
+            | Self::MissingUserPermissions { ctx, .. }
+            | Self::PermissionFetchFailed { ctx }
+            | Self::NotAnOwner { ctx, .. }
+            | Self::GuildOnly { ctx, .. }
+            | Self::DmOnly { ctx, .. }
+            | Self::NsfwOnly { ctx, .. }
+            | Self::CommandCheckFailed { ctx, .. } => ctx.serenity_context(),
             Self::DynamicPrefix { ctx, .. } => ctx.framework.serenity_context,
-            Self::UnknownCommand { framework, .. } => framework.serenity_context,
-            Self::UnknownInteraction { framework, .. } => framework.serenity_context,
-            Self::NonCommandMessage { framework, .. } => framework.serenity_context,
+            Self::UnknownCommand { framework, .. }
+            | Self::UnknownInteraction { framework, .. }
+            | Self::NonCommandMessage { framework, .. } => framework.serenity_context,
             Self::__NonExhaustive(unreachable) => match unreachable {},
         }
     }
@@ -210,20 +211,20 @@ impl<'a, U: Send + Sync + 'static, E> FrameworkError<'a, U, E> {
     /// Returns the [`crate::Context`] of this error, if it has one
     pub fn ctx(&self) -> Option<crate::Context<'a, U, E>> {
         Some(match *self {
-            Self::Command { ctx, .. } => ctx,
-            Self::SubcommandRequired { ctx } => ctx,
-            Self::CommandPanic { ctx, .. } => ctx,
-            Self::ArgumentParse { ctx, .. } => ctx,
             Self::CommandStructureMismatch { ctx, .. } => crate::Context::Application(ctx),
-            Self::CooldownHit { ctx, .. } => ctx,
-            Self::MissingBotPermissions { ctx, .. } => ctx,
-            Self::MissingUserPermissions { ctx, .. } => ctx,
-            Self::PermissionFetchFailed { ctx } => ctx,
-            Self::NotAnOwner { ctx, .. } => ctx,
-            Self::GuildOnly { ctx, .. } => ctx,
-            Self::DmOnly { ctx, .. } => ctx,
-            Self::NsfwOnly { ctx, .. } => ctx,
-            Self::CommandCheckFailed { ctx, .. } => ctx,
+            Self::Command { ctx, .. }
+            | Self::SubcommandRequired { ctx }
+            | Self::CommandPanic { ctx, .. }
+            | Self::ArgumentParse { ctx, .. }
+            | Self::CooldownHit { ctx, .. }
+            | Self::MissingBotPermissions { ctx, .. }
+            | Self::MissingUserPermissions { ctx, .. }
+            | Self::PermissionFetchFailed { ctx }
+            | Self::NotAnOwner { ctx, .. }
+            | Self::GuildOnly { ctx, .. }
+            | Self::DmOnly { ctx, .. }
+            | Self::NsfwOnly { ctx, .. }
+            | Self::CommandCheckFailed { ctx, .. } => ctx,
             Self::UnknownCommand { .. }
             | Self::UnknownInteraction { .. }
             | Self::NonCommandMessage { .. }
@@ -234,10 +235,8 @@ impl<'a, U: Send + Sync + 'static, E> FrameworkError<'a, U, E> {
 
     /// Calls the appropriate `on_error` function (command-specific or global) with this error
     pub async fn handle(self, framework_options: &crate::FrameworkOptions<U, E>) {
-        let on_error = self
-            .ctx()
-            .and_then(|c| c.command().on_error)
-            .unwrap_or(framework_options.on_error);
+        let on_error =
+            self.ctx().and_then(|c| c.command().on_error).unwrap_or(framework_options.on_error);
         on_error(self).await;
     }
 }
@@ -261,6 +260,7 @@ impl<'a, U, E> FrameworkError<'a, U, E> {
         }
     }
 
+    #[must_use]
     pub fn new_command_structure_mismatch(
         ctx: crate::ApplicationContext<'a, U, E>,
         description: &'static str,
@@ -283,17 +283,13 @@ impl<U: Send + Sync + 'static, E: std::fmt::Display> std::fmt::Display
         match self {
             Self::Command { error: _, ctx } => {
                 write!(f, "error in command `{}`", full_command_name!(ctx))
-            }
+            },
             Self::SubcommandRequired { ctx } => {
-                write!(
-                    f,
-                    "expected subcommand for command `{}`",
-                    full_command_name!(ctx)
-                )
-            }
+                write!(f, "expected subcommand for command `{}`", full_command_name!(ctx))
+            },
             Self::CommandPanic { ctx, payload: _ } => {
                 write!(f, "panic in command `{}`", full_command_name!(ctx))
-            }
+            },
             Self::ArgumentParse {
                 error: _,
                 input,
@@ -347,16 +343,12 @@ impl<U: Send + Sync + 'static, E: std::fmt::Display> std::fmt::Display
                 "owner-only command `{}` cannot be run by non-owners",
                 full_command_name!(ctx)
             ),
-            Self::GuildOnly { ctx } => write!(
-                f,
-                "guild-only command `{}` cannot run in DMs",
-                full_command_name!(ctx)
-            ),
-            Self::DmOnly { ctx } => write!(
-                f,
-                "DM-only command `{}` cannot run in guilds",
-                full_command_name!(ctx)
-            ),
+            Self::GuildOnly { ctx } => {
+                write!(f, "guild-only command `{}` cannot run in DMs", full_command_name!(ctx))
+            },
+            Self::DmOnly { ctx } => {
+                write!(f, "DM-only command `{}` cannot run in guilds", full_command_name!(ctx))
+            },
             Self::NsfwOnly { ctx } => write!(
                 f,
                 "nsfw-only command `{}` cannot run in non-nsfw channels",
@@ -372,28 +364,24 @@ impl<U: Send + Sync + 'static, E: std::fmt::Display> std::fmt::Display
                 ctx: _,
                 msg,
             } => {
-                write!(
-                    f,
-                    "dynamic prefix callback errored on message {:?}",
-                    msg.content
-                )
-            }
+                write!(f, "dynamic prefix callback errored on message {:?}", msg.content)
+            },
             Self::UnknownCommand {
                 content_start, msg, ..
             } => {
                 let msg_content = &msg.content[(*content_start).into()..];
-                write!(f, "unknown command `{}`", msg_content)
-            }
+                write!(f, "unknown command `{msg_content}`")
+            },
             Self::UnknownInteraction { interaction, .. } => {
                 write!(f, "unknown interaction `{}`", interaction.data.name)
-            }
+            },
             Self::NonCommandMessage { msg, .. } => {
                 write!(
                     f,
                     "error in non-command message handler in <@{}> (message ID {})",
                     msg.channel_id, msg.id
                 )
-            }
+            },
             Self::__NonExhaustive(unreachable) => match *unreachable {},
         }
     }
@@ -406,24 +394,24 @@ where
 {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match self {
-            Self::Command { error, .. } => Some(error),
-            Self::SubcommandRequired { .. } => None,
-            Self::CommandPanic { .. } => None,
+            Self::SubcommandRequired { .. }
+            | Self::CommandPanic { .. }
+            | Self::CommandStructureMismatch { .. }
+            | Self::CooldownHit { .. }
+            | Self::MissingBotPermissions { .. }
+            | Self::MissingUserPermissions { .. }
+            | Self::PermissionFetchFailed { .. }
+            | Self::NotAnOwner { .. }
+            | Self::GuildOnly { .. }
+            | Self::DmOnly { .. }
+            | Self::NsfwOnly { .. }
+            | Self::UnknownCommand { .. }
+            | Self::UnknownInteraction { .. } => None,
             Self::ArgumentParse { error, .. } => Some(&**error),
-            Self::CommandStructureMismatch { .. } => None,
-            Self::CooldownHit { .. } => None,
-            Self::MissingBotPermissions { .. } => None,
-            Self::MissingUserPermissions { .. } => None,
-            Self::PermissionFetchFailed { .. } => None,
-            Self::NotAnOwner { .. } => None,
-            Self::GuildOnly { .. } => None,
-            Self::DmOnly { .. } => None,
-            Self::NsfwOnly { .. } => None,
             Self::CommandCheckFailed { error, .. } => error.as_ref().map(|x| x as _),
-            Self::DynamicPrefix { error, .. } => Some(error),
-            Self::UnknownCommand { .. } => None,
-            Self::UnknownInteraction { .. } => None,
-            Self::NonCommandMessage { error, .. } => Some(error),
+            Self::Command { error, .. }
+            | Self::DynamicPrefix { error, .. }
+            | Self::NonCommandMessage { error, .. } => Some(error),
             Self::__NonExhaustive(unreachable) => match *unreachable {},
         }
     }

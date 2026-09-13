@@ -1,5 +1,6 @@
-use crate::{Context, Error};
 use poise::serenity_prelude as serenity;
+
+use crate::{Context, Error};
 
 #[poise::command(slash_command, prefix_command, reuse_response)]
 pub async fn test_reuse_response(ctx: Context<'_>) -> Result<(), Error> {
@@ -9,17 +10,13 @@ pub async fn test_reuse_response(ctx: Context<'_>) -> Result<(), Error> {
         .description("embed 1")
         .image(image_url, Some("Serenity logo".into()));
 
-    let buttons = [serenity::CreateButton::new("1")
-        .label("button 1")
-        .style(serenity::ButtonStyle::Primary)];
+    let buttons =
+        [serenity::CreateButton::new("1").label("button 1").style(serenity::ButtonStyle::Primary)];
 
-    let components = [serenity::CreateComponent::ActionRow(
-        serenity::CreateActionRow::buttons(&buttons),
-    )];
-    let reply = poise::CreateReply::default()
-        .content("message 1")
-        .embed(embed)
-        .components(&components);
+    let components =
+        [serenity::CreateComponent::ActionRow(serenity::CreateActionRow::buttons(&buttons))];
+    let reply =
+        poise::CreateReply::default().content("message 1").embed(embed).components(&components);
 
     ctx.send(reply).await?;
 
@@ -30,17 +27,13 @@ pub async fn test_reuse_response(ctx: Context<'_>) -> Result<(), Error> {
         .description("embed 2")
         .image(image_url, Some("Ferris with big eyes".into()));
 
-    let buttons = [serenity::CreateButton::new("2")
-        .label("button 2")
-        .style(serenity::ButtonStyle::Danger)];
+    let buttons =
+        [serenity::CreateButton::new("2").label("button 2").style(serenity::ButtonStyle::Danger)];
 
-    let components = [serenity::CreateComponent::ActionRow(
-        serenity::CreateActionRow::buttons(&buttons),
-    )];
-    let reply = poise::CreateReply::default()
-        .content("message 2")
-        .embed(embed)
-        .components(&components);
+    let components =
+        [serenity::CreateComponent::ActionRow(serenity::CreateActionRow::buttons(&buttons))];
+    let reply =
+        poise::CreateReply::default().content("message 2").embed(embed).components(&components);
 
     ctx.send(reply).await?;
     Ok(())

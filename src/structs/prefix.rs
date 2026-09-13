@@ -2,7 +2,7 @@
 
 use std::borrow::Cow;
 
-use crate::{serenity_prelude as serenity, BoxFuture};
+use crate::{BoxFuture, serenity_prelude as serenity};
 
 /// The event that triggered a prefix command execution
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -85,7 +85,8 @@ pub struct PrefixFrameworkOptions<U, E> {
     pub additional_prefixes: Vec<Prefix>,
     /// Callback invoked on every message to return a prefix.
     ///
-    /// Override this field for a simple dynamic prefix which changes depending on the guild or user.
+    /// Override this field for a simple dynamic prefix which changes depending on the guild or
+    /// user.
     ///
     /// For more advanced dynamic prefixes, see [`Self::stripped_dynamic_prefix`]
     #[derive_where(skip)]
@@ -116,8 +117,8 @@ pub struct PrefixFrameworkOptions<U, E> {
     >,
     /// Treat a bot mention (a ping) like a prefix
     pub mention_as_prefix: bool,
-    /// If Some, the framework will react to message edits by editing the corresponding bot response
-    /// with the new result.
+    /// If Some, the framework will react to message edits by editing the corresponding bot
+    /// response with the new result.
     pub edit_tracker: Option<std::sync::Arc<std::sync::RwLock<crate::EditTracker>>>,
     /// If the user makes a typo in their message and a subsequent edit creates a valid invocation,
     /// the bot will execute the command if this attribute is set.
@@ -129,8 +130,8 @@ pub struct PrefixFrameworkOptions<U, E> {
     pub execute_untracked_edits: bool,
     /// Whether to ignore message edits on messages that have not yet been responded to.
     ///
-    /// This is the case if the message edit happens before a command has sent a response, or if the
-    /// command does not send a response at all.
+    /// This is the case if the message edit happens before a command has sent a response, or if
+    /// the command does not send a response at all.
     pub ignore_edits_if_not_yet_responded: bool,
     /// Whether to ignore message edits when the message was present in the message cache and the
     /// content of the updated message is unchanged. Default is `true`.
@@ -165,15 +166,15 @@ pub struct PrefixFrameworkOptions<U, E> {
             &'a serenity::Message,
         ) -> crate::BoxFuture<'a, Result<(), E>>,
     >,
-    /* // TODO: implement
-    /// Whether to invoke help command when someone sends a message with just a bot mention
-    pub help_when_mentioned: bool,
-    /// The bot's general help command. Currently used for [`Self::help_when_mentioned`].
-    pub help_commmand: Option<Command<U, E>>,
-    // /// The bot's help command for individial commands. Currently used when a command group without
-    // /// any specific subcommand is invoked. This command is expected to take the command name as a
-    // /// single parameter
-    // pub command_specific_help_commmand: Option<Command<U, E>>, */
+    // TODO: implement
+    // /// Whether to invoke help command when someone sends a message with just a bot mention
+    // pub help_when_mentioned: bool,
+    // /// The bot's general help command. Currently used for [`Self::help_when_mentioned`].
+    // pub help_commmand: Option<Command<U, E>>,
+    // /// The bot's help command for individial commands. Currently used when a command group
+    // /// without any specific subcommand is invoked. This command is expected to take the
+    // /// command name as a single parameter
+    // pub command_specific_help_commmand: Option<Command<U, E>>,
     // #[non_exhaustive] forbids struct update syntax for ?? reason
     #[doc(hidden)]
     pub __non_exhaustive: (),
@@ -192,7 +193,7 @@ impl<U, E> Default for PrefixFrameworkOptions<U, E> {
             ignore_edits_if_not_yet_responded: false,
             #[cfg(feature = "cache")]
             check_edits_against_cache: true,
-            tracking_initiation_window: Some(std::time::Duration::from_secs(60 * 15)),
+            tracking_initiation_window: Some(std::time::Duration::from_mins(15)),
             execute_self_messages: false,
             ignore_bots: true,
             ignore_thread_creation: true,
