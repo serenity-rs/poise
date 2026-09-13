@@ -52,7 +52,7 @@ impl syn::fold::Fold for AllLifetimesToStatic {
 }
 
 /// Darling utility type that accepts a list of things, e.g. `#[attr(thing1, thing2...)]`
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct List<T>(pub Vec<T>);
 impl<T: darling::FromMeta> darling::FromMeta for List<T> {
     fn from_list(items: &[::darling::ast::NestedMeta]) -> darling::Result<Self> {
@@ -70,7 +70,7 @@ impl<T> Default for List<T> {
 }
 
 /// Darling utility type that accepts a 2-tuple list of things, e.g. `#[attr(thing1, thing2)]`
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Tuple2<T>(pub T, pub T);
 impl<T: darling::FromMeta> darling::FromMeta for Tuple2<T> {
     fn from_list(items: &[::darling::ast::NestedMeta]) -> darling::Result<Self> {
