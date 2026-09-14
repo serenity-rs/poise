@@ -18,6 +18,7 @@
 
 mod choice_parameter;
 mod command;
+mod context;
 mod modal;
 mod util;
 
@@ -706,4 +707,11 @@ pub fn modal(input: TokenStream) -> TokenStream {
         Ok(x) => x,
         Err(e) => e.write_errors().into(),
     }
+}
+
+/// A macro to generate Context methods and also `PrefixContext` and `ApplicationContext` methods
+/// that delegate to Context
+#[proc_macro]
+pub fn context_methods(input: TokenStream) -> TokenStream {
+    syn::parse_macro_input!(input as context::ContextMethods).generate()
 }
