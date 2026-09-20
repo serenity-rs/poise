@@ -71,7 +71,9 @@ async fn strip_prefix<'a, U, E>(
             crate::Prefix::__NonExhaustive => unreachable!(),
         })
     {
-        return Some(prefix_len_to_u16(prefix));
+        if msg.content.starts_with(prefix) {
+            return Some(prefix_len_to_u16(prefix));
+        }
     }
 
     if let Some(dynamic_prefix) = framework.options.prefix_options.stripped_dynamic_prefix {
