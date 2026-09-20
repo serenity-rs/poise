@@ -59,7 +59,7 @@ async fn strip_prefix<'a, U, E>(
         .additional_prefixes
         .iter()
         .find_map(|prefix| match prefix {
-            &crate::Prefix::Literal(prefix) => Some(prefix),
+            &crate::Prefix::Literal(prefix) => msg.content.starts_with(prefix).then_some(prefix),
             crate::Prefix::Regex(prefix) => {
                 let regex_match = prefix.find(&msg.content)?;
                 if regex_match.start() == 0 {
@@ -71,9 +71,7 @@ async fn strip_prefix<'a, U, E>(
             crate::Prefix::__NonExhaustive => unreachable!(),
         })
     {
-        if msg.content.starts_with(prefix) {
-            return Some(prefix_len_to_u16(prefix));
-        }
+        return Some(prefix_len_to_u16(prefix));
     }
 
     if let Some(dynamic_prefix) = framework.options.prefix_options.stripped_dynamic_prefix {
