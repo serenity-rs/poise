@@ -59,7 +59,7 @@ async fn strip_prefix<'a, U, E>(
         .additional_prefixes
         .iter()
         .find_map(|prefix| match prefix {
-            &crate::Prefix::Literal(prefix) => Some(prefix),
+            &crate::Prefix::Literal(prefix) => msg.content.starts_with(prefix).then_some(prefix),
             crate::Prefix::Regex(prefix) => {
                 let regex_match = prefix.find(&msg.content)?;
                 if regex_match.start() == 0 {
