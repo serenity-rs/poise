@@ -125,11 +125,13 @@ context_methods! {
     }
 
     /// Return the stored [`serenity::Context`] within the underlying context type.
+    #[must_use]
     pub fn serenity_context(self) -> &'a serenity::Context {
         self.framework().serenity_context
     }
 
     /// Create a [`crate::CooldownContext`] based off the underlying context type.
+    #[must_use]
     pub fn cooldown_context(self) -> crate::CooldownContext {
         crate::CooldownContext {
             user_id: self.author().id,
@@ -141,11 +143,13 @@ context_methods! {
     /// See [`Self::serenity_context`].
     #[deprecated = "poise::Context can now be passed directly into most serenity functions. Otherwise, use `.serenity_context()` now"]
     #[allow(deprecated)]
+    #[must_use]
     pub fn discord(self) -> &'a serenity::Context {
         self.serenity_context()
     }
 
     /// Returns a view into data stored by the framework, like configuration
+    #[must_use]
     pub fn framework(self) -> crate::FrameworkContext<'a, U, E> {
         match self {
             Self::Application(ctx) => ctx.framework,
@@ -154,11 +158,13 @@ context_methods! {
     }
 
     /// Return a reference to your custom user data
+    #[must_use]
     pub fn data(self) -> std::sync::Arc<U> {
         self.framework().user_data()
     }
 
     /// Return the channel ID of this context
+    #[must_use]
     pub fn channel_id(self) -> serenity::GenericChannelId {
         match self {
             Self::Application(ctx) => ctx.interaction.channel_id,
@@ -167,6 +173,7 @@ context_methods! {
     }
 
     /// Returns the guild ID of this context, if we are inside a guild
+    #[must_use]
     pub fn guild_id(self) -> Option<serenity::GuildId> {
         match self {
             Self::Application(ctx) => ctx.interaction.guild_id,
@@ -183,6 +190,7 @@ context_methods! {
     // Doesn't fit in with the rest of the functions here but it's convenient
     /// Return the guild of this context, if we are inside a guild.
     #[cfg(feature = "cache")]
+    #[must_use]
     pub fn guild(self) -> Option<serenity::GuildRef<'a>> {
         self.guild_id()?.to_guild_cached(self.cache())
     }
@@ -226,6 +234,7 @@ context_methods! {
     }
 
     /// Return the datetime of the invoking message or interaction
+    #[must_use]
     pub fn created_at(self) -> serenity::Timestamp {
         match self {
             Self::Application(ctx) => ctx.interaction.id.created_at(),
@@ -234,6 +243,7 @@ context_methods! {
     }
 
     /// Get the author of the command message or application command.
+    #[must_use]
     pub fn author(self) -> &'a serenity::User {
         match self {
             Self::Application(ctx) => &ctx.interaction.user,
@@ -243,6 +253,7 @@ context_methods! {
 
     /// Return a ID that uniquely identifies this command invocation.
     #[cfg(feature = "chrono")]
+    #[must_use]
     pub fn id(self) -> u64 {
         match self {
             Self::Application(ctx) => ctx.interaction.id.get(),
@@ -270,6 +281,7 @@ context_methods! {
     /// from parent commands to invoked command.
     ///
     /// For example, if `/x y z` or `?x y z` is invoked, this will contain `x, y, z`.
+    #[must_use]
     pub fn command_tree(self) -> &'a [&'a crate::Command<U, E>] {
         match self {
             Self::Prefix(x) => x.command_tree,
@@ -280,6 +292,7 @@ context_methods! {
     /// If the invoked command was a subcommand, returns a reference to the parent commands,
     /// ordered top-down.
     // Field removed from Context, so this is for backward-compatibility.
+    #[must_use]
     pub fn parent_commands(self) -> &'a [&'a crate::Command<U, E>] {
         match self {
             Self::Prefix(x) => x
@@ -296,6 +309,7 @@ context_methods! {
     }
 
     /// Returns a reference to the command.
+    #[must_use]
     pub fn command(self) -> &'a crate::Command<U, E> {
         match self {
             Self::Prefix(x) => x.command_tree.last().unwrap(),
@@ -305,6 +319,7 @@ context_methods! {
 
     /// Returns the prefix this command was invoked with, or a slash (`/`), if this is an
     /// application command.
+    #[must_use]
     pub fn prefix(self) -> &'a str {
         match self {
             Context::Prefix(ctx) => &ctx.msg.content[..ctx.content_start.into()],
@@ -318,6 +333,7 @@ context_methods! {
     ///
     /// In slash contexts, the given command name will always be returned verbatim, since there are
     /// no slash command aliases and the user has no control over spelling
+    #[must_use]
     pub fn invoked_command_name(self) -> &'a str {
         match self {
             Self::Prefix(ctx) => ctx.invoked_command_name,
@@ -437,6 +453,7 @@ context_methods! {
     }
 
     /// If available, returns the locale (selected language) of the invoking user
+    #[must_use]
     pub fn locale(self) -> Option<&'a str> {
         match self {
             Context::Application(ctx) => Some(&ctx.interaction.locale),
@@ -450,10 +467,10 @@ context_methods! {
     /// This is primarily an internal function and only exposed for people who want to manually
     /// convert [`crate::CreateReply`] instances into Discord requests.
     #[allow(unused_mut)] // side effect of how macro works
-    pub fn reply_builder<'args>(
+    pub fn reply_builder(
         self,
-        mut builder: crate::CreateReply<'args>
-    ) -> crate::CreateReply<'args> {
+        mut builder: crate::CreateReply<'_>
+    ) -> crate::CreateReply<'_> {
         let fw_options = self.framework().options();
         builder.ephemeral = builder.ephemeral.or(Some(self.command().ephemeral));
         builder.allowed_mentions = builder.allowed_mentions.or_else(|| fw_options.allowed_mentions.clone());
@@ -469,6 +486,7 @@ context_methods! {
     ///
     /// Shorthand for [`.serenity_context().cache`](serenity::Context::cache)
     #[cfg(feature = "cache")]
+    #[must_use]
     pub fn cache(self) -> &'a serenity::Cache {
         &self.serenity_context().cache
     }
@@ -476,6 +494,7 @@ context_methods! {
     /// Returns serenity's raw Discord API client to make raw API requests, if needed.
     ///
     /// Shorthand for [`.serenity_context().http`](serenity::Context::http)
+    #[must_use]
     pub fn http(self) -> &'a serenity::Http {
         &self.serenity_context().http
     }
@@ -483,7 +502,8 @@ context_methods! {
     /// Returns the current gateway heartbeat latency ([`::serenity::gateway::Shard::heartbeat_latency()`]).
     ///
     /// If the shard has just connected, `None` is returned.
-    pub async fn ping(self) -> Option<std::time::Duration> {
+    #[must_use]
+    pub fn ping(self) -> Option<std::time::Duration> {
         let ctx = self.serenity_context();
         ctx.runner_info.try_read()?.latency
     }
