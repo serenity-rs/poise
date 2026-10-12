@@ -31,6 +31,15 @@ this find-and-replace regex (VSCode flavor):
 - Replace: [@$1](https://github.com/$1)
 -->
 
+# 0.7.1
+
+Behavior changes:
+- Fix possible panic when using additional prefixes ([b4b3957](https://github.com/serenity-rs/poise/commit/b4b3957c259cdc07fe6ee6a70fb0ae6176f2f9e8))
+
+Detailed changelog: https://github.com/serenity-rs/poise/compare/v0.7.0...v0.7.1
+
+Thanks to [@meditationmind](https://github.com/meditationmind)!
+
 # 0.7.0
 
 New features:
@@ -129,7 +138,7 @@ Thanks to [@kangalio](https://github.com/kangalio), [@emilyyyylime](https://gith
 
 New features:
 - Choice parameters can now be defined inline in a function signature ([6167311](https://github.com/serenity-rs/poise/commit/6167311216065b953c6dc64406e56a31e52cd9a1))
-  
+
   For example:
   ```rust
   #[choices("Europe", "Asia", "Africa", "America", "Australia", "Antarctica")]
