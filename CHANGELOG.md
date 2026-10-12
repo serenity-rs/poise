@@ -38,7 +38,7 @@ Behavior changes:
 
 Detailed changelog: https://github.com/serenity-rs/poise/compare/v0.7.0...v0.7.1
 
-Thanks to [@meditationmind](https://github.com/meditationmind)!
+Thanks to [@mkrasnitski](https://github.com/mkrasnitski) and [@meditationmind](https://github.com/meditationmind)!
 
 # 0.7.0
 
