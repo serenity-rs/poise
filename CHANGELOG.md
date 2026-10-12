@@ -33,6 +33,9 @@ this find-and-replace regex (VSCode flavor):
 
 # 0.7.1
 
+New features:
+- Add support for `#[lazy] Vec<T>` in prefix commands ([f22a68a](https://github.com/serenity-rs/poise/commit/f22a68aa6fa3957232136c710bc40690b5182ac3))
+
 Behavior changes:
 - Fix possible panic when using additional prefixes ([b4b3957](https://github.com/serenity-rs/poise/commit/b4b3957c259cdc07fe6ee6a70fb0ae6176f2f9e8))
 
