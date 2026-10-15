@@ -21,6 +21,8 @@ struct FieldAttributes {
 }
 
 pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
+    let krate = crate::util::derive_crate_path(&input)?;
+
     let fields = match input.data {
         syn::Data::Struct(syn::DataStruct {
             fields: syn::Fields::Named(fields),
@@ -93,7 +95,7 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
             None
         };
         parsers.push(quote::quote! {
-            #field_ident: poise::find_modal_text(&mut data, stringify!(#field_ident)) #ok_or,
+            #field_ident: #krate::find_modal_text(&mut data, stringify!(#field_ident)) #ok_or,
         });
     }
 
@@ -101,8 +103,8 @@ pub fn modal(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
     let struct_ident = input.ident;
     let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
     Ok(quote::quote! { const _: () = {
-        use poise::serenity_prelude as serenity;
-        impl #impl_generics poise::Modal for #struct_ident #ty_generics #where_clause {
+        use #krate::serenity_prelude as serenity;
+        impl #impl_generics #krate::Modal for #struct_ident #ty_generics #where_clause {
             fn create(mut defaults: Option<Self>, custom_id: String) -> serenity::CreateInteractionResponse {
                 serenity::CreateInteractionResponse::Modal(
                     serenity::CreateModal::new(custom_id, #modal_title).components(vec!{#( #builders )*})

@@ -60,6 +60,9 @@ pub struct CommandArgs {
     guild_cooldown: Option<u64>,
     channel_cooldown: Option<u64>,
     member_cooldown: Option<u64>,
+
+    #[darling(rename = "crate")]
+    crate_path: Option<syn::Path>,
 }
 
 /// Representation of the function parameter attribute arguments
@@ -106,6 +109,7 @@ pub struct Invocation {
     install_context: syn::Expr,
     interaction_context: syn::Expr,
     args: CommandArgs,
+    krate: syn::Path,
 }
 
 fn extract_help_from_doc_comments(attrs: &[syn::Attribute]) -> (Option<String>, Option<String>) {
@@ -206,34 +210,42 @@ pub fn command(
         });
     }
 
+    // Get the crate location or fallback to default ::poise
+    let krate = args
+        .crate_path
+        .clone()
+        .unwrap_or_else(|| syn::parse_quote! { ::poise });
+
     // Extract the command descriptions from the function doc comments
     let (description, help_text) = extract_help_from_doc_comments(&function.attrs);
 
     fn permissions_to_tokens(
         perms: &Option<syn::punctuated::Punctuated<syn::Ident, syn::Token![|]>>,
+        krate: &syn::Path,
     ) -> syn::Expr {
         match perms {
             Some(perms) => {
                 let perms = perms.iter();
-                syn::parse_quote! { #(poise::serenity_prelude::Permissions::#perms)|* }
+                syn::parse_quote! { #(#krate::serenity_prelude::Permissions::#perms)|* }
             }
-            None => syn::parse_quote! { poise::serenity_prelude::Permissions::empty() },
+            None => syn::parse_quote! { #krate::serenity_prelude::Permissions::empty() },
         }
     }
-    let default_member_permissions = permissions_to_tokens(&args.default_member_permissions);
-    let required_permissions = permissions_to_tokens(&args.required_permissions);
-    let required_bot_permissions = permissions_to_tokens(&args.required_bot_permissions);
+    let default_member_permissions =
+        permissions_to_tokens(&args.default_member_permissions, &krate);
+    let required_permissions = permissions_to_tokens(&args.required_permissions, &krate);
+    let required_bot_permissions = permissions_to_tokens(&args.required_bot_permissions, &krate);
 
     let install_context = if let Some(contexts) = &args.install_context {
         let contexts = contexts.iter();
-        syn::parse_quote! { Some(vec![ #(poise::serenity_prelude::InstallationContext::#contexts),* ]) }
+        syn::parse_quote! { Some(vec![ #(#krate::serenity_prelude::InstallationContext::#contexts),* ]) }
     } else {
         syn::parse_quote! { None }
     };
 
     let interaction_context = if let Some(contexts) = &args.interaction_context {
         let contexts = contexts.iter();
-        syn::parse_quote! { Some(vec![ #(poise::serenity_prelude::InteractionContext::#contexts),* ]) }
+        syn::parse_quote! { Some(vec![ #(#krate::serenity_prelude::InteractionContext::#contexts),* ]) }
     } else {
         syn::parse_quote! { None }
     };
@@ -249,6 +261,7 @@ pub fn command(
         required_bot_permissions,
         install_context,
         interaction_context,
+        krate,
     };
 
     Ok(TokenStream::from(generate_command(inv)?))
@@ -304,8 +317,9 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
     let description = wrap_option_to_string(inv.description.as_ref());
     let category = wrap_option_to_string(inv.args.category.as_ref());
 
+    let krate = &inv.krate;
     let manual_cooldowns = wrap_option(inv.args.manual_cooldowns);
-    let cooldown_config = generate_cooldown_config(&inv.args);
+    let cooldown_config = generate_cooldown_config(&inv.args, krate);
 
     let default_member_permissions = &inv.default_member_permissions;
     let required_permissions = &inv.required_permissions;
@@ -357,15 +371,15 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
 
     Ok(quote::quote! {
         #[allow(clippy::str_to_string)]
-        #function_visibility fn #function_ident #function_generics() -> ::poise::Command<
-            <#ctx_type_with_static as poise::_GetGenerics>::U,
-            <#ctx_type_with_static as poise::_GetGenerics>::E,
+        #function_visibility fn #function_ident #function_generics() -> #krate::Command<
+            <#ctx_type_with_static as #krate::_GetGenerics>::U,
+            <#ctx_type_with_static as #krate::_GetGenerics>::E,
         > {
             use ::std::borrow::Cow;
 
             #function
 
-            ::poise::Command {
+            #krate::Command {
                 prefix_action: #prefix_action,
                 slash_action: #slash_action,
                 context_menu_action: #context_menu_action,
@@ -383,7 +397,7 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
                 help_text: #help_text,
                 hide_in_help: #hide_in_help,
                 manual_cooldowns: #manual_cooldowns,
-                cooldowns: std::sync::Mutex::new(::poise::Cooldowns::new()),
+                cooldowns: std::sync::Mutex::new(#krate::Cooldowns::new()),
                 cooldown_config: #cooldown_config,
                 reuse_response: #reuse_response,
                 default_member_permissions: #default_member_permissions,
@@ -414,7 +428,7 @@ fn generate_command(mut inv: Invocation) -> Result<proc_macro2::TokenStream, dar
     })
 }
 
-fn generate_cooldown_config(args: &CommandArgs) -> proc_macro2::TokenStream {
+fn generate_cooldown_config(args: &CommandArgs, krate: &syn::Path) -> proc_macro2::TokenStream {
     let all_cooldowns = [
         args.global_cooldown,
         args.user_cooldown,
@@ -436,7 +450,7 @@ fn generate_cooldown_config(args: &CommandArgs) -> proc_macro2::TokenStream {
     let member_cooldown = wrap_option_and_map(args.member_cooldown, &to_seconds_path);
 
     quote::quote!(
-        std::sync::RwLock::new(::poise::CooldownConfig {
+        std::sync::RwLock::new(#krate::CooldownConfig {
             global: #global_cooldown,
             user: #user_cooldown,
             guild: #guild_cooldown,
