@@ -39,7 +39,7 @@ for example for command-specific help (i.e. `~help command_name`). Escape newlin
 - `identifying_name`: Optionally, a unique identifier for this command for your personal usage
 - `install_context`: Installation contexts where this command is available (slash-only)
 - `interaction_context`: Interaction contexts where this command is available (slash-only)
-- `crate`: Path to poise, for crates that re-export it `crate = "::my_crate::poise"` (default: `::poise`)
+- `crate`: Path to poise, for crates that re-export it `crate = "my_crate::poise"` (default: `::poise`)
 
 ## Checks
 
@@ -229,7 +229,8 @@ Example invocations:
 - `~yourcommand cHoIcEb` - names are case-insensitive
 
 # Re-exported poise
-If poise is re-exported by another crate, add `#[poise(crate = "::my_crate::poise")]` to the enum
+
+If poise is re-exported by another crate, add `#[poise(crate = "my_crate::poise")]` to the enum
 
 # Localization
 
