@@ -15,6 +15,8 @@ struct VariantAttribute {
 }
 
 pub fn choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, darling::Error> {
+    let krate = crate::util::derive_crate_path(&input)?;
+
     let enum_ = match input.data {
         syn::Data::Enum(x) => x,
         _ => {
@@ -66,11 +68,11 @@ pub fn choice_parameter(input: syn::DeriveInput) -> Result<TokenStream, darling:
     let enum_ident = &input.ident;
     let indices = 0..variant_idents.len();
     Ok(quote::quote! {
-        impl poise::ChoiceParameter for #enum_ident {
-            fn list() -> std::borrow::Cow<'static, [poise::CommandParameterChoice]> {
+        impl #krate::ChoiceParameter for #enum_ident {
+            fn list() -> std::borrow::Cow<'static, [#krate::CommandParameterChoice]> {
                 use ::std::borrow::Cow;
 
-                Cow::Borrowed(&[ #( poise::CommandParameterChoice {
+                Cow::Borrowed(&[ #( #krate::CommandParameterChoice {
                     __non_exhaustive: (),
                     name: Cow::Borrowed(#names),
                     localizations: Cow::Borrowed(&[

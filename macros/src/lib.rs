@@ -39,6 +39,7 @@ for example for command-specific help (i.e. `~help command_name`). Escape newlin
 - `identifying_name`: Optionally, a unique identifier for this command for your personal usage
 - `install_context`: Installation contexts where this command is available (slash-only)
 - `interaction_context`: Interaction contexts where this command is available (slash-only)
+- `crate`: Path to poise, for crates that re-export it `crate = "my_crate::poise"` (default: `::poise`)
 
 ## Checks
 
@@ -227,6 +228,10 @@ Example invocations:
 - `~yourcommand ChoiceB`
 - `~yourcommand cHoIcEb` - names are case-insensitive
 
+# Re-exported poise
+
+If poise is re-exported by another crate, add `#[poise(crate = "my_crate::poise")]` to the enum
+
 # Localization
 
 In slash commands, you can take advantage of Discord's localization.
@@ -250,7 +255,7 @@ When invoking your slash command, users will be shown the name matching their lo
 
 You can also set localized choice names programmatically; see `CommandParameter::choices`
 */
-#[proc_macro_derive(ChoiceParameter, attributes(name, name_localized))]
+#[proc_macro_derive(ChoiceParameter, attributes(name, name_localized, poise))]
 pub fn choice_parameter(input: TokenStream) -> TokenStream {
     let enum_ = syn::parse_macro_input!(input as syn::DeriveInput);
 
@@ -270,7 +275,7 @@ pub fn slash_choice_parameter(input: TokenStream) -> TokenStream {
 /// See `Modal` trait documentation
 #[proc_macro_derive(
     Modal,
-    attributes(name, placeholder, min_length, max_length, paragraph)
+    attributes(name, placeholder, min_length, max_length, paragraph, poise)
 )]
 pub fn modal(input: TokenStream) -> TokenStream {
     let struct_ = syn::parse_macro_input!(input as syn::DeriveInput);
