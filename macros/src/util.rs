@@ -119,3 +119,20 @@ where
         ])
     }
 }
+
+/// Representation of the derive macro container attribute (`#[poise(...)]`)
+#[derive(Default, darling::FromDeriveInput)]
+#[darling(attributes(poise), default)]
+struct DeriveArgs {
+    #[darling(rename = "crate")]
+    crate_path: Option<syn::Path>,
+}
+
+/// Reads the poise path from `#[poise(crate = "...")]`, defaulting to `poise`
+pub fn derive_crate_path(input: &syn::DeriveInput) -> Result<syn::Path, darling::Error> {
+    let args = <DeriveArgs as darling::FromDeriveInput>::from_derive_input(input)?;
+
+    Ok(args
+        .crate_path
+        .unwrap_or_else(|| syn::parse_quote! { poise }))
+}
