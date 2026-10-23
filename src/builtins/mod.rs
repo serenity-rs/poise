@@ -8,9 +8,7 @@ use std::fmt::{self, Display};
 mod register;
 pub use register::*;
 
-#[cfg(feature = "chrono")]
 mod paginate;
-#[cfg(feature = "chrono")]
 pub use paginate::*;
 
 use crate::serenity_prelude::CreateAllowedMentions;
