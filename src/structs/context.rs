@@ -252,7 +252,6 @@ context_methods! {
     }
 
     /// Return a ID that uniquely identifies this command invocation.
-    #[cfg(feature = "chrono")]
     #[must_use]
     pub fn id(self) -> u64 {
         match self {
@@ -266,11 +265,8 @@ context_methods! {
                     // Set existing datetime bits to zero
                     id &= !0 >> 42;
 
-                    // Calculate Discord's datetime representation (millis since Discord epoch) and
-                    // insert those bits into the ID
-                    let timestamp_millis = edited_timestamp.timestamp_millis();
-
-                    id |= ((timestamp_millis - 1_420_070_400_000) as u64) << 22;
+                    // Convert timestamp into a Discord ID and insert its datetime bits into the ID.
+                    id |= serenity::MessageId::try_from(edited_timestamp).unwrap().get();
                 }
                 id
             }
