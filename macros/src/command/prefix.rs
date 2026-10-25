@@ -126,6 +126,7 @@ fn parse_prefix_params(
                 if input.is_empty() {
                     #empty
                 } else {
+                    #[allow(unreachable_code, reason="e is Infallible when T is String")]
                     let #token =
                         <#ty as ::poise::ArgumentConvert>::convert(
                             serenity_ctx,
