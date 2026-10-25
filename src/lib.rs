@@ -43,7 +43,7 @@
 //! You can run Discord actions outside of commands by cloning and storing [`serenity::CacheHttp`]/
 //! [`Arc<serenity::Http>`](serenity::Http)/[`Arc<serenity::Cache>`](serenity::Cache). You can get
 //! those either from [`serenity::Context`] (passed serenity event handlers) and all commands via
-//! [`ctx.serenity_framework()`](crate::Context::discord)) or before starting the client via
+//! [`ctx.serenity_context()`](crate::Context::serenity_context)) or before starting the client via
 //! [`http`](serenity::Client::http) and [`cache`](serenity::Client::cache).
 //!
 //! Pass your `CacheHttp` or `Arc<Http>` to serenity functions in place of the usual
@@ -419,13 +419,6 @@ pub use {
     structs::*,
     track_edits::*,
 };
-
-/// See [`builtins`]
-#[deprecated = "`samples` module was renamed to `builtins`"]
-pub mod samples {
-    pub use crate::builtins::*;
-}
-
 #[doc(hidden)]
 pub use {async_trait::async_trait, futures_util};
 

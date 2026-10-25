@@ -27,7 +27,7 @@ use crate::serenity_prelude as serenity;
 ///     "Content of fourth page",
 /// ];
 ///
-/// poise::samples::paginate(ctx, pages).await?;
+/// poise::builtins::paginate(ctx, pages).await?;
 /// # Ok(()) }
 /// ```
 ///
