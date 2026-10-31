@@ -320,13 +320,6 @@ pub fn choice_parameter(input: TokenStream) -> TokenStream {
     }
 }
 
-/// See [`ChoiceParameter`]
-#[deprecated = "renamed to ChoiceParameter"]
-#[proc_macro_derive(SlashChoiceParameter, attributes(name))]
-pub fn slash_choice_parameter(input: TokenStream) -> TokenStream {
-    choice_parameter(input)
-}
-
 /// Use this derive macro on a struct to easily generate a modal interaction, Discord's version
 /// of interactive forms.
 ///

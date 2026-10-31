@@ -69,19 +69,6 @@ pub struct FrameworkOptions<U, E> {
     pub __non_exhaustive: (),
 }
 
-impl<U, E> FrameworkOptions<U, E> {
-    /// Add a new command to the framework
-    #[deprecated = "supply commands in FrameworkOptions directly with `commands: vec![...]`"]
-    pub fn command(
-        &mut self,
-        mut command: crate::Command<U, E>,
-        meta_builder: impl FnOnce(&mut crate::Command<U, E>) -> &mut crate::Command<U, E> + 'static,
-    ) {
-        meta_builder(&mut command);
-        self.commands.push(command);
-    }
-}
-
 impl<U, E> Default for FrameworkOptions<U, E>
 where
     U: Send + Sync + 'static,
