@@ -58,7 +58,7 @@ fn get_bot_permissions(
             Some(guild.user_permissions_in(channel, bot_member))
         },
         serenity::GenericGuildChannelRef::Thread(thread) => {
-            let parent_channel = guild.channels.get(&thread.parent_id)?;
+            let parent_channel = guild.viewable_channels.get(&thread.parent_id)?;
             let mut parent_permissions = guild.user_permissions_in(parent_channel, bot_member);
 
             parent_permissions.set(
