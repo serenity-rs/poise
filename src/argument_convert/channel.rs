@@ -114,7 +114,7 @@ pub enum GuildChannelParseError {
     /// The provided channel string failed to parse, or the parsed result cannot be found in the
     /// cache.
     NotFoundOrMalformed,
-    /// When the referenced channel is not a guild channel
+    /// When the referenced channel is not a viewable guild channel
     NotAGuildChannel,
 }
 
@@ -132,7 +132,7 @@ impl fmt::Display for GuildChannelParseError {
         match self {
             Self::Http(_) => f.write_str("Failed to request channel via HTTP"),
             Self::NotFoundOrMalformed => f.write_str("Channel not found or unknown format"),
-            Self::NotAGuildChannel => f.write_str("Channel is not a guild channel"),
+            Self::NotAGuildChannel => f.write_str("Channel is not a viewable guild channel"),
         }
     }
 }
