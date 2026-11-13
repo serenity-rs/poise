@@ -9,6 +9,10 @@ async fn check_nsfw_channel<U: Send + Sync + 'static, E>(ctx: crate::Context<'_,
     match ctx.channel().await {
         Some(serenity::Channel::Private(_)) => true,
         Some(serenity::Channel::GuildViewable(ch)) => ch.nsfw,
+        Some(serenity::Channel::GuildObfuscated(_)) => {
+            tracing::warn!("Cannot fetch NSFW status of an obfuscated channel");
+            false
+        },
         Some(serenity::Channel::GuildThread(th)) => {
             let guild_id = th.base.guild_id;
             match th.parent_id.to_guild_channel(ctx, Some(guild_id)).await {
