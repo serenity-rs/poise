@@ -74,14 +74,7 @@ async fn main() {
             })
         },
         // Every command invocation must pass this check to continue execution
-        command_check: Some(|ctx| {
-            Box::pin(async move {
-                if ctx.author().id == 123456789 {
-                    return Ok(false);
-                }
-                Ok(true)
-            })
-        }),
+        command_check: Some(|ctx| Box::pin(async move { Ok(ctx.author().id != 123456789) })),
         // Enforce command checks even for owners (enforced by default)
         // Set to true to bypass checks, which is useful for testing
         skip_checks_for_owners: false,
